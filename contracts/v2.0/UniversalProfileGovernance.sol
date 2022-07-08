@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
+import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import "./UP_DAO_CONSTANTS.sol";
 
 /**
  * @author B00ste
@@ -14,36 +15,41 @@ contract UniversalProfileGovernance {
   /**
    * @notice Instance of the DAO Universal Profile.
    */
-  IERC725Y DAO;
+  LSP0ERC725Account DAO = new LSP0ERC725Account(address(this));
 
   /**
-   * @notice Permissions.
-   * VOTE         = 0x0000000000000000000000000000000000000000000000000000000000000001;
-   * PROPOSE      = 0x0000000000000000000000000000000000000000000000000000000000000002;
-   * VOTE&PROPOSE = 0x0000000000000000000000000000000000000000000000000000000000000003;
+   * @notice Instance of the UP DAO Constants.
    */
-  bytes32[3] private permissions = [
-    0x0000000000000000000000000000000000000000000000000000000000000001,
-    0x0000000000000000000000000000000000000000000000000000000000000002,
-    0x0000000000000000000000000000000000000000000000000000000000000003
-  ];
+  UP_DAO_CONSTANTS constants = new UP_DAO_CONSTANTS();
 
   /**
-   * @notice The key for getting the array of addresses that have a permission inside DAO.
+   * @notice Initialization of the Universal Profile as a DAO Profile;
+   * This smart contract will be given all controller permissions.
+   * We initialize the array of addresses with DAO permissions key to value 0x00.
    */
-  bytes32 private ARRAY_KEY = bytes32(keccak256("AddressDAOPermissions[]"));
+  constructor() {
 
-  /**
-   * @notice Initialization using a constructor;
-   */
-  constructor(
-    address universalProfileAddress 
-  ) {
-    DAO = IERC725Y(universalProfileAddress);
+    bytes32[] memory keysArray = new bytes32[](4);
+    // DAO Permissions array key
+    keysArray[0] = bytes32(constants.getArrayOfAddressesWithDAOPermissionsKey());
+    // Controller addresses array key
+    keysArray[1] = bytes32(0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3);
+    // First element from controller addresses array key
+    keysArray[2] = bytes32(bytes.concat(bytes16(0xdf30dba06db6a30e65354d9a64c60986), bytes16(0)));
+    // This addresses permissions key
+    keysArray[3] = bytes32(bytes.concat(bytes12(0x4b80742de2bf82acb3630000), bytes20(address(this))));
 
-    bytes32 zero = bytes32(0);
+    bytes[] memory valuesArray = new bytes[](4);
+    // DAO Permissions array value
+    valuesArray[0] = bytes.concat(bytes32(0));
+    // Controller addresses array value
+    valuesArray[1] = bytes.concat(bytes32(uint256(1)));
+    // First element from controller addresses array value
+    valuesArray[2] = bytes.concat(bytes20(address(this)));
+    // This addresses permissions value
+    valuesArray[3] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007FFF));
 
-    DAO.setData(ARRAY_KEY, zero);
+    DAO.setData(keysArray, valuesArray);
   }
 
   // --- GETTERS & SETTERS
@@ -51,65 +57,37 @@ contract UniversalProfileGovernance {
   /**
    * @notice Getter of the lenght of the array of addresses that have DAO permissions.
    */
-  function getAddressArrayLenght() public view returns(uint128 length) {
-    length = uint128(uint256(bytes32(DAO.getData(ARRAY_KEY))));
-  }
-
-  /**
-   * @notice Getter for the key for getting the BitArray of permissiions of a specific address.
-   */
-  function getAddressPermissionsKey(address universalProfileAddress) public pure returns(bytes32 key) {
-    key = bytes32(bytes.concat(
-      bytes6(keccak256("AddressDAOPermissions")),
-      bytes4(keccak256("DAOPermissions")),
-      bytes2(0),
-      bytes20(universalProfileAddress)
-    ));
-  }
-
-  /**
-   * @notice Getter for the key for getting an address that has DAO permissions by index.
-   */
-  function getAddressKeyByIndex(uint128 index) public view returns(bytes32 key) {
-    bytes16[2] memory arrayKeyHalfs = _bytes32ToTwoHalfs(ARRAY_KEY);
-    key = bytes32(bytes.concat(
-      arrayKeyHalfs[0], bytes16(index)
-    ));
-  }
-
-  // --- INTERNAL METHODS
-
-  /**
-   * @notice Split a bytes32 in half into two bytes16 values.
-   */
-  function _bytes32ToTwoHalfs(bytes32 source) internal pure returns(bytes16[2] memory y) {
-    y = [bytes16(0), 0];
-    assembly {
-        mstore(y, source)
-        mstore(add(y, 16), source)
-    }
+  function getDAOAddressArrayLenght() public view returns(uint128 length) {
+    length = uint128(uint256(bytes32(DAO.getData(constants.getArrayOfAddressesWithDAOPermissionsKey()))));
   }
 
   // --- GENERAL METHODS
 
   /**
    * @notice Add permission to an address by index.
+   * index 0 sets the VOTE permission.
+   * index 1 sets the PROPOSE permission.
+   * index 2 sets the VOTE&PROPOSE permission.
    */
-  function addPermission(address universalProfileAddress, uint8 index) public view {
-    uint128 addressArrayLength = getAddressArrayLenght();
-    bytes32 newAddressKey = getAddressKeyByIndex(addressArrayLength);
+  function addPermission(address universalProfileAddress, uint8 index) public {
+    uint128 addressArrayLength = getDAOAddressArrayLenght();
+    bytes32 newAddressKey = constants.getAddressKeyByIndex(addressArrayLength);
     bytes20 newAddressValue = bytes20(universalProfileAddress);
-    //DAO.setData(newAddressKey, newAddressValue);
-    //DAO.setData(ARRAY_KEY, bytes16(addressArrayLength +  1));
     
-    bytes32 votingPermissionKey = getAddressPermissionsKey(universalProfileAddress);
-    bytes32 votingPermissionValue = permissions[index];
-    //DAO.setData(votingPermissionKey, votingPermissionValue);
+    bytes32 votingPermissionKey = constants.getAddressDAOPermissionsKey(universalProfileAddress);
+    bytes32 votingPermissionValue = constants.getPermissionsArrayElement(index);
 
-    DAO.setData(
-      [newAddressKey, ARRAY_KEY, votingPermissionKey],
-      [newAddressValue, (addressArrayLength +  1), votingPermissionValue]
-    );
+    bytes32[] memory keysArray = new bytes32[](3);
+    keysArray[0] = newAddressKey;
+    keysArray[1] = constants.getArrayOfAddressesWithDAOPermissionsKey();
+    keysArray[2] = votingPermissionKey;
+
+    bytes[] memory valuesArray = new bytes[](3);
+    valuesArray[0] = bytes.concat(newAddressValue);
+    valuesArray[1] = bytes.concat(bytes16((addressArrayLength +  1)));
+    valuesArray[2] = bytes.concat(votingPermissionValue);
+
+    DAO.setData(keysArray, valuesArray);
   }
 
 }
