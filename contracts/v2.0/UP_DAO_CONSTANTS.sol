@@ -8,7 +8,7 @@ import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account
 /**
  * @author B00ste
  * @title DAOConstants
- * @custom:version 0.2
+ * @custom:version 0.1
  */
 contract UP_DAO_CONSTANTS {
 
