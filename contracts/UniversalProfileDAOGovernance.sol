@@ -280,7 +280,7 @@ contract UniversalProfileDAOGovernance {
     returns(bytes32 proposalSignature)
   {
     require(_targets.length == _datas.length, "Provided targets and datas have different lengths.");
-    proposalSignature = bytes32(abi.encode(_title, _description, _targets, _datas));
+    proposalSignature = bytes32(keccak256(abi.encode(_title, _description, _targets, _datas)));
     delayQueue.pushBack(proposalSignature);
     proposalData[proposalSignature].title = _title;
     proposalData[proposalSignature].description = _description;
