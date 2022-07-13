@@ -172,7 +172,7 @@ contract UniversalProfileDAOGovernance {
     bytes memory addressPermissions = DAO.getData(addressPermissionsKey);
     uint8 uintAddressPermissions = uint8(addressPermissions[31]);
     require(
-      (uintAddressPermissions & (1 << 1) == 4),
+      (uintAddressPermissions & (1 << 1) == 2),
       "This address doesn't have PROPOSE permission."
     );
     _;
