@@ -4,20 +4,39 @@ pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 import "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
-import "./UniversalProfileDAOStorage.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "./UniversalProfileDAOConstants.sol";
 
 /**
  * @author B00ste
  * @title UniversalProfileDAOGovernance
- * @custom:version 0.3
+ * @custom:version 0.1
  */
 
-contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
+contract UniversalProfileDAOGovernance {
    
   /**
    * @notice Instance of the DAO Universal Profile.
    */
   LSP0ERC725Account private DAO;
+
+  /**
+   * @notice Instance of the UP DAO Constants.
+   */
+  UniversalProfileDAOConstants private constants;
+
+  /**
+   * @notice Queue data structure used for queueing proposals in delay queues and vote queues.
+   */
+  using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;  
+  DoubleEndedQueue.Bytes32Deque private delayQueue;
+  DoubleEndedQueue.Bytes32Deque private voteQueue;
+
+  /**
+   * @notice Set data structure for storing the ended proposal by signature.
+   */
+  using EnumerableSet for EnumerableSet.Bytes32Set;
+  EnumerableSet.Bytes32Set private pastProposals;
 
   /**
    * @notice Map data structure for fast access to the data of a proposal.
@@ -64,7 +83,7 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
      * Phase 2 = 0x02  // 0010
      * Phase 3 = 0x04  // 0100
      */
-    uint8 phase;
+    bytes1 phase;
     /**
      * @notice Array for storing the 3 types of votes.
      * Index 0 are the against votes. 
@@ -83,10 +102,9 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
     uint8 _participationRate,
     uint256 _votingDelay,
     uint256 _votingPeriod,
-    LSP0ERC725Account _DAO
-  )
-    UniversalProfileDAOStorage(_DAO)
-  {
+    LSP0ERC725Account _DAO,
+    UniversalProfileDAOConstants _constants
+  ) {
     require(_quorum >= 0 && _quorum <= 100);
     require(_participationRate >= 0 && _participationRate <= 100);
     quorum = _quorum;
@@ -94,16 +112,39 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
     votingDelay = _votingDelay;
     votingPeriod = _votingPeriod;
     DAO = _DAO;
+    constants = _constants;
   }
 
   // --- MODIFIERS
+
+  /**
+   * @notice Verify if the proposal is first in the delay queue. This is needed for passing into the next phase.
+   */
+  modifier proposalIsFirstInDelayQueue(bytes32 proposalSignature) {
+    require(
+      delayQueue.front() == proposalSignature,
+      "The proposal is not first in queue."
+    );
+    _;
+  }
+
+  /**
+   * @notice Verify if the proposal is first in the vote queue. This is needed for passing into the next phase.
+   */
+  modifier proposalIsFirstInVoteQueue(bytes32 proposalSignature) {
+    require(
+      voteQueue.front() == proposalSignature,
+      "The proposal is not first in queue."
+    );
+    _;
+  }
 
   /**
    * @notice Verify the phase that the proposal is in right now.
    */
   modifier checkPhase(bytes32 proposalSignature, uint8 _phase) {
     require(
-      proposalData[proposalSignature].phase == _phase,
+      uint8(proposalData[proposalSignature].phase) & _phase == _phase,
       "The selected phase not reached yet."
     );
     _;
@@ -113,9 +154,11 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
    * @notice Verifies if an Universal Profile has VOTE permission.
    */
   modifier hasVotePermission(address universalProfileAddress) {
-    bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
+    bytes32 addressPermissionsKey = constants.getAddressDAOPermissionsKey(universalProfileAddress);
+    bytes memory addressPermissions = DAO.getData(addressPermissionsKey);
+    uint8 uintAddressPermissions = uint8(addressPermissions[31]);
     require(
-      (uint256(bytes32(addressPermissions)) & (1 << 0) == 1),
+      (uintAddressPermissions & (1 << 0) == 1),
       "This address doesn't have VOTE permission."
     );
     _;
@@ -125,9 +168,11 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
    * @notice Verifies if an Universal Profile has PROPOSE permission.
    */
   modifier hasProposePermission(address universalProfileAddress) {
-    bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
+    bytes32 addressPermissionsKey = constants.getAddressDAOPermissionsKey(universalProfileAddress);
+    bytes memory addressPermissions = DAO.getData(addressPermissionsKey);
+    uint8 uintAddressPermissions = uint8(addressPermissions[31]);
     require(
-      (uint256(bytes32(addressPermissions)) & (1 << 1) == 2),
+      (uintAddressPermissions & (1 << 1) == 2),
       "This address doesn't have PROPOSE permission."
     );
     _;
@@ -187,24 +232,29 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
   /**
    * @notice Saves a ended proposal to the UniversalProfile.
    */
-  function saveProposal(bytes32 proposalSignature, uint8 phaseNr) private {
+  function saveProposal(bytes32 proposalSignature) private {
+    bytes32[] memory keys = new bytes32[](2);
+    keys[0] = bytes32(bytes.concat(
+      bytes16(constants._bytes32ToTwoHalfs(constants.getProposalArrayKey())[0]),
+      bytes16(
+        bytes16(uint128(uint256(bytes32(DAO.getData(constants.getProposalArrayKey())))))
+      )
+    ));
+    keys[1] = constants.getProposalArrayKey();
 
-    uint256 proposalsArrayLength = _getProposalsArrayLength(phaseNr);
-    bytes memory proposalDataBytes = abi.encode(
-        proposalData[proposalSignature].title,
-        proposalData[proposalSignature].description,
-        proposalData[proposalSignature].creationTimestamp,
-        proposalData[proposalSignature].votingTimestamp,
-        proposalData[proposalSignature].endTimestamp,
-        proposalData[proposalSignature].votes[0],
-        proposalData[proposalSignature].votes[1],
-        proposalData[proposalSignature].votes[2]
+    bytes[] memory values = new bytes[](2); 
+    values[0] = abi.encode(
+      proposalData[proposalSignature].title,
+      proposalData[proposalSignature].description,
+      proposalData[proposalSignature].creationTimestamp,
+      proposalData[proposalSignature].votingTimestamp,
+      proposalData[proposalSignature].endTimestamp,
+      proposalData[proposalSignature].votes[0],
+      proposalData[proposalSignature].votes[1],
+      proposalData[proposalSignature].votes[2]
     );
-
-    _setProposalByIndex(proposalsArrayLength, proposalSignature, phaseNr);
-    _setProposalsArrayLength(proposalsArrayLength + 1, phaseNr);
-    _setProposalData(proposalSignature, proposalDataBytes);
-    
+    values[1] = bytes.concat(bytes32(uint256(bytes32(DAO.getData(constants.getProposalArrayKey()))) + 1));
+    DAO.setData(keys, values);
   }
 
   // --- GENERAL METHODS
@@ -230,22 +280,14 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
     returns(bytes32 proposalSignature)
   {
     require(_targets.length == _datas.length, "Provided targets and datas have different lengths.");
-
-    proposalSignature = bytes32(keccak256(
-      abi.encode(
-        _title,
-        _description,
-        block.timestamp
-    )));
-
+    proposalSignature = bytes32(keccak256(abi.encode(_title, _description, _targets, _datas)));
+    delayQueue.pushBack(proposalSignature);
     proposalData[proposalSignature].title = _title;
     proposalData[proposalSignature].description = _description;
     proposalData[proposalSignature].targets = _targets;
     proposalData[proposalSignature].datas = _datas;
-    proposalData[proposalSignature].phase = 1;
+    proposalData[proposalSignature].phase = 0x01;
     proposalData[proposalSignature].creationTimestamp = block.timestamp;
-
-    saveProposal(proposalSignature, 1);
   }
 
   /**
@@ -257,13 +299,14 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
     bytes32 proposalSignature
   ) 
     external
+    proposalIsFirstInDelayQueue(proposalSignature)
     checkPhase(proposalSignature, (1 << 0))
     votingDelayPassed(proposalSignature)
   {
-    proposalData[proposalSignature].phase = 2;
+    delayQueue.popFront();
+    voteQueue.pushBack(proposalSignature);
+    proposalData[proposalSignature].phase = 0x02;
     proposalData[proposalSignature].votingTimestamp = block.timestamp;
-    saveProposal(proposalSignature, 2);
-    _removeProposal(proposalSignature, 1);
   }
 
   /**
@@ -276,11 +319,12 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
     bytes32 proposalSignature
   ) 
     external
+    proposalIsFirstInVoteQueue(proposalSignature)
     checkPhase(proposalSignature, (1 << 1))
     checkVotes(proposalSignature)
     votingPeriodPassed(proposalSignature)
   {
-    proposalData[proposalSignature].phase = 3;
+    proposalData[proposalSignature].phase = 0x04;
     proposalData[proposalSignature].endTimestamp = block.timestamp;
     for (uint i = 0; i < proposalData[proposalSignature].targets.length; i++) {
       DAO.execute(
@@ -290,9 +334,8 @@ contract UniversalProfileDAOGovernance is UniversalProfileDAOStorage {
         proposalData[proposalSignature].datas[i]
       );
     }
-
-    saveProposal(proposalSignature, 3);
-    _removeProposal(proposalSignature, 2);
+    saveProposal(proposalSignature);
+    voteQueue.popFront();
     delete proposalData[proposalSignature];
   }
 

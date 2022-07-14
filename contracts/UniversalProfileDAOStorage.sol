@@ -8,13 +8,18 @@ import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account
 /**
  * @author B00ste
  * @title UniversalProfileDAOStorage
+ * @custom:version 0.3
  */
 contract UniversalProfileDAOStorage {
 
   /**
    * @notice Instance of the DAO key manager.
    */
-  LSP0ERC725Account DAO = new LSP0ERC725Account(address(this));
+  LSP0ERC725Account private DAO;
+
+  constructor(LSP0ERC725Account _DAO) {
+    DAO = _DAO;
+  }
 
   /**
    * @notice Permissions.
@@ -53,6 +58,28 @@ contract UniversalProfileDAOStorage {
 
   // --- GETTERS & SETTERS
 
+  function getDaoProposalsArrayKeyByPhase(uint8 phaseNr) internal pure returns(bytes32 key) {
+    bytes2 phase;
+    if (phaseNr == 1) {
+      phase = bytes2(keccak256("Phase1"));
+    }
+    else if(phaseNr == 2) {
+      phase = bytes2(keccak256("Phase2"));
+    }
+    else if(phaseNr == 3) {
+      phase = bytes2(keccak256("Phase3"));
+    }
+    key = bytes32(bytes.concat(
+      phase,
+      bytes8(keccak256("Proposals")),
+      bytes20(keccak256("ProposalsArray[]"))
+    ));
+  }
+
+  function _getPermissionsByIndex(uint8 index) internal view returns(bytes32 permission) {
+    permission = permissions[index];
+  }
+
   /**
    * @notice Get the length of the array of the addresses that have permissions in the DAO.
    */
@@ -75,9 +102,9 @@ contract UniversalProfileDAOStorage {
    *
    * @param index The index of the an address.
    */
-  function _getDaoAddressByIndex(uint256 index) internal view returns(bytes32 daoAddressKey, bytes memory daoAddress) {
+  function _getDaoAddressByIndex(uint256 index) internal view returns(bytes memory daoAddress) {
     bytes16[2] memory daoAddressesArrayKeyHalfs = _bytes32ToTwoHalfs(daoAddressesArrayKey);
-    daoAddressKey = bytes32(bytes.concat(
+    bytes32 daoAddressKey = bytes32(bytes.concat(
       daoAddressesArrayKeyHalfs[0], bytes16(uint128(index))
     ));
     daoAddress = DAO.getData(daoAddressKey);
@@ -103,8 +130,8 @@ contract UniversalProfileDAOStorage {
    *
    * @param daoAddress The address of a DAO participant.
    */
-  function _getAddressDaoPermission(address daoAddress) internal view returns(bytes32 addressPermssionsKey, bytes memory addressPermssions) {
-    addressPermssionsKey = bytes32(bytes.concat(
+  function _getAddressDaoPermission(address daoAddress) internal view returns(bytes memory addressPermssions) {
+    bytes32 addressPermssionsKey = bytes32(bytes.concat(
       bytes6(keccak256("DAOPermissionsAddresses")),
       bytes4(keccak256("DAOPermissions")),
       bytes2(0),
@@ -145,24 +172,24 @@ contract UniversalProfileDAOStorage {
   /**
    * @notice Get the proposals array lenngth.
    */
-  function _getProposalsArrayLength() internal view returns(uint256 length) {
-    length = uint256(bytes32(DAO.getData(daoProposalsArrayKey)));
+  function _getProposalsArrayLength(uint8 phaseNr) internal view returns(uint256 length) {
+    length = uint256(bytes32(DAO.getData(getDaoProposalsArrayKeyByPhase(phaseNr))));
   }
 
   /**
    * @notice Set the proposals array lenngth.
    */
-  function setProposalsArrayLength(uint256 length) internal returns(bytes memory newLength) {
+  function _setProposalsArrayLength(uint256 length, uint8 phaseNr) internal returns(bytes memory newLength) {
     newLength = bytes.concat(bytes32(length));
-    DAO.setData(daoProposalsArrayKey, newLength);
+    DAO.setData(getDaoProposalsArrayKeyByPhase(phaseNr), newLength);
   }
 
   /**
    * @notice Get Proposal by index.
    */
-  function _getProposalByIndex(uint256 index) internal view returns(bytes32 proposalKey, bytes memory proposalSignature) {
-    bytes16[2] memory daoProposalsArrayKeyHalfs = _bytes32ToTwoHalfs(daoProposalsArrayKey);
-    proposalKey = bytes32(bytes.concat(
+  function _getProposalByIndex(uint256 index, uint8 phaseNr) internal view returns(bytes memory proposalSignature) {
+    bytes16[2] memory daoProposalsArrayKeyHalfs = _bytes32ToTwoHalfs(getDaoProposalsArrayKeyByPhase(phaseNr));
+    bytes32 proposalKey = bytes32(bytes.concat(
       daoProposalsArrayKeyHalfs[0], bytes16(uint128(index))
     ));
     proposalSignature = DAO.getData(proposalKey);
@@ -171,13 +198,31 @@ contract UniversalProfileDAOStorage {
   /**
    * @notice Set Proposal by index.
    */
-  function _getProposalByIndex(uint256 index, bytes32 _proposalSignature) internal returns(bytes32 proposalKey, bytes memory proposalSignature) {
-    bytes16[2] memory daoProposalsArrayKeyHalfs = _bytes32ToTwoHalfs(daoProposalsArrayKey);
+  function _setProposalByIndex(uint256 index, bytes32 _proposalSignature, uint8 phaseNr) internal returns(bytes32 proposalKey, bytes memory proposalSignature) {
+    bytes16[2] memory daoProposalsArrayKeyHalfs = _bytes32ToTwoHalfs(getDaoProposalsArrayKeyByPhase(phaseNr));
     proposalKey = bytes32(bytes.concat(
       daoProposalsArrayKeyHalfs[0], bytes16(uint128(index))
     ));
     proposalSignature = bytes.concat(_proposalSignature);
     DAO.setData(proposalKey, proposalSignature);
+  }
+
+  /**
+   * @notice Remove Proposal by index.
+   */
+  function _removeProposal(bytes32 proposalSignature, uint8 phaseNr) internal returns(bool, bytes32) {
+    uint256 length = _getProposalsArrayLength(phaseNr);
+    for (uint i = 0; i < length; i++) {
+      bytes32 currentProposalSignature = bytes23(_getProposalByIndex(i, phaseNr));
+      bytes32 nextProposalSignature = bytes32(_getProposalByIndex((i + 1), phaseNr));
+      if (currentProposalSignature == proposalSignature) {
+        _setProposalByIndex(i, nextProposalSignature, phaseNr);
+        _setProposalByIndex((i + 1), currentProposalSignature, phaseNr);
+      }
+    }
+    _setProposalByIndex(length, bytes32(0), phaseNr);
+    _setProposalsArrayLength((length + 1), phaseNr);
+    return (true, proposalSignature);
   }
 
   /**
@@ -208,28 +253,11 @@ contract UniversalProfileDAOStorage {
   /**
    * @notice Set DAO proposal data.
    */
-  function _setProposalData(
-      string memory title,
-      string memory description,
-      uint256 creationTimestamp,
-      uint256 votingTimestamp,
-      uint256 endTimestamp,
-      uint256 againstVotes,
-      uint256 proVotes,
-      uint256 abstainVotes
-  ) internal returns(bytes32 proposalSignature, bytes memory proposalData) {
-    proposalData = abi.encode(
-      title,
-      description,
-      creationTimestamp,
-      votingTimestamp,
-      endTimestamp,
-      againstVotes,
-      proVotes,
-      abstainVotes
+  function _setProposalData(bytes32 proposalSignature, bytes memory proposalData) internal {
+    DAO.setData(
+      proposalSignature,
+      proposalData  
     );
-    proposalSignature = keccak256(proposalData);
-    DAO.setData(proposalSignature, proposalData);
   }
 
 
