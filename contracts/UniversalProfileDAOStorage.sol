@@ -92,8 +92,8 @@ contract UniversalProfileDAOStorage {
    *
    * @param length the length of the array of addresses that are participants to the DAO.
    */
-  function _setDaoAddressesArrayLength(uint256 length) internal returns(bytes memory newLength) {
-    newLength = bytes.concat(bytes32(length));
+  function _setDaoAddressesArrayLength(uint256 length) internal {
+    bytes memory newLength = bytes.concat(bytes32(length));
     DAO.setData(daoProposalsArrayKey, newLength);
   }
 
@@ -116,12 +116,12 @@ contract UniversalProfileDAOStorage {
    * @param index The index of an address.
    * @param _daoAddress The address of a DAO participant.
    */
-  function _setDaoAddressByIndex(uint256 index, address _daoAddress) internal returns(bytes32 daoAddressKey, bytes memory daoAddress) {
+  function _setDaoAddressByIndex(uint256 index, address _daoAddress) internal {
     bytes16[2] memory daoAddressesArrayKeyHalfs = _bytes32ToTwoHalfs(daoAddressesArrayKey);
-    daoAddressKey = bytes32(bytes.concat(
+    bytes32 daoAddressKey = bytes32(bytes.concat(
       daoAddressesArrayKeyHalfs[0], bytes16(uint128(index))
     ));
-    daoAddress = bytes.concat(bytes20(_daoAddress));
+    bytes memory daoAddress = bytes.concat(bytes20(_daoAddress));
     DAO.setData(daoAddressKey, daoAddress);
   }
 
@@ -149,13 +149,14 @@ contract UniversalProfileDAOStorage {
    * Index 1 is the PROPOSE permission.
    * Index 2 is the EXECUTE permission.
    */
-  function _setAddressDaoPermission(address daoAddress, uint8 index, bool permissionAdded) internal returns(bytes32 addressPermssionsKey, bytes memory addressPermssions) {
-    addressPermssionsKey = bytes32(bytes.concat(
+  function _setAddressDaoPermission(address daoAddress, uint8 index, bool permissionAdded) internal {
+    bytes32 addressPermssionsKey = bytes32(bytes.concat(
       bytes6(keccak256("DAOPermissionsAddresses")),
       bytes4(keccak256("DAOPermissions")),
       bytes2(0),
       bytes20(daoAddress)
     ));
+    bytes memory addressPermssions;
     if (permissionAdded) {
       addressPermssions = bytes.concat(
         bytes32(uint256(bytes32(DAO.getData(addressPermssionsKey))) + uint256(permissions[index]))
@@ -179,8 +180,8 @@ contract UniversalProfileDAOStorage {
   /**
    * @notice Set the proposals array lenngth.
    */
-  function _setProposalsArrayLength(uint256 length, uint8 phaseNr) internal returns(bytes memory newLength) {
-    newLength = bytes.concat(bytes32(length));
+  function _setProposalsArrayLength(uint256 length, uint8 phaseNr) internal {
+    bytes memory newLength = bytes.concat(bytes32(length));
     DAO.setData(getDaoProposalsArrayKeyByPhase(phaseNr), newLength);
   }
 
@@ -198,12 +199,12 @@ contract UniversalProfileDAOStorage {
   /**
    * @notice Set Proposal by index.
    */
-  function _setProposalByIndex(uint256 index, bytes32 _proposalSignature, uint8 phaseNr) internal returns(bytes32 proposalKey, bytes memory proposalSignature) {
+  function _setProposalByIndex(uint256 index, bytes32 _proposalSignature, uint8 phaseNr) internal {
     bytes16[2] memory daoProposalsArrayKeyHalfs = _bytes32ToTwoHalfs(getDaoProposalsArrayKeyByPhase(phaseNr));
-    proposalKey = bytes32(bytes.concat(
+    bytes32 proposalKey = bytes32(bytes.concat(
       daoProposalsArrayKeyHalfs[0], bytes16(uint128(index))
     ));
-    proposalSignature = bytes.concat(_proposalSignature);
+    bytes memory proposalSignature = bytes.concat(_proposalSignature);
     DAO.setData(proposalKey, proposalSignature);
   }
 
@@ -260,5 +261,31 @@ contract UniversalProfileDAOStorage {
     );
   }
 
+  /**
+   * @notice Delegate vote to an address.
+   */
+  function _setDelegatee(address delegator, address delegatee) internal {
+    bytes32 voteDelegateeKey = bytes32(bytes.concat(
+      bytes6(keccak256("SingleDelegatee")),
+      bytes4(keccak256("Delegatee")),
+      bytes2(0),
+      bytes20(delegator)
+    ));
+    bytes memory voteDelegatee = bytes.concat(bytes20(delegatee));
+    DAO.setData(voteDelegateeKey, voteDelegatee);
+  }
+
+  /**
+   * @notice Get delegatee of an Universal Profile
+   */
+  function _getDelegatee(address delegator) internal view returns(address delegatee) {
+    bytes32 voteDelegateeKey = bytes32(bytes.concat(
+      bytes6(keccak256("SingleDelegatee")),
+      bytes4(keccak256("Delegatee")),
+      bytes2(0),
+      bytes20(delegator)
+    ));
+    delegatee = address(bytes20(DAO.getData(voteDelegateeKey)));
+  }
 
 }

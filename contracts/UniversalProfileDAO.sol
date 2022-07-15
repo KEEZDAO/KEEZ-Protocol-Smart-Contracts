@@ -45,7 +45,9 @@ contract UniversalProfileDAO is UniversalProfileDAOGovernance {
   {
 
     _setDaoAddressesArrayLength(0);
-    _setProposalsArrayLength(0);
+    _setProposalsArrayLength(0, 1);
+    _setProposalsArrayLength(0, 2);
+    _setProposalsArrayLength(0, 3);
 
     bytes32[] memory keysArray = new bytes32[](3);
     // Controller addresses array key
@@ -138,7 +140,6 @@ contract UniversalProfileDAO is UniversalProfileDAOGovernance {
   ) 
     external
     permissionUnset(universalProfileAddress, _getPermissionsByIndex(index))
-    returns(bytes32 addressPermssionsKey, bytes memory addressPermssions)
   {
     if (!checkUser(universalProfileAddress)) {
       uint256 addressesArrayLength = _getDaoAddressesArrayLength();
@@ -146,7 +147,7 @@ contract UniversalProfileDAO is UniversalProfileDAOGovernance {
       _setDaoAddressesArrayLength(addressesArrayLength + 1);
     }
     
-    (addressPermssionsKey, addressPermssions) = _setAddressDaoPermission(universalProfileAddress, index, true);
+    _setAddressDaoPermission(universalProfileAddress, index, true);
   }
 
   /**
@@ -165,9 +166,8 @@ contract UniversalProfileDAO is UniversalProfileDAOGovernance {
   ) 
     external
     permissionSet(universalProfileAddress, _getPermissionsByIndex(index))
-    returns(bytes32 addressPermssionsKey, bytes memory addressPermssions)
   {
-    (addressPermssionsKey, addressPermssions) = _setAddressDaoPermission(universalProfileAddress, index, false);
+    _setAddressDaoPermission(universalProfileAddress, index, false);
   }
 
 }
