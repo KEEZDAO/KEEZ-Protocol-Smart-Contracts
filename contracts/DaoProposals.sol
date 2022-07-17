@@ -201,6 +201,18 @@ contract DaoProposals {
     _;
   }
 
+  /**
+   * @notice Verifying if universal profile is a participant of the DAO.
+   */
+  modifier isParticipantOfDao(address universalProfileAddress) {
+    bytes memory addressPermissions = permissions._getAddressDaoPermission(universalProfileAddress);
+    require(
+      bytes32(addressPermissions) != bytes32(0),
+      "This Universal Profile is not a participant of the DAO."
+    );
+    _;
+  }
+
   // --- GETTERS & SETTERS
 
   /**
@@ -392,6 +404,7 @@ contract DaoProposals {
     external
     checkPhase(proposalSignature, (1 << 0))
     votingDelayPassed(proposalSignature)
+    isParticipantOfDao(msg.sender)
   {
     proposals[proposalSignature].phase = 2;
     proposals[proposalSignature].votingTimestamp = block.timestamp;
@@ -412,6 +425,7 @@ contract DaoProposals {
     checkPhase(proposalSignature, (1 << 1))
     checkVotes(proposalSignature)
     votingPeriodPassed(proposalSignature)
+    isParticipantOfDao(msg.sender)
   {
     proposals[proposalSignature].phase = 3;
     proposals[proposalSignature].endTimestamp = block.timestamp;

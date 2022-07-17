@@ -90,7 +90,7 @@ contract DaoAccount is DaoPermissions, DaoProposals, DaoDelegates {
   modifier hasExecutePermission(address universalProfileAddress) {
     bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
     require(
-      (uint256(bytes32(addressPermissions)) & (1 << 2) == 4),
+      (uint256(bytes32(addressPermissions)) & (1 << 4) == 16),
       "This address doesn't have EXECUTE permission."
     );
     _;

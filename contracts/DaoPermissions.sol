@@ -33,14 +33,18 @@ contract DaoPermissions {
 
   /**
    * @notice Permissions.
-   * VOTE    = 0x0000000000000000000000000000000000000000000000000000000000000001; // 0001
-   * PROPOSE = 0x0000000000000000000000000000000000000000000000000000000000000002; // 0010
-   * EXECUTE = 0x0000000000000000000000000000000000000000000000000000000000000004; // 0100
+   * VOTE              = 0x0000000000000000000000000000000000000000000000000000000000000001; // 0000 0001
+   * PROPOSE           = 0x0000000000000000000000000000000000000000000000000000000000000002; // 0000 0010
+   * SEND_DELEGATE     = 0x0000000000000000000000000000000000000000000000000000000000000004; // 0000 0100
+   * RECIEVE_DELEGATE  = 0x0000000000000000000000000000000000000000000000000000000000000008; // 0000 1000
+   * EXECUTE           = 0x0000000000000000000000000000000000000000000000000000000000000010; // 0001 0000
    */
-  bytes32[3] private permissions = [
+  bytes32[5] private permissions = [
     bytes32(0x0000000000000000000000000000000000000000000000000000000000000001),
     0x0000000000000000000000000000000000000000000000000000000000000002,
-    0x0000000000000000000000000000000000000000000000000000000000000004
+    0x0000000000000000000000000000000000000000000000000000000000000004,
+    0x0000000000000000000000000000000000000000000000000000000000000008,
+    0x0000000000000000000000000000000000000000000000000000000000000010
   ];
 
   /**
@@ -150,7 +154,9 @@ contract DaoPermissions {
    * @param index The index of the permissions array.
    * Index 0 is the VOTE permission.
    * Index 1 is the PROPOSE permission.
-   * Index 2 is the EXECUTE permission.
+   * Index 2 is the SEND_DELEGATE permission.
+   * Index 3 is the RECIEVE_DELEGATE permission.
+   * Index 4 is the EXECUTE permission.
    */
   function _setAddressDaoPermission(address daoAddress, uint8 index, bool permissionAdded) internal {
     bytes32 addressPermssionsKey = bytes32(bytes.concat(
@@ -193,12 +199,14 @@ contract DaoPermissions {
 
   /**
    * @notice Add permission to an address by index.
-   * index 0 sets the VOTE permission.
-   * index 1 sets the PROPOSE permission.
-   * index 2 sets the EXECUTE permission.
+   * Index 0 sets the VOTE permission.
+   * Index 1 sets the PROPOSE permission.
+   * Index 2 sets the SEND_DELEGATE permission.
+   * Index 3 sets the RECIEVE_DELEGATE permission.
+   * Index 4 sets the EXECUTE permission.
    *
    * @param universalProfileAddress The address of a Universal Profile.
-   * @param index A number 0 <= `index` <= 2.
+   * @param index A number 0 <= `index` <= 4.
    */
   function addPermission(
     address universalProfileAddress,
@@ -218,12 +226,14 @@ contract DaoPermissions {
 
   /**
    * @notice Remove the permission of an Unversal Profile by index.
-   * index 0 unsets the VOTE permission.
-   * index 1 unsets the PROPOSE permission.
-   * index 2 unsets the EXECUTE permission.
+   * Index 0 unsets the VOTE permission.
+   * Index 1 unsets the PROPOSE permission.
+   * Index 2 unsets the SEND_DELEGATE permission.
+   * Index 3 unsets the RECIEVE_DELEGATE permission.
+   * Index 4 unsets the EXECUTE permission.
    *
    * @param universalProfileAddress The address of a Universal Profile.
-   * @param index A number 0 <= `index` <= 2.
+   * @param index A number 0 <= `index` <= 4.
    */
 
   function removePermission(

@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import "./DaoPermissionsInterface.sol";
 
 /**
  * @author B00ste
@@ -16,9 +17,42 @@ contract DaoDelegates {
    */
   LSP0ERC725Account private DAO;
 
+  /**
+   * @notice Instance for the DAO permissions contract.
+   */
+  DaoPermissionsInterface private permissions;
+
   constructor(LSP0ERC725Account _DAO) {
     DAO = _DAO;
   }
+
+  // --- MODIFIERS
+
+  /**
+   * @notice Verifies if an Universal Profile has SEND_DELEGATE permission.
+   */
+  modifier hasSendDelegatePermission(address universalProfileAddress) {
+    bytes memory addressPermissions = permissions._getAddressDaoPermission(universalProfileAddress);
+    require(
+      (uint256(bytes32(addressPermissions)) & (1 << 2) == 4),
+      "This address doesn't have SEND_DELEGATE permission."
+    );
+    _;
+  }
+
+  /**
+   * @notice Verifies if an Universal Profile has RECIEVE_DELEGATE permission.
+   */
+  modifier hasRecieveDelegatePermission(address universalProfileAddress) {
+    bytes memory addressPermissions = permissions._getAddressDaoPermission(universalProfileAddress);
+    require(
+      (uint256(bytes32(addressPermissions)) & (1 << 3) == 8),
+      "This address doesn't have RECIEVE_DELEGATE permission."
+    );
+    _;
+  }
+
+  // --- GETTERS & SETTERS
 
   /**
    * @notice Delegate vote to an address.
@@ -45,6 +79,17 @@ contract DaoDelegates {
       bytes20(delegator)
     ));
     delegatee = address(bytes20(DAO.getData(voteDelegateeKey)));
+  }
+
+  /**
+   * @notice Delegate your vote to another participant of the DAO
+   */
+  function delegate(address delegator, address delegatee)
+    external
+    hasSendDelegatePermission(delegator)
+    hasRecieveDelegatePermission(delegatee)
+  {
+    _setDelegatee(delegator, delegatee);
   }
   
 }
