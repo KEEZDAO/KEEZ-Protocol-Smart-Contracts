@@ -12,7 +12,7 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoPermissions
- * @custom:version 0.7
+ * @custom:version 0.8
  */
 contract DaoPermissions {
 

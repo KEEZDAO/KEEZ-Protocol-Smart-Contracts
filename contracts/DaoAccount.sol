@@ -14,7 +14,7 @@ import "./DaoDelegates.sol";
  *
  * @author B00ste
  * @title DaoAccount
- * @custom:version 0.7
+ * @custom:version 0.8
  */
 contract DaoAccount is DaoPermissions, DaoProposals, DaoDelegates {
    
@@ -54,7 +54,7 @@ contract DaoAccount is DaoPermissions, DaoProposals, DaoDelegates {
       utils,
       address(this)
     )
-    DaoDelegates(DAO)
+    DaoDelegates(DAO, utils)
   {
 
     _setDaoAddressesArrayLength(0);

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 import "./DaoPermissionsInterface.sol";
+import "./DaoDelegatesInterface.sol";
 import "./DaoUtils.sol";
 
 /**
@@ -13,7 +14,7 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoProposals
- * @custom:version 0.7
+ * @custom:version 0.8
  */
 contract DaoProposals {
 
@@ -33,6 +34,11 @@ contract DaoProposals {
    * @notice Instance for the DAO permissions contract.
    */
   DaoPermissionsInterface private permissions;
+
+  /**
+   * @notice Instance for the DAO delegates.
+   */
+  DaoDelegatesInterface private delegates;
 
   // --- PROPOSAL ATTRIBUTES
 
@@ -102,7 +108,7 @@ contract DaoProposals {
     uint256 _votingPeriod,
     LSP0ERC725Account _DAO,
     DaoUtils _utils,
-    address daoPermissions
+    address daoAddress
   ) {
     require(_quorum >= 0 && _quorum <= 100);
     require(_participationRate >= 0 && _participationRate <= 100);
@@ -112,7 +118,8 @@ contract DaoProposals {
     votingPeriod = _votingPeriod;
     DAO = _DAO;
     utils = _utils;
-    permissions = DaoPermissionsInterface(daoPermissions);
+    permissions = DaoPermissionsInterface(daoAddress);
+    delegates = DaoDelegatesInterface(daoAddress);
   }
 
   // --- MODIFIERS
@@ -153,17 +160,12 @@ contract DaoProposals {
   }
 
   /**
-   * @notice Verifys if total votes are enough for the proposal to pass. 
-   */
-  modifier checkVotes(bytes32 proposalSignature) {
-    uint256[3] memory votes = proposals[proposalSignature].votes;
+   * @notice Verifies that a Universal Profile did not delegate his vote.
+   */ 
+  modifier didNotDelegate(address universalProfileAddress) {
+    address delegatee = delegates._getDelegateeOfTheDelegator(universalProfileAddress);
     require(
-      votes[1]/(votes[1] + votes[0]) > quorum/(votes[1] + votes[0]),
-      "Note enough pro votes for the proposal to pass."
-    );
-    require(
-      (votes[1] + votes[0])/(votes[1] + votes[0] + votes[2]) > participationRate/(votes[1] + votes[0] + votes[2]),
-      "Participation rate is too low for the proposal to pass."
+      universalProfileAddress == delegatee || universalProfileAddress == address(0)
     );
     _;
   }
@@ -232,6 +234,7 @@ contract DaoProposals {
     key = bytes32(bytes.concat(
       phase,
       bytes8(keccak256("Proposals")),
+      bytes2(0),
       bytes20(keccak256("ProposalsArray[]"))
     ));
   }
@@ -272,24 +275,6 @@ contract DaoProposals {
     ));
     bytes memory proposalSignature = bytes.concat(_proposalSignature);
     DAO.setData(proposalKey, proposalSignature);
-  }
-
-  /**
-   * @notice Remove Proposal by index.
-   */
-  function _removeProposal(bytes32 proposalSignature, uint8 phaseNr) internal returns(bool, bytes32) {
-    uint256 length = _getProposalsArrayLength(phaseNr);
-    for (uint i = 0; i < length; i++) {
-      bytes32 currentProposalSignature = bytes23(_getProposalByIndex(i, phaseNr));
-      bytes32 nextProposalSignature = bytes32(_getProposalByIndex((i + 1), phaseNr));
-      if (currentProposalSignature == proposalSignature) {
-        _setProposalByIndex(i, nextProposalSignature, phaseNr);
-        _setProposalByIndex((i + 1), currentProposalSignature, phaseNr);
-      }
-    }
-    _setProposalByIndex(length, bytes32(0), phaseNr);
-    _setProposalsArrayLength((length + 1), phaseNr);
-    return (true, proposalSignature);
   }
 
   /**
@@ -350,6 +335,24 @@ contract DaoProposals {
     _setProposalsArrayLength(proposalsArrayLength + 1, phaseNr);
     _setProposalData(proposalSignature, proposalDataBytes);
     
+  }
+
+  /**
+   * @notice Remove proposal.
+   */
+  function _removeProposal(bytes32 proposalSignature, uint8 phaseNr) internal returns(bool, bytes32) {
+    uint256 length = _getProposalsArrayLength(phaseNr);
+    for (uint i = 0; i < length; i++) {
+      bytes32 currentProposalSignature = bytes23(_getProposalByIndex(i, phaseNr));
+      bytes32 nextProposalSignature = bytes32(_getProposalByIndex((i + 1), phaseNr));
+      if (currentProposalSignature == proposalSignature) {
+        _setProposalByIndex(i, nextProposalSignature, phaseNr);
+        _setProposalByIndex((i + 1), currentProposalSignature, phaseNr);
+      }
+    }
+    _setProposalByIndex(length, bytes32(0), phaseNr);
+    _setProposalsArrayLength((length + 1), phaseNr);
+    return (true, proposalSignature);
   }
 
   // --- GENERAL METHODS
@@ -423,24 +426,29 @@ contract DaoProposals {
   ) 
     external
     checkPhase(proposalSignature, (1 << 1))
-    checkVotes(proposalSignature)
     votingPeriodPassed(proposalSignature)
     isParticipantOfDao(msg.sender)
   {
     proposals[proposalSignature].phase = 3;
     proposals[proposalSignature].endTimestamp = block.timestamp;
-    for (uint i = 0; i < proposals[proposalSignature].targets.length; i++) {
-      DAO.execute(
-        0,
-        proposals[proposalSignature].targets[i],
-        0,
-        proposals[proposalSignature].datas[i]
-      );
-    }
-
     saveProposal(proposalSignature, 3);
     _removeProposal(proposalSignature, 2);
     delete proposals[proposalSignature];
+  
+    uint256[3] memory votes = proposals[proposalSignature].votes;
+    if(
+      votes[1]/(votes[1] + votes[0]) > quorum/(votes[1] + votes[0]) &&
+      (votes[1] + votes[0])/(votes[1] + votes[0] + votes[2]) > participationRate/(votes[1] + votes[0] + votes[2])
+    ) {
+      for (uint i = 0; i < proposals[proposalSignature].targets.length; i++) {
+        DAO.execute(
+          0,
+          proposals[proposalSignature].targets[i],
+          0,
+          proposals[proposalSignature].datas[i]
+        );
+      }
+    }
   }
 
   /**
@@ -457,11 +465,24 @@ contract DaoProposals {
     uint8 voteIndex
   )
     external
-    checkPhase(proposalSignature, (1 << 1))
     hasVotePermission(msg.sender)
+    didNotDelegate(msg.sender)
+    checkPhase(proposalSignature, (1 << 1))
     votingPeriodIsOn(proposalSignature)
   {
-    proposals[proposalSignature].votes[voteIndex] ++;
+    if(uint256(bytes32(permissions._getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {
+      if(voteIndex != 2) {
+        uint256 totalVotes = delegates._getDelegatorsArrayLength(msg.sender);
+        proposals[proposalSignature].votes[voteIndex] += totalVotes;
+        proposals[proposalSignature].votes[2] -= totalVotes;
+      }
+    }
+    else {
+      if(voteIndex != 2) {
+        proposals[proposalSignature].votes[voteIndex] ++;
+        proposals[proposalSignature].votes[2] --;
+      }
+    }
   }
 
 }
