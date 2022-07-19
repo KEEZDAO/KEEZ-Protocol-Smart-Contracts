@@ -12,7 +12,7 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoPermissions
- * @custom:version 0.8
+ * @custom:version 0.9
  */
 contract DaoPermissions {
 
@@ -37,7 +37,7 @@ contract DaoPermissions {
    * PROPOSE           = 0x0000000000000000000000000000000000000000000000000000000000000002; // 0000 0010
    * SEND_DELEGATE     = 0x0000000000000000000000000000000000000000000000000000000000000004; // 0000 0100
    * RECIEVE_DELEGATE  = 0x0000000000000000000000000000000000000000000000000000000000000008; // 0000 1000
-   * EXECUTE           = 0x0000000000000000000000000000000000000000000000000000000000000010; // 0001 0000
+   * MASTER            = 0x0000000000000000000000000000000000000000000000000000000000000010; // 0001 0000
    */
   bytes32[5] private permissions = [
     bytes32(0x0000000000000000000000000000000000000000000000000000000000000001),
@@ -179,7 +179,7 @@ contract DaoPermissions {
     DAO.setData(addressPermssionsKey, addressPermssions);
   }
 
-  // --- GENERAL METHODS
+  // --- INTERNAL METHODS
 
   /**
    * @notice Check if a Universal Profile is a participant of the DAO
@@ -195,55 +195,6 @@ contract DaoPermissions {
       }
     }
     return false;
-  }
-
-  /**
-   * @notice Add permission to an address by index.
-   * Index 0 sets the VOTE permission.
-   * Index 1 sets the PROPOSE permission.
-   * Index 2 sets the SEND_DELEGATE permission.
-   * Index 3 sets the RECIEVE_DELEGATE permission.
-   * Index 4 sets the EXECUTE permission.
-   *
-   * @param universalProfileAddress The address of a Universal Profile.
-   * @param index A number 0 <= `index` <= 4.
-   */
-  function addPermission(
-    address universalProfileAddress,
-    uint8 index
-  ) 
-    external
-    permissionUnset(universalProfileAddress, _getPermissionsByIndex(index))
-  {
-    if (!checkUser(universalProfileAddress)) {
-      uint256 addressesArrayLength = _getDaoAddressesArrayLength();
-      _setDaoAddressByIndex(addressesArrayLength, universalProfileAddress);
-      _setDaoAddressesArrayLength(addressesArrayLength + 1);
-    }
-    
-    _setAddressDaoPermission(universalProfileAddress, index, true);
-  }
-
-  /**
-   * @notice Remove the permission of an Unversal Profile by index.
-   * Index 0 unsets the VOTE permission.
-   * Index 1 unsets the PROPOSE permission.
-   * Index 2 unsets the SEND_DELEGATE permission.
-   * Index 3 unsets the RECIEVE_DELEGATE permission.
-   * Index 4 unsets the EXECUTE permission.
-   *
-   * @param universalProfileAddress The address of a Universal Profile.
-   * @param index A number 0 <= `index` <= 4.
-   */
-
-  function removePermission(
-    address universalProfileAddress,
-    uint8 index
-  ) 
-    external
-    permissionSet(universalProfileAddress, _getPermissionsByIndex(index))
-  {
-    _setAddressDaoPermission(universalProfileAddress, index, false);
   }
 
 }

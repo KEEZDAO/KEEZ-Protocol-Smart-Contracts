@@ -1,0 +1,116 @@
+[
+  {
+    "metadataSchemas": [
+      {
+        "name": "Name",
+        "key": "0x55e49609591f684ecf6f2909c9e20c2439b990887b9c3fe108b154c9077d85cf",
+        "keyType": "Singleton",
+        "valueType": "string",
+        "valueContent": "String"
+      },
+      {
+        "name": "Description",
+        "key": "0x95e794640ff3efd16bfe738f1a9bf2886d166af549121f57d6e14af6b513f45d",
+        "keyType": "Singleton",
+        "valueType": "string",
+        "valueContent": "String"
+      },
+      {
+        "name": "Quorum",
+        "key": "0x1c990d1606629a2681dbc22754450a119d5896cd739732a966bd0a2e08647359",
+        "keyType": "Singleton",
+        "valueType": "uint8",
+        "valueContent": "Uint8"
+      },
+      {
+        "name": "ParticipationRate",
+        "key": "0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9",
+        "keyType": "Singleton",
+        "valueType": "uint8",
+        "valueContent": "Uint8"
+      },
+      {
+        "name": "VotingDelay",
+        "key": "0x5bd05fa174be6a4aa4a8222f8837a27a381de14e7797cf7945df58b0626e6c3d",
+        "keyType": "Singleton",
+        "valueType": "uint256",
+        "valueContent": "Uint256"
+      },
+      {
+        "name": "VotingPeriod",
+        "key": "0xd08ca3a83d59467dd8ba57e940549874ea8310a1ebfb4396959235b00035d777",
+        "keyType": "Singleton",
+        "valueType": "uint256",
+        "valueContent": "Uint256"
+      }    
+    ]
+  },
+  {
+    "permissionsSchemas": [
+      {
+        "name": "DAOPermissionsAddresses[]",
+        "key": "0x72ba3778f5d93e8643176651d8174361d2ba28345f5eaa8b6a10f65dbfcf7c91",
+        "keyType": "Array",
+        "valueType": "address",
+        "valueContent": "Address"
+      },
+      {
+        "name": "DAOPermissionsAddresses:DAOPermissions:<address>",
+        "key": "0x6f1212b29e0dd553aa040000<address>",
+        "keyType": "MappingWithGrouping",
+        "valueType": "bytes32",
+        "valueContent": "BitArray"
+      }
+    ]
+  },
+  {
+    "delegateSchemas": [
+      {
+        "name": "Delegatee:<address>",
+        "key": "0xe9506e3d2587fc04e3280000<address>",
+        "keyType": "Mapping",
+        "valueType": "address",
+        "valueContent": "Address"
+      },
+      {
+        "name": "VotesDelegatedArray[]:Delegatee:<address>",
+        "key": "0x321d588394b2e9506e3d0000<address>",
+        "keyType": "Array",
+        "valueType": "address",
+        "valueContent": "Address"
+      }
+    ]
+  },
+  {
+    "proposalsSchemas": [
+      {
+        "name": "Phase1:Proposals:ProposalsArray[]",
+        "key": "0x9699000000006c70dab60000868640b1c1ae76f98d5a65e35f03a012e5169c29",
+        "keyType": "Array",
+        "valueType": "bytes32[]",
+        "valueContent": "Bytes32"
+      },
+      {
+        "name": "Phase2:Proposals:ProposalsArray[]",
+        "key": "0xe7ee000000006c70dab60000868640b1c1ae76f98d5a65e35f03a012e5169c29",
+        "keyType": "Array",
+        "valueType": "bytes32[]",
+        "valueContent": "Bytes32"
+      },
+      {
+        "name": "Phase3:Proposals:ProposalsArray[]",
+        "key": "0xfb6b000000006c70dab60000868640b1c1ae76f98d5a65e35f03a012e5169c29",
+        "keyType": "Array",
+        "valueType": "bytes32[]",
+        "valueContent": "Bytes32"
+      },
+      {
+        "name": "<proposalSignature>",
+        "key": "<proposalSignature>",
+        "keyType": "Singleton",
+        "valueType": "bytes",
+        "valueContent": "abi.encode(string, string, uint256, uint256, uint256, uint256, uint256, uint256)"
+      }
+    ]
+  }
+]

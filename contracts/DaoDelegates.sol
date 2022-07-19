@@ -3,13 +3,13 @@
 pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
-import "./DaoPermissionsInterface.sol";
+import "./Interfaces/DaoPermissionsInterface.sol";
 import "./DaoUtils.sol";
 
 /**
  * @author B00ste
  * @title DaoDelegates
- * @custom:version 0.8
+ * @custom:version 0.9
  */
 contract DaoDelegates {
 
@@ -31,32 +31,6 @@ contract DaoDelegates {
   constructor(LSP0ERC725Account _DAO, DaoUtils _utils) {
     DAO = _DAO;
     utils = _utils;
-  }
-
-  // --- MODIFIERS
-
-  /**
-   * @notice Verifies if an Universal Profile has SEND_DELEGATE permission.
-   */
-  modifier hasSendDelegatePermission(address universalProfileAddress) {
-    bytes memory addressPermissions = permissions._getAddressDaoPermission(universalProfileAddress);
-    require(
-      (uint256(bytes32(addressPermissions)) & (1 << 2) == 4),
-      "This address doesn't have SEND_DELEGATE permission."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifies if an Universal Profile has RECIEVE_DELEGATE permission.
-   */
-  modifier hasRecieveDelegatePermission(address universalProfileAddress) {
-    bytes memory addressPermissions = permissions._getAddressDaoPermission(universalProfileAddress);
-    require(
-      (uint256(bytes32(addressPermissions)) & (1 << 3) == 8),
-      "This address doesn't have RECIEVE_DELEGATE permission."
-    );
-    _;
   }
 
   // --- GETTERS & SETTERS
@@ -99,7 +73,7 @@ contract DaoDelegates {
   function _getDelegatorsArrayLength(address delegatee) public view returns(uint256 length) {
     length = uint256(bytes32(DAO.getData(      
       bytes32(bytes.concat(
-        bytes6(keccak256("VotesDelegatedArray")),
+        bytes6(keccak256("VotesDelegatedArray[]")),
         bytes4(keccak256("Delegatee")),
         bytes2(0),
         bytes20(delegatee)
@@ -115,7 +89,7 @@ contract DaoDelegates {
    */
   function _setDelegatorsArrayLength(uint256 length, address delegatee) internal {
     bytes32 delegateesArrayOfDeleggatorsKey = bytes32(bytes.concat(
-      bytes6(keccak256("VotesDelegatedArray")),
+      bytes6(keccak256("VotesDelegatedArray[]")),
       bytes4(keccak256("Delegatee")),
       bytes2(0),
       bytes20(delegatee)
@@ -134,7 +108,7 @@ contract DaoDelegates {
     bytes32 delegateeAndIndexKey = bytes32(bytes.concat(
       utils._bytes32ToTwoHalfs(
         bytes32(bytes.concat(
-          bytes6(keccak256("VotesDelegatedArray")),
+          bytes6(keccak256("VotesDelegatedArray[]")),
           bytes4(keccak256("Delegatee")),
           bytes2(0),
           bytes20(delegatee)
@@ -156,7 +130,7 @@ contract DaoDelegates {
     bytes32 delegateeAndIndexKey = bytes32(bytes.concat(
       utils._bytes32ToTwoHalfs(
         bytes32(bytes.concat(
-          bytes6(keccak256("VotesDelegatedArray")),
+          bytes6(keccak256("VotesDelegatedArray[]")),
           bytes4(keccak256("Delegatee")),
           bytes2(0),
           bytes20(delegatee)
@@ -166,26 +140,6 @@ contract DaoDelegates {
     ));
     bytes memory delegateeAndIndexValue = bytes.concat(bytes20(delegator));
     DAO.setData(delegateeAndIndexKey, delegateeAndIndexValue);
-  }
-
-  /**
-   * @notice Delegate your vote to another participant of the DAO
-   */
-  function delegate(address delegator, address delegatee)
-    external
-    hasSendDelegatePermission(delegator)
-    hasRecieveDelegatePermission(delegatee)
-  {
-    _setDelegateeOfTheDelegator(delegator, delegatee);
-    _setDelegatorByIndex(
-      delegator,
-      delegatee,
-      _getDelegatorsArrayLength(delegatee)
-    );
-    _setDelegatorsArrayLength(
-      _getDelegatorsArrayLength(delegatee),
-      delegatee
-    );
   }
   
 }

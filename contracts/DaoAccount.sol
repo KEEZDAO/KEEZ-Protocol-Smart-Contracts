@@ -3,9 +3,12 @@
 pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import "./DaoAccountMetadata.sol";
 import "./DaoPermissions.sol";
 import "./DaoProposals.sol";
+import "./VotingStrategies.sol";
 import "./DaoDelegates.sol";
+import "./DaoUtils.sol";
 
 /**
  *
@@ -14,9 +17,9 @@ import "./DaoDelegates.sol";
  *
  * @author B00ste
  * @title DaoAccount
- * @custom:version 0.8
+ * @custom:version 0.9
  */
-contract DaoAccount is DaoPermissions, DaoProposals, DaoDelegates {
+abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals, VotingStrategies, DaoDelegates {
    
   /**
    * @notice Unique instance of the DAO Universal Profile.
@@ -33,29 +36,36 @@ contract DaoAccount is DaoPermissions, DaoProposals, DaoDelegates {
    * This smart contract will be given all controller permissions.
    * Here is where all the tools needed for a functioning DAO are initialized.
    *
-   * @param _quorum The percentage of pro votes from the sum of pro and against votes needed for a proposal to pass.
-   * @param _participationRate The percentage of pro and against votes compared to abstain votes needed for a proposal to pass.
-   * @param _votingDelay Time required to pass before a proposal goes to the voting phase.
-   * @param _votingPeriod Time allowed for voting on a proposal.
+   * @param name Name of the DAO.
+   * @param description Description of the DAO.
+   * @param quorum The percentage of pro votes from the sum of pro and against votes needed for a proposal to pass.
+   * @param participationRate The percentage of pro and against votes compared to abstain votes needed for a proposal to pass.
+   * @param votingDelay Time required to pass before a proposal goes to the voting phase.
+   * @param votingPeriod Time allowed for voting on a proposal.
    */
   constructor(
-    uint8 _quorum,
-    uint8 _participationRate,
-    uint256 _votingDelay,
-    uint256 _votingPeriod
+    string memory name,
+    string memory description,
+    uint8 quorum,
+    uint8 participationRate,
+    uint256 votingDelay,
+    uint256 votingPeriod
   )
     DaoPermissions(DAO, utils)
-    DaoProposals(
-      _quorum,
-      _participationRate,
-      _votingDelay,
-      _votingPeriod,
-      DAO,
-      utils,
-      address(this)
-    )
+    DaoProposals(DAO, utils, address(this))
+    VotingStrategies(address(this))
     DaoDelegates(DAO, utils)
   {
+
+    require(quorum >= 0 && quorum <= 100);
+    require(participationRate >= 0 && participationRate <= 100);
+
+    _setDaoName(name);
+    _setDaoDescription(description);
+    _setDaoQuorum(quorum);
+    _setDaoParticipationRate(participationRate);
+    _setDaoVotingDelay(votingDelay);
+    _setDaoVotingPeriod(votingPeriod);
 
     _setDaoAddressesArrayLength(0);
     _setProposalsArrayLength(0, 1);
@@ -82,18 +92,201 @@ contract DaoAccount is DaoPermissions, DaoProposals, DaoDelegates {
     DAO.setData(keysArray, valuesArray);
   }
 
-  // --- MODIFIERS
+  // --- GENERAL METHODS
+  
+  /**
+   * @notice Add permission to an address by index.
+   * Index 0 sets the VOTE permission.
+   * Index 1 sets the PROPOSE permission.
+   * Index 2 sets the SEND_DELEGATE permission.
+   * Index 3 sets the RECIEVE_DELEGATE permission.
+   * Index 4 sets the MASTER permission.
+   *
+   * @param universalProfileAddress The address of a Universal Profile.
+   * @param index A number 0 <= `index` <= 4.
+   */
+  function addPermission(
+    address universalProfileAddress,
+    uint8 index
+  ) 
+    external
+    permissionSet(universalProfileAddress, _getPermissionsByIndex(4)) /** @dev User has MASTER permission */
+    permissionUnset(universalProfileAddress, _getPermissionsByIndex(index))
+  {
+    if (!checkUser(universalProfileAddress)) {
+      uint256 addressesArrayLength = _getDaoAddressesArrayLength();
+      _setDaoAddressByIndex(addressesArrayLength, universalProfileAddress);
+      _setDaoAddressesArrayLength(addressesArrayLength + 1);
+    }
+    
+    _setAddressDaoPermission(universalProfileAddress, index, true);
+  }
 
   /**
-   * @notice Verifies if an Universal Profile has EXECUTE permission.
+   * @notice Remove the permission of an Unversal Profile by index.
+   * Index 0 unsets the VOTE permission.
+   * Index 1 unsets the PROPOSE permission.
+   * Index 2 unsets the SEND_DELEGATE permission.
+   * Index 3 unsets the RECIEVE_DELEGATE permission.
+   * Index 4 unsets the MASTER permission.
+   *
+   * @param universalProfileAddress The address of a Universal Profile.
+   * @param index A number 0 <= `index` <= 4.
    */
-  modifier hasExecutePermission(address universalProfileAddress) {
-    bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
-    require(
-      (uint256(bytes32(addressPermissions)) & (1 << 4) == 16),
-      "This address doesn't have EXECUTE permission."
+
+  function removePermission(
+    address universalProfileAddress,
+    uint8 index
+  ) 
+    external
+    permissionSet(universalProfileAddress, _getPermissionsByIndex(4)) /** @dev User has MASTER permission */
+    permissionSet(universalProfileAddress, _getPermissionsByIndex(index))
+  {
+    _setAddressDaoPermission(universalProfileAddress, index, false);
+  }
+
+  /**
+   * @notice Delegate your vote to another participant of the DAO
+   */
+  function delegate(address delegator, address delegatee)
+    external
+    permissionSet(delegator, _getPermissionsByIndex(2))
+    permissionSet(delegatee, _getPermissionsByIndex(3))
+  {
+    _setDelegateeOfTheDelegator(delegator, delegatee);
+    _setDelegatorByIndex(
+      delegator,
+      delegatee,
+      _getDelegatorsArrayLength(delegatee)
     );
-    _;
+    _setDelegatorsArrayLength(
+      _getDelegatorsArrayLength(delegatee),
+      delegatee
+    );
+  }
+
+  /**
+   * @notice Create a proposal.
+   * The proposal signature is encoded to a bytes32 variable using
+   * abi.encode(_title, _description, _targets, _datas).
+   *
+   * @param _title Title of the proposal.
+   * @param _description Description of the proposal.
+   * @param _targets The addresses of the smart contracts that might have calldata executed.
+   * @param _datas The calldata that will be executed if the proposall passes.
+   */
+  function createProposal(
+    string memory _title,
+    string memory _description,
+    address[] memory _targets,
+    bytes[] memory _datas
+  )
+    external
+    permissionSet(msg.sender, _getPermissionsByIndex(1))
+    returns(bytes32 proposalSignature)
+  {
+    require(_targets.length == _datas.length, "Provided targets and datas have different lengths.");
+
+    proposalSignature = bytes32(keccak256(
+      abi.encode(
+        _title,
+        _description,
+        block.timestamp
+    )));
+
+    proposals[proposalSignature].title = _title;
+    proposals[proposalSignature].description = _description;
+    proposals[proposalSignature].targets = _targets;
+    proposals[proposalSignature].datas = _datas;
+    proposals[proposalSignature].phase = 1;
+    proposals[proposalSignature].creationTimestamp = block.timestamp;
+
+    _saveProposal(proposalSignature, 1);
+  }
+
+  /**
+   * @notice Move the proposal to the voting phase.
+   *
+   * @param proposalSignature The abi.encode bytes32 signature of a proposal.
+   */
+  function putProposalToVote(
+    bytes32 proposalSignature
+  ) 
+    external
+    checkPhase(proposalSignature, (1 << 0))
+    votingDelayPassed(proposalSignature)
+    isParticipantOfDao(msg.sender)
+  {
+    proposals[proposalSignature].phase = 2;
+    proposals[proposalSignature].votingTimestamp = block.timestamp;
+    _saveProposal(proposalSignature, 2);
+    _removeProposal(proposalSignature, 1);
+  }
+
+  /**
+   * @notice End proposal and execute the calldata.
+   * Encode the proposal info, timestamps and results and save them to the Universal Profile of the DAO.
+   *
+   * @param proposalSignature The abi.encode bytes32 signature of a proposal.
+   */
+  function endProposal(
+    bytes32 proposalSignature
+  ) 
+    external
+    checkPhase(proposalSignature, (1 << 1))
+    votingPeriodPassed(proposalSignature)
+    isParticipantOfDao(msg.sender)
+  {
+    proposals[proposalSignature].phase = 3;
+    proposals[proposalSignature].endTimestamp = block.timestamp;
+    _saveProposal(proposalSignature, 3);
+    _removeProposal(proposalSignature, 2);
+    delete proposals[proposalSignature];
+  
+    if(_strategyOneResult(proposalSignature)) {
+      for (uint i = 0; i < proposals[proposalSignature].targets.length; i++) {
+        DAO.execute(
+          0,
+          proposals[proposalSignature].targets[i],
+          0,
+          proposals[proposalSignature].datas[i]
+        );
+      }
+    }
+  }
+
+  /**
+   * @notice Vote on a proposal.
+   *
+   * @param proposalSignature The abi.encode bytes32 signature of a proposal.
+   * @param voteIndex a number 0 <= `voteIndex` <= 2.
+   * Index 0 are the against votes. 
+   * Index 1 are the pro votes. 
+   * Index 2 are the abstain votes. 
+   */
+  function vote(
+    bytes32 proposalSignature,
+    uint8 voteIndex
+  )
+    external
+    permissionSet(msg.sender, _getPermissionsByIndex(0))
+    didNotDelegate(msg.sender)
+    checkPhase(proposalSignature, (1 << 1))
+    votingPeriodIsOn(proposalSignature)
+  {
+    if(uint256(bytes32(_getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {
+      if(voteIndex != 2) {
+        uint256 totalVotes = _getDelegatorsArrayLength(msg.sender);
+        proposals[proposalSignature].votes[voteIndex] += totalVotes;
+        proposals[proposalSignature].votes[2] -= totalVotes;
+      }
+    }
+    else {
+      if(voteIndex != 2) {
+        proposals[proposalSignature].votes[voteIndex] ++;
+        proposals[proposalSignature].votes[2] --;
+      }
+    }
   }
 
 }

@@ -7,7 +7,7 @@ import "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
 /**
  * @author B00ste
  * @title DaoUtils
- * @custom:version 0.8
+ * @custom:version 0.9
  */
 contract DaoUtils {
 
@@ -124,38 +124,5 @@ contract DaoUtils {
     }
 
   }
-
-  // --- Time utils.
-
-  /*function a() public view returns(uint256, string memory) {
-    uint256 weekTime = 60 * 60 * 24 * 7;
-    uint256 dayTime = 60 * 60 * 24;
-    uint256 thisMoment = block.timestamp;
-    uint256 timePassedFromLastWeek = thisMoment % weekTime;
-    uint256 weekDay = timePassedFromLastWeek / dayTime;
-    if (weekDay == 0) {
-      return(timePassedFromLastWeek, "Thursday");
-    }
-    else if (weekDay == 1) {
-      return(timePassedFromLastWeek, "Friday");
-    }
-    else if (weekDay == 2) {
-      return(timePassedFromLastWeek, "Saturday");
-    }
-    else if (weekDay == 3) {
-      return(timePassedFromLastWeek, "Sunday");
-    }
-    else if (weekDay == 4) {
-      return(timePassedFromLastWeek, "Monday");
-    }
-    else if (weekDay == 5) {
-      return(timePassedFromLastWeek, "Tuesday");
-    }
-    else if (weekDay == 6) {
-      return(timePassedFromLastWeek, "Wednesday");
-    }
-
-    return(0, "");
-  }*/
 
 }

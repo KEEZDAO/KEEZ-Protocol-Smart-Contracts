@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
-import "./DaoPermissionsInterface.sol";
-import "./DaoDelegatesInterface.sol";
+import "./Interfaces/DaoPermissionsInterface.sol";
+import "./Interfaces/DaoDelegatesInterface.sol";
+import "./Interfaces/DaoAccountMetadataInterface.sol";
 import "./DaoUtils.sol";
 
 /**
@@ -14,7 +15,7 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoProposals
- * @custom:version 0.8
+ * @custom:version 0.9
  */
 contract DaoProposals {
 
@@ -40,32 +41,17 @@ contract DaoProposals {
    */
   DaoDelegatesInterface private delegates;
 
+  /**
+   * @notice Instance for the DAO metadata.
+   */
+  DaoAccountMetadataInterface private metadata;
+
   // --- PROPOSAL ATTRIBUTES
 
   /**
    * @notice Map data structure for fast access to the data of a proposal.
    */
-  mapping(bytes32 => Proposal) private proposals;
-
-  /**
-   * @notice Percentage of pro votes needed for a proposal to pass.
-   */
-  uint8 private quorum;
-
-  /**
-   * @notice Participation rate needed to be reached for a proposal to be valid.
-   */
-  uint8 private participationRate;
-
-  /**
-   * @notice Time requiered to pass before ending the queueing period is possible.
-   */
-  uint256 private votingDelay;
-
-  /**
-   * @notice Time requiered to pass before ending the voting period is possible.
-   */
-  uint256 private votingPeriod;
+  mapping(bytes32 => Proposal) internal proposals;
 
   /**
    * @notice A struct containing all the info about a Proposal.
@@ -102,24 +88,15 @@ contract DaoProposals {
    * @notice Initializing the Proposals smart contract.
    */
   constructor(
-    uint8 _quorum,
-    uint8 _participationRate,
-    uint256 _votingDelay,
-    uint256 _votingPeriod,
     LSP0ERC725Account _DAO,
     DaoUtils _utils,
     address daoAddress
   ) {
-    require(_quorum >= 0 && _quorum <= 100);
-    require(_participationRate >= 0 && _participationRate <= 100);
-    quorum = _quorum;
-    participationRate = _participationRate;
-    votingDelay = _votingDelay;
-    votingPeriod = _votingPeriod;
     DAO = _DAO;
     utils = _utils;
     permissions = DaoPermissionsInterface(daoAddress);
     delegates = DaoDelegatesInterface(daoAddress);
+    metadata = DaoAccountMetadataInterface(daoAddress); 
   }
 
   // --- MODIFIERS
@@ -131,30 +108,6 @@ contract DaoProposals {
     require(
       proposals[proposalSignature].phase == _phase,
       "The selected phase not reached yet."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifies if an Universal Profile has VOTE permission.
-   */
-  modifier hasVotePermission(address universalProfileAddress) {
-    bytes memory addressPermissions = permissions._getAddressDaoPermission(universalProfileAddress);
-    require(
-      (uint256(bytes32(addressPermissions)) & (1 << 0) == 1),
-      "This address doesn't have VOTE permission."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifies if an Universal Profile has PROPOSE permission.
-   */
-  modifier hasProposePermission(address universalProfileAddress) {
-    bytes memory addressPermissions = permissions._getAddressDaoPermission(universalProfileAddress);
-    require(
-      (uint256(bytes32(addressPermissions)) & (1 << 1) == 2),
-      "This address doesn't have PROPOSE permission."
     );
     _;
   }
@@ -175,7 +128,7 @@ contract DaoProposals {
    */
   modifier votingDelayPassed(bytes32 proposalSignature) {
     require(
-      votingDelay + proposals[proposalSignature].creationTimestamp < block.timestamp,
+      metadata._getDaoVotingDelay() + proposals[proposalSignature].creationTimestamp < block.timestamp,
       "The voting delay is not yeat over."
     );
     _;
@@ -186,7 +139,7 @@ contract DaoProposals {
    */
   modifier votingPeriodPassed(bytes32 proposalSignature) {
     require(
-      votingPeriod + proposals[proposalSignature].votingTimestamp < block.timestamp,
+      metadata._getDaoVotingPeriod() + proposals[proposalSignature].votingTimestamp < block.timestamp,
       "The voting delay is not yeat over."
     );
     _;
@@ -197,7 +150,7 @@ contract DaoProposals {
    */
   modifier votingPeriodIsOn(bytes32 proposalSignature) {
     require(
-      proposals[proposalSignature].votingTimestamp + votingPeriod > block.timestamp,
+      proposals[proposalSignature].votingTimestamp + metadata._getDaoVotingPeriod() > block.timestamp,
       "Voting period is already over."
     );
     _;
@@ -220,8 +173,8 @@ contract DaoProposals {
   /**
    * @notice Get the proposals array key depending on the phase of the proposals.
    */
-  function getDaoProposalsArrayKeyByPhase(uint8 phaseNr) internal pure returns(bytes32 key) {
-    bytes2 phase;
+  function _getDaoProposalsArrayKeyByPhase(uint8 phaseNr) public pure returns(bytes32 key) {
+    bytes6 phase;
     if (phaseNr == 1) {
       phase = bytes2(keccak256("Phase1"));
     }
@@ -233,7 +186,7 @@ contract DaoProposals {
     }
     key = bytes32(bytes.concat(
       phase,
-      bytes8(keccak256("Proposals")),
+      bytes4(keccak256("Proposals")),
       bytes2(0),
       bytes20(keccak256("ProposalsArray[]"))
     ));
@@ -242,8 +195,8 @@ contract DaoProposals {
   /**
    * @notice Get the proposals array lenngth.
    */
-  function _getProposalsArrayLength(uint8 phaseNr) internal view returns(uint256 length) {
-    length = uint256(bytes32(DAO.getData(getDaoProposalsArrayKeyByPhase(phaseNr))));
+  function _getProposalsArrayLength(uint8 phaseNr) public view returns(uint256 length) {
+    length = uint256(bytes32(DAO.getData(_getDaoProposalsArrayKeyByPhase(phaseNr))));
   }
 
   /**
@@ -251,14 +204,14 @@ contract DaoProposals {
    */
   function _setProposalsArrayLength(uint256 length, uint8 phaseNr) internal {
     bytes memory newLength = bytes.concat(bytes32(length));
-    DAO.setData(getDaoProposalsArrayKeyByPhase(phaseNr), newLength);
+    DAO.setData(_getDaoProposalsArrayKeyByPhase(phaseNr), newLength);
   }
 
   /**
    * @notice Get Proposal by index.
    */
-  function _getProposalByIndex(uint256 index, uint8 phaseNr) internal view returns(bytes memory proposalSignature) {
-    bytes16[2] memory daoProposalsArrayKeyHalfs = utils._bytes32ToTwoHalfs(getDaoProposalsArrayKeyByPhase(phaseNr));
+  function _getProposalByIndex(uint256 index, uint8 phaseNr) public view returns(bytes memory proposalSignature) {
+    bytes16[2] memory daoProposalsArrayKeyHalfs = utils._bytes32ToTwoHalfs(_getDaoProposalsArrayKeyByPhase(phaseNr));
     bytes32 proposalKey = bytes32(bytes.concat(
       daoProposalsArrayKeyHalfs[0], bytes16(uint128(index))
     ));
@@ -269,7 +222,7 @@ contract DaoProposals {
    * @notice Set Proposal by index.
    */
   function _setProposalByIndex(uint256 index, bytes32 _proposalSignature, uint8 phaseNr) internal {
-    bytes16[2] memory daoProposalsArrayKeyHalfs = utils._bytes32ToTwoHalfs(getDaoProposalsArrayKeyByPhase(phaseNr));
+    bytes16[2] memory daoProposalsArrayKeyHalfs = utils._bytes32ToTwoHalfs(_getDaoProposalsArrayKeyByPhase(phaseNr));
     bytes32 proposalKey = bytes32(bytes.concat(
       daoProposalsArrayKeyHalfs[0], bytes16(uint128(index))
     ));
@@ -280,7 +233,7 @@ contract DaoProposals {
   /**
    * @notice Get DAO proposal data.
    */
-  function _getProposalData(bytes32 proposalSignature) internal view returns(
+  function _getProposalData(bytes32 proposalSignature) public view returns(
       string memory title,
       string memory description,
       uint256 creationTimestamp,
@@ -315,9 +268,9 @@ contract DaoProposals {
   // --- INTERNAL METHODS
 
   /**
-   * @notice Saves a ended proposal to the UniversalProfile.
+   * @notice Save proposal to the Universal Profile.
    */
-  function saveProposal(bytes32 proposalSignature, uint8 phaseNr) private {
+  function _saveProposal(bytes32 proposalSignature, uint8 phaseNr) internal {
 
     uint256 proposalsArrayLength = _getProposalsArrayLength(phaseNr);
     bytes memory proposalDataBytes = abi.encode(
@@ -338,7 +291,7 @@ contract DaoProposals {
   }
 
   /**
-   * @notice Remove proposal.
+   * @notice Remove proposal from Universal Profile.
    */
   function _removeProposal(bytes32 proposalSignature, uint8 phaseNr) internal returns(bool, bytes32) {
     uint256 length = _getProposalsArrayLength(phaseNr);
@@ -353,136 +306,6 @@ contract DaoProposals {
     _setProposalByIndex(length, bytes32(0), phaseNr);
     _setProposalsArrayLength((length + 1), phaseNr);
     return (true, proposalSignature);
-  }
-
-  // --- GENERAL METHODS
-
-  /**
-   * @notice Create a proposal.
-   * The proposal signature is encoded to a bytes32 variable using
-   * abi.encode(_title, _description, _targets, _datas).
-   *
-   * @param _title Title of the proposal.
-   * @param _description Description of the proposal.
-   * @param _targets The addresses of the smart contracts that might have calldata executed.
-   * @param _datas The calldata that will be executed if the proposall passes.
-   */
-  function createProposal(
-    string memory _title,
-    string memory _description,
-    address[] memory _targets,
-    bytes[] memory _datas
-  )
-    external
-    hasProposePermission(msg.sender)
-    returns(bytes32 proposalSignature)
-  {
-    require(_targets.length == _datas.length, "Provided targets and datas have different lengths.");
-
-    proposalSignature = bytes32(keccak256(
-      abi.encode(
-        _title,
-        _description,
-        block.timestamp
-    )));
-
-    proposals[proposalSignature].title = _title;
-    proposals[proposalSignature].description = _description;
-    proposals[proposalSignature].targets = _targets;
-    proposals[proposalSignature].datas = _datas;
-    proposals[proposalSignature].phase = 1;
-    proposals[proposalSignature].creationTimestamp = block.timestamp;
-
-    saveProposal(proposalSignature, 1);
-  }
-
-  /**
-   * @notice Move the proposal to the voting phase.
-   *
-   * @param proposalSignature The abi.encode bytes32 signature of a proposal.
-   */
-  function putProposalToVote(
-    bytes32 proposalSignature
-  ) 
-    external
-    checkPhase(proposalSignature, (1 << 0))
-    votingDelayPassed(proposalSignature)
-    isParticipantOfDao(msg.sender)
-  {
-    proposals[proposalSignature].phase = 2;
-    proposals[proposalSignature].votingTimestamp = block.timestamp;
-    saveProposal(proposalSignature, 2);
-    _removeProposal(proposalSignature, 1);
-  }
-
-  /**
-   * @notice End proposal and execute the calldata.
-   * Encode the proposal info, timestamps and results and save them to the Universal Profile of the DAO.
-   *
-   * @param proposalSignature The abi.encode bytes32 signature of a proposal.
-   */
-  function endProposal(
-    bytes32 proposalSignature
-  ) 
-    external
-    checkPhase(proposalSignature, (1 << 1))
-    votingPeriodPassed(proposalSignature)
-    isParticipantOfDao(msg.sender)
-  {
-    proposals[proposalSignature].phase = 3;
-    proposals[proposalSignature].endTimestamp = block.timestamp;
-    saveProposal(proposalSignature, 3);
-    _removeProposal(proposalSignature, 2);
-    delete proposals[proposalSignature];
-  
-    uint256[3] memory votes = proposals[proposalSignature].votes;
-    if(
-      votes[1]/(votes[1] + votes[0]) > quorum/(votes[1] + votes[0]) &&
-      (votes[1] + votes[0])/(votes[1] + votes[0] + votes[2]) > participationRate/(votes[1] + votes[0] + votes[2])
-    ) {
-      for (uint i = 0; i < proposals[proposalSignature].targets.length; i++) {
-        DAO.execute(
-          0,
-          proposals[proposalSignature].targets[i],
-          0,
-          proposals[proposalSignature].datas[i]
-        );
-      }
-    }
-  }
-
-  /**
-   * @notice Vote on a proposal.
-   *
-   * @param proposalSignature The abi.encode bytes32 signature of a proposal.
-   * @param voteIndex a number 0 <= `voteIndex` <= 2.
-   * Index 0 are the against votes. 
-   * Index 1 are the pro votes. 
-   * Index 2 are the abstain votes. 
-   */
-  function vote(
-    bytes32 proposalSignature,
-    uint8 voteIndex
-  )
-    external
-    hasVotePermission(msg.sender)
-    didNotDelegate(msg.sender)
-    checkPhase(proposalSignature, (1 << 1))
-    votingPeriodIsOn(proposalSignature)
-  {
-    if(uint256(bytes32(permissions._getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {
-      if(voteIndex != 2) {
-        uint256 totalVotes = delegates._getDelegatorsArrayLength(msg.sender);
-        proposals[proposalSignature].votes[voteIndex] += totalVotes;
-        proposals[proposalSignature].votes[2] -= totalVotes;
-      }
-    }
-    else {
-      if(voteIndex != 2) {
-        proposals[proposalSignature].votes[voteIndex] ++;
-        proposals[proposalSignature].votes[2] --;
-      }
-    }
   }
 
 }
