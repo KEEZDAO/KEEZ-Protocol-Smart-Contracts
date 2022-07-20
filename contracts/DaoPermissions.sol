@@ -12,7 +12,7 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoPermissions
- * @custom:version 0.9
+ * @custom:version 0.91
  */
 contract DaoPermissions {
 
@@ -74,6 +74,18 @@ contract DaoPermissions {
     require(
       uint256(bytes32(addressPermissions)) & uint256(checkedPermission) == 0,
       "User already has the permission."
+    );
+    _;
+  }
+
+  /**
+   * @notice Verifying if universal profile is a participant of the DAO.
+   */
+  modifier isParticipantOfDao(address universalProfileAddress) {
+    bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
+    require(
+      bytes32(addressPermissions) != bytes32(0),
+      "This Universal Profile is not a participant of the DAO."
     );
     _;
   }

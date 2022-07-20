@@ -3,22 +3,15 @@
 pragma solidity ^0.8.0;
 
 interface DaoProposalsInterface {
-  
-  function getDaoProposalsArrayKeyByPhase(uint8 phaseNr) external pure returns(bytes32 key);
 
-  function _getProposalsArrayLength(uint8 phaseNr) external view returns(uint256 length);
+  function _getProposalSignature(uint256 creationTimestamp, string memory proposalName) external pure returns(bytes10 proposalSignature);
 
-  function _getProposalByIndex(uint256 index, uint8 phaseNr) external view returns(bytes memory proposalSignature);
+  function _getProposalsArrayLength() external view returns(uint256 length);
 
-  function _getProposalData(bytes32 proposalSignature) external view returns(
-      string memory title,
-      string memory description,
-      uint256 creationTimestamp,
-      uint256 votingTimestamp,
-      uint256 endTimestamp,
-      uint256 againstVotes,
-      uint256 proVotes,
-      uint256 abstainVotes
-  );
+  function _getProposalSignatureByIndex(uint256 index) external view returns(bytes memory proposalSignature);
+
+  function _getAttributeValue(bytes10 proposalSignature, bytes20 proposalAttributeKey) external view returns(bytes memory value);
+
+  function _getTargetsAndDatas(bytes10 proposalSignature) external view returns(address[] memory targets, bytes[] memory datas);
 
 }

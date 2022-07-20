@@ -10,7 +10,7 @@ import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account
  *
  * @author B00ste
  * @title DaoAccountMetadata
- * @custom:version 0.9
+ * @custom:version 0.91
  */
 contract DaoAccountMetadata {
 

@@ -84,32 +84,67 @@
   {
     "proposalsSchemas": [
       {
-        "name": "Phase1:Proposals:ProposalsArray[]",
-        "key": "0x9699000000006c70dab60000868640b1c1ae76f98d5a65e35f03a012e5169c29",
-        "keyType": "Array",
-        "valueType": "bytes32[]",
-        "valueContent": "Bytes32"
-      },
-      {
-        "name": "Phase2:Proposals:ProposalsArray[]",
-        "key": "0xe7ee000000006c70dab60000868640b1c1ae76f98d5a65e35f03a012e5169c29",
-        "keyType": "Array",
-        "valueType": "bytes32[]",
-        "valueContent": "Bytes32"
-      },
-      {
-        "name": "Phase3:Proposals:ProposalsArray[]",
-        "key": "0xfb6b000000006c70dab60000868640b1c1ae76f98d5a65e35f03a012e5169c29",
-        "keyType": "Array",
-        "valueType": "bytes32[]",
-        "valueContent": "Bytes32"
-      },
-      {
-        "name": "<proposalSignature>",
-        "key": "<proposalSignature>",
+        "name": "<creationTimestamp>:<title>:Title",
+        "key": "<creationTimestamp><title>5469746c65000000000000000000000000000000",
         "keyType": "Singleton",
-        "valueType": "bytes",
-        "valueContent": "abi.encode(string, string, uint256, uint256, uint256, uint256, uint256, uint256)"
+        "valueType": "string",
+        "valueContent": "String"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:Description",
+        "key": "<creationTimestamp><title>4465736372697074696f6e000000000000000000",
+        "keyType": "Singleton",
+        "valueType": "string",
+        "valueContent": "String"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:CreationTimestamp",
+        "key": "<creationTimestamp><title>4372656174696f6e54696d657374616d70000000",
+        "keyType": "Singleton",
+        "valueType": "uint256",
+        "valueContent": "Uint256"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:VotingTimestamp",
+        "key": "<creationTimestamp><title>566f74696e6754696d657374616d700000000000",
+        "keyType": "Singleton",
+        "valueType": "uint256",
+        "valueContent": "Uint256"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:EndTimestamp",
+        "key": "<creationTimestamp><title>456e6454696d657374616d700000000000000000",
+        "keyType": "Singleton",
+        "valueType": "uint256",
+        "valueContent": "Uint256"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:Targets[]",
+        "key": "<creationTimestamp><title>546172676574735b5d0000000000000000000000",
+        "keyType": "Array",
+        "valueType": "uint256[]",
+        "valueContent": "Uint256"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:Datas[]",
+        "key": "<creationTimestamp><title>44617461735b5d00000000000000000000000000",
+        "keyType": "Array",
+        "valueType": "uint256[]",
+        "valueContent": "Uint256"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:AgainstVotes",
+        "key": "<creationTimestamp><title>416761696e7374566f7465730000000000000000",
+        "keyType": "Singleton",
+        "valueType": "uint256",
+        "valueContent": "Uint256"
+      },
+      {
+        "name": "<creationTimestamp>:<title>:ProVotes",
+        "key": "<creationTimestamp><title>50726f566f746573000000000000000000000000",
+        "keyType": "Singleton",
+        "valueType": "uint256",
+        "valueContent": "Uint256"
       }
     ]
   }

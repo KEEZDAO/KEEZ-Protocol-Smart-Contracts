@@ -7,7 +7,7 @@ import "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
 /**
  * @author B00ste
  * @title DaoUtils
- * @custom:version 0.9
+ * @custom:version 0.91
  */
 contract DaoUtils {
 

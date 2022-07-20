@@ -9,7 +9,7 @@ import "./DaoUtils.sol";
 /**
  * @author B00ste
  * @title DaoDelegates
- * @custom:version 0.9
+ * @custom:version 0.91
  */
 contract DaoDelegates {
 
@@ -31,6 +31,20 @@ contract DaoDelegates {
   constructor(LSP0ERC725Account _DAO, DaoUtils _utils) {
     DAO = _DAO;
     utils = _utils;
+  }
+
+  // --- MODIFIERS
+
+  /**
+   * @notice Verifies that a Universal Profile did not delegate his vote.
+   */ 
+  modifier didNotDelegate(address universalProfileAddress) {
+    address delegatee = _getDelegateeOfTheDelegator(universalProfileAddress);
+    require(
+      universalProfileAddress == delegatee || bytes20(universalProfileAddress) == bytes20(0),
+      "User delegated his votes."
+    );
+    _;
   }
 
   // --- GETTERS & SETTERS

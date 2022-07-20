@@ -17,7 +17,7 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoAccount
- * @custom:version 0.9
+ * @custom:version 0.91
  */
 abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals, VotingStrategies, DaoDelegates {
    
@@ -51,12 +51,12 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     uint256 votingDelay,
     uint256 votingPeriod
   )
+    DaoAccountMetadata(DAO)
     DaoPermissions(DAO, utils)
     DaoProposals(DAO, utils, address(this))
-    VotingStrategies(address(this))
+    VotingStrategies(DAO, address(this))
     DaoDelegates(DAO, utils)
   {
-
     require(quorum >= 0 && quorum <= 100);
     require(participationRate >= 0 && participationRate <= 100);
 
@@ -66,30 +66,6 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     _setDaoParticipationRate(participationRate);
     _setDaoVotingDelay(votingDelay);
     _setDaoVotingPeriod(votingPeriod);
-
-    _setDaoAddressesArrayLength(0);
-    _setProposalsArrayLength(0, 1);
-    _setProposalsArrayLength(0, 2);
-    _setProposalsArrayLength(0, 3);
-
-    bytes32[] memory keysArray = new bytes32[](3);
-    // Controller addresses array key
-    keysArray[0] = bytes32(0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3);
-    // First element from controller addresses array key
-    keysArray[1] = bytes32(bytes.concat(bytes16(0xdf30dba06db6a30e65354d9a64c60986), bytes16(0)));
-    // This addresses permissions key
-    keysArray[2] = bytes32(bytes.concat(bytes12(0x4b80742de2bf82acb3630000), bytes20(address(this))));
-
-
-    bytes[] memory valuesArray = new bytes[](3);
-    // Controller addresses array value
-    valuesArray[0] = bytes.concat(bytes32(uint256(1)));
-    // First element from controller addresses array value
-    valuesArray[1] = bytes.concat(bytes20(address(this)));
-    // This addresses permissions value
-    valuesArray[2] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007FFF));
-
-    DAO.setData(keysArray, valuesArray);
   }
 
   // --- GENERAL METHODS
@@ -109,8 +85,8 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     address universalProfileAddress,
     uint8 index
   ) 
-    external
-    permissionSet(universalProfileAddress, _getPermissionsByIndex(4)) /** @dev User has MASTER permission */
+    public
+    permissionSet(msg.sender, _getPermissionsByIndex(4)) /** @dev User has MASTER permission */
     permissionUnset(universalProfileAddress, _getPermissionsByIndex(index))
   {
     if (!checkUser(universalProfileAddress)) {
@@ -167,60 +143,46 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
 
   /**
    * @notice Create a proposal.
-   * The proposal signature is encoded to a bytes32 variable using
-   * abi.encode(_title, _description, _targets, _datas).
+   * The proposal signature is encoded to a bytes10 variable.
+   * Which is later used compined with an attribute key for getting the attribute value.
    *
-   * @param _title Title of the proposal.
-   * @param _description Description of the proposal.
-   * @param _targets The addresses of the smart contracts that might have calldata executed.
-   * @param _datas The calldata that will be executed if the proposall passes.
+   * @param title Title of the proposal.
+   * @param description Description of the proposal.
+   * @param targets The addresses of the smart contracts that might have calldata executed.
+   * @param datas The calldata that will be executed if the proposall passes.
    */
   function createProposal(
-    string memory _title,
-    string memory _description,
-    address[] memory _targets,
-    bytes[] memory _datas
+    string memory title,
+    string memory description,
+    address[] memory targets,
+    bytes[] memory datas
   )
     external
     permissionSet(msg.sender, _getPermissionsByIndex(1))
-    returns(bytes32 proposalSignature)
+    returns(bytes10 proposalSignature)
   {
-    require(_targets.length == _datas.length, "Provided targets and datas have different lengths.");
+    require(targets.length == datas.length, "Provided targets and datas have different lengths.");
 
-    proposalSignature = bytes32(keccak256(
-      abi.encode(
-        _title,
-        _description,
-        block.timestamp
-    )));
-
-    proposals[proposalSignature].title = _title;
-    proposals[proposalSignature].description = _description;
-    proposals[proposalSignature].targets = _targets;
-    proposals[proposalSignature].datas = _datas;
-    proposals[proposalSignature].phase = 1;
-    proposals[proposalSignature].creationTimestamp = block.timestamp;
-
-    _saveProposal(proposalSignature, 1);
+    proposalSignature = _getProposalSignature(block.timestamp, title);
+    _setAttributeValue(proposalSignature, proposalAttributeKeys[0], bytes(title));
+    _setAttributeValue(proposalSignature, proposalAttributeKeys[1], bytes(description));
+    _setAttributeValue(proposalSignature, proposalAttributeKeys[2], bytes.concat(bytes32(block.timestamp)));
+    _setTargetsAndDatas(proposalSignature, targets, datas);
   }
 
   /**
-   * @notice Move the proposal to the voting phase.
+   * @notice Move the proposal to the voting phase. Save the current timestamp.
    *
-   * @param proposalSignature The abi.encode bytes32 signature of a proposal.
+   * @param proposalSignature The bytes10 signature of a proposal.
    */
   function putProposalToVote(
-    bytes32 proposalSignature
+    bytes10 proposalSignature
   ) 
     external
-    checkPhase(proposalSignature, (1 << 0))
     votingDelayPassed(proposalSignature)
     isParticipantOfDao(msg.sender)
   {
-    proposals[proposalSignature].phase = 2;
-    proposals[proposalSignature].votingTimestamp = block.timestamp;
-    _saveProposal(proposalSignature, 2);
-    _removeProposal(proposalSignature, 1);
+    _setAttributeValue(proposalSignature, proposalAttributeKeys[3], bytes.concat(bytes32(block.timestamp)));
   }
 
   /**
@@ -230,26 +192,22 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
    * @param proposalSignature The abi.encode bytes32 signature of a proposal.
    */
   function endProposal(
-    bytes32 proposalSignature
+    bytes10 proposalSignature
   ) 
     external
-    checkPhase(proposalSignature, (1 << 1))
     votingPeriodPassed(proposalSignature)
     isParticipantOfDao(msg.sender)
   {
-    proposals[proposalSignature].phase = 3;
-    proposals[proposalSignature].endTimestamp = block.timestamp;
-    _saveProposal(proposalSignature, 3);
-    _removeProposal(proposalSignature, 2);
-    delete proposals[proposalSignature];
+    _setAttributeValue(proposalSignature, proposalAttributeKeys[4], bytes.concat(bytes32(block.timestamp)));
   
+    (address[] memory targets, bytes[] memory datas) = _getTargetsAndDatas(proposalSignature);
     if(_strategyOneResult(proposalSignature)) {
-      for (uint i = 0; i < proposals[proposalSignature].targets.length; i++) {
+      for (uint i = 0; i < targets.length; i++) {
         DAO.execute(
           0,
-          proposals[proposalSignature].targets[i],
+          targets[i],
           0,
-          proposals[proposalSignature].datas[i]
+          datas[i]
         );
       }
     }
@@ -259,33 +217,37 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
    * @notice Vote on a proposal.
    *
    * @param proposalSignature The abi.encode bytes32 signature of a proposal.
-   * @param voteIndex a number 0 <= `voteIndex` <= 2.
+   * @param voteIndex a number 0 <= `voteIndex` <= 1.
    * Index 0 are the against votes. 
    * Index 1 are the pro votes. 
-   * Index 2 are the abstain votes. 
    */
   function vote(
-    bytes32 proposalSignature,
+    bytes10 proposalSignature,
     uint8 voteIndex
   )
     external
     permissionSet(msg.sender, _getPermissionsByIndex(0))
     didNotDelegate(msg.sender)
-    checkPhase(proposalSignature, (1 << 1))
     votingPeriodIsOn(proposalSignature)
   {
     if(uint256(bytes32(_getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {
-      if(voteIndex != 2) {
-        uint256 totalVotes = _getDelegatorsArrayLength(msg.sender);
-        proposals[proposalSignature].votes[voteIndex] += totalVotes;
-        proposals[proposalSignature].votes[2] -= totalVotes;
-      }
+      uint256 totalVotes = _getDelegatorsArrayLength(msg.sender);
+      _setAttributeValue(
+        proposalSignature,
+        proposalAttributeKeys[7 + voteIndex],
+        bytes.concat(bytes32(
+          uint256(bytes32(_getAttributeValue(proposalSignature, proposalAttributeKeys[7 + voteIndex]))) + totalVotes
+        ))
+      );
     }
     else {
-      if(voteIndex != 2) {
-        proposals[proposalSignature].votes[voteIndex] ++;
-        proposals[proposalSignature].votes[2] --;
-      }
+      _setAttributeValue(
+        proposalSignature,
+        proposalAttributeKeys[7 + voteIndex],
+        bytes.concat(bytes32(
+          uint256(bytes32(_getAttributeValue(proposalSignature, proposalAttributeKeys[7 + voteIndex]))) + 1
+        ))
+      );
     }
   }
 
