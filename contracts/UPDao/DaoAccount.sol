@@ -6,7 +6,7 @@ import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account
 import "./DaoAccountMetadata.sol";
 import "./DaoPermissions.sol";
 import "./DaoProposals.sol";
-import "./VotingStrategies.sol";
+import "./DaoVotingStrategies.sol";
 import "./DaoDelegates.sol";
 import "./DaoUtils.sol";
 
@@ -19,8 +19,19 @@ import "./DaoUtils.sol";
  * @title DaoAccount
  * @custom:version 0.91
  */
-abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals, VotingStrategies, DaoDelegates {
+abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals, DaoVotingStrategies, DaoDelegates {
    
+  /**
+    * @dev See {IERC165-supportsInterface}.
+    */
+  function supportsInterface(bytes4 interfaceId)
+    public
+    pure
+    returns (bool)
+  {
+    return interfaceId == bytes4(keccak256("UniversalProfileDaoAccount"));
+}
+
   /**
    * @notice Unique instance of the DAO Universal Profile.
    */
@@ -54,7 +65,7 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     DaoAccountMetadata(DAO)
     DaoPermissions(DAO, utils)
     DaoProposals(DAO, utils, address(this))
-    VotingStrategies(DAO, address(this))
+    DaoVotingStrategies(DAO, address(this))
     DaoDelegates(DAO, utils)
   {
     require(quorum >= 0 && quorum <= 100);
@@ -124,14 +135,14 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
   /**
    * @notice Delegate your vote to another participant of the DAO
    */
-  function delegate(address delegator, address delegatee)
+  function delegate(address delegatee)
     external
-    permissionSet(delegator, _getPermissionsByIndex(2))
+    permissionSet(msg.sender, _getPermissionsByIndex(2))
     permissionSet(delegatee, _getPermissionsByIndex(3))
   {
-    _setDelegateeOfTheDelegator(delegator, delegatee);
+    _setDelegateeOfTheDelegator(msg.sender, delegatee);
     _setDelegatorByIndex(
-      delegator,
+      msg.sender,
       delegatee,
       _getDelegatorsArrayLength(delegatee)
     );
@@ -228,6 +239,7 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     external
     permissionSet(msg.sender, _getPermissionsByIndex(0))
     didNotDelegate(msg.sender)
+    didNotVote(msg.sender, proposalSignature)
     votingPeriodIsOn(proposalSignature)
   {
     if(uint256(bytes32(_getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {

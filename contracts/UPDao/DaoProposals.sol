@@ -104,6 +104,17 @@ contract DaoProposals {
     _;
   }
 
+  /**
+   * @notice Verifying if the user didn't vote.
+   */
+  modifier didNotVote(address universalProfileAddress, bytes10 proposalSignature) {
+    require(
+      !_getVotedStatus(universalProfileAddress, proposalSignature),
+      "User did already vote."
+    );
+    _;
+  }
+
   // --- GETTERS & SETTERS
 
   /**
@@ -225,7 +236,35 @@ contract DaoProposals {
         datas[i]
       );
     }
+  }
 
+  /**
+   * @notice Get voted status of a Universal Profile for a proposal.
+   */
+  function _getVotedStatus(address universalProfileAddress, bytes10 proposalSignature) public view returns(bool result) {
+    bytes32 key = bytes32(bytes.concat(
+      bytes10(proposalSignature),
+      bytes2(0),
+      bytes20(universalProfileAddress)
+    ));
+    if(uint256(bytes32(DAO.getData(key))) == 1) {
+      result = true;
+    }
+    else {
+      result = false;
+    }
+  }
+
+  /**
+   * @notice Set voted status of a Universal Profile for a proposal.
+   */
+  function _setVotedStatus(address universalProfileAddress, bytes10 proposalSignature) internal {
+    bytes32 key = bytes32(bytes.concat(
+      bytes10(proposalSignature),
+      bytes2(0),
+      bytes20(universalProfileAddress)
+    ));
+    DAO.setData(key, bytes.concat(bytes32(uint256(1))));
   }
 
 }

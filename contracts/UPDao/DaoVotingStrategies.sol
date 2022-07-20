@@ -11,10 +11,10 @@ import "./Interfaces/DaoProposalsInterface.sol";
 * @notice This smart contract is responsible for the voting strategies for DAO.
  *
  * @author B00ste
- * @title VotingStrategies
+ * @title DaoVotingStrategies
  * @custom:version 0.91
  */
-contract VotingStrategies {
+contract DaoVotingStrategies {
 
   /**
    * @notice Instance of the DAO key manager.
