@@ -94,35 +94,30 @@ contract DaoAccount is DaoModifiers {
     uint8 participationRate,
     uint256 votingDelay,
     uint256 votingPeriod,
-    address metadataAddress,
-    address delegatesAddress,
-    address permissionsAddress,
-    address proposalsAddress,
-    address participationAddress,
-    address votingStrategiesAddress
+    address[6] memory daoAddresses
   )
     DaoModifiers(
-      metadataAddress,
-      delegatesAddress,
-      permissionsAddress,
-      proposalsAddress,
-      participationAddress
+      daoAddresses[0],
+      daoAddresses[1],
+      daoAddresses[2],
+      daoAddresses[3],
+      daoAddresses[4]
     )
   {
     require(quorum >= 0 && quorum <= 100);
     require(participationRate >= 0 && participationRate <= 100);
 
-    metadata = DaoAccountMetadata(metadataAddress);
+    metadata = DaoAccountMetadata(daoAddresses[0]);
     metadata.init(DAO, utils, address(this));
-    permissions = DaoPermissions(permissionsAddress);
+    permissions = DaoPermissions(daoAddresses[1]);
     permissions.init(DAO, utils, address(this));
-    proposals = DaoProposals(proposalsAddress);
+    proposals = DaoProposals(daoAddresses[2]);
     proposals.init(DAO, utils, address(this));
-    delegates = DaoDelegates(delegatesAddress);
+    delegates = DaoDelegates(daoAddresses[3]);
     delegates.init(DAO, utils, address(this));
-    participation = DaoParticipation(participationAddress);
+    participation = DaoParticipation(daoAddresses[4]);
     participation.init(utils, address(this));
-    strategies = DaoVotingStrategies(votingStrategiesAddress);
+    strategies = DaoVotingStrategies(daoAddresses[5]);
     strategies.init(DAO, address(this));
 
     metadata._setDaoName(name);
@@ -342,24 +337,19 @@ contract DaoAccount is DaoModifiers {
     didNotVote(msg.sender, proposalSignature)
     votingPeriodIsOn(proposalSignature)
   {
+    bytes20 votesKey = proposals._getProposalAttributeKeyByIndex(7 + voteIndex);
+    uint256 votes;
     if(uint256(bytes32(permissions._getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {
-      proposals._setAttributeValue(
-        proposalSignature,
-        proposals._getProposalAttributeKeyByIndex(7 + voteIndex),
-        bytes.concat(bytes32(
-          uint256(bytes32(proposals._getAttributeValue(proposalSignature, proposals._getProposalAttributeKeyByIndex(7 + voteIndex)))) + delegates._getDelegatorsArrayLength(msg.sender)
-        ))
-      );
+      votes = uint256(bytes32(proposals._getAttributeValue(proposalSignature, votesKey ))) + delegates._getDelegatorsArrayLength(msg.sender);
     }
     else {
-      proposals._setAttributeValue(
-        proposalSignature,
-        proposals._getProposalAttributeKeyByIndex(7 + voteIndex),
-        bytes.concat(bytes32(
-          uint256(bytes32(proposals._getAttributeValue(proposalSignature, proposals._getProposalAttributeKeyByIndex(7 + voteIndex)))) + 1
-        ))
-      );
+      votes = uint256(bytes32(proposals._getAttributeValue(proposalSignature, votesKey))) + 1;
     }
+    proposals._setAttributeValue(
+      proposalSignature,
+      votesKey,
+      bytes.concat(bytes32(votes))
+    );
   }
 
 }
