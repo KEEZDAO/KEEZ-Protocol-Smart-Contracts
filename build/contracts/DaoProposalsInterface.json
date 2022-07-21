@@ -1,0 +1,668 @@
+{
+  "contractName": "DaoProposalsInterface",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "creationTimestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "proposalName",
+          "type": "string"
+        }
+      ],
+      "name": "_getProposalSignature",
+      "outputs": [
+        {
+          "internalType": "bytes10",
+          "name": "proposalSignature",
+          "type": "bytes10"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "_getProposalsArrayLength",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "_getProposalSignatureByIndex",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "proposalSignature",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes10",
+          "name": "proposalSignature",
+          "type": "bytes10"
+        },
+        {
+          "internalType": "bytes20",
+          "name": "proposalAttributeKey",
+          "type": "bytes20"
+        }
+      ],
+      "name": "_getAttributeValue",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "value",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes10",
+          "name": "proposalSignature",
+          "type": "bytes10"
+        }
+      ],
+      "name": "_getTargetsAndDatas",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "targets",
+          "type": "address[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "datas",
+          "type": "bytes[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes10\",\"name\":\"proposalSignature\",\"type\":\"bytes10\"},{\"internalType\":\"bytes20\",\"name\":\"proposalAttributeKey\",\"type\":\"bytes20\"}],\"name\":\"_getAttributeValue\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"creationTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"proposalName\",\"type\":\"string\"}],\"name\":\"_getProposalSignature\",\"outputs\":[{\"internalType\":\"bytes10\",\"name\":\"proposalSignature\",\"type\":\"bytes10\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"_getProposalSignatureByIndex\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"proposalSignature\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getProposalsArrayLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes10\",\"name\":\"proposalSignature\",\"type\":\"bytes10\"}],\"name\":\"_getTargetsAndDatas\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"bytes[]\",\"name\":\"datas\",\"type\":\"bytes[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPDao/Interfaces/DaoProposalsInterface.sol\":\"DaoProposalsInterface\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/UPDao/Interfaces/DaoProposalsInterface.sol\":{\"keccak256\":\"0x2f298dd4df6589709ebf6dd8333c3444ee23554cdc30398b6d98e2842f18ba4d\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://f0ff165b98225c2f12b3700d17e0545d426c90d9e3b4583eef5a882f697ed2d3\",\"dweb:/ipfs/Qmc5o8yAEXvLCBsMQnXnE4aRYbEBQBe3yRwQzDRXmNiNYw\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\ninterface DaoProposalsInterface {\n\n  function _getProposalSignature(uint256 creationTimestamp, string memory proposalName) external pure returns(bytes10 proposalSignature);\n\n  function _getProposalsArrayLength() external view returns(uint256 length);\n\n  function _getProposalSignatureByIndex(uint256 index) external view returns(bytes memory proposalSignature);\n\n  function _getAttributeValue(bytes10 proposalSignature, bytes20 proposalAttributeKey) external view returns(bytes memory value);\n\n  function _getTargetsAndDatas(bytes10 proposalSignature) external view returns(address[] memory targets, bytes[] memory datas);\n\n}",
+  "sourcePath": "/home/b00ste/Projects/universal-profile-governance/contracts/UPDao/Interfaces/DaoProposalsInterface.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/UPDao/Interfaces/DaoProposalsInterface.sol",
+    "exportedSymbols": {
+      "DaoProposalsInterface": [
+        8199
+      ]
+    },
+    "id": 8200,
+    "license": "CC0-1.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8157,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:23:48"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "DaoProposalsInterface",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 8199,
+        "linearizedBaseContracts": [
+          8199
+        ],
+        "name": "DaoProposalsInterface",
+        "nameLocation": "72:21:48",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "46ccaefa",
+            "id": 8166,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getProposalSignature",
+            "nameLocation": "108:21:48",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8162,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8159,
+                  "mutability": "mutable",
+                  "name": "creationTimestamp",
+                  "nameLocation": "138:17:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8166,
+                  "src": "130:25:48",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8158,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "130:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8161,
+                  "mutability": "mutable",
+                  "name": "proposalName",
+                  "nameLocation": "171:12:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8166,
+                  "src": "157:26:48",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 8160,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "157:6:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "129:55:48"
+            },
+            "returnParameters": {
+              "id": 8165,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8164,
+                  "mutability": "mutable",
+                  "name": "proposalSignature",
+                  "nameLocation": "215:17:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8166,
+                  "src": "207:25:48",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes10",
+                    "typeString": "bytes10"
+                  },
+                  "typeName": {
+                    "id": 8163,
+                    "name": "bytes10",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "207:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes10",
+                      "typeString": "bytes10"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "206:27:48"
+            },
+            "scope": 8199,
+            "src": "99:135:48",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "d7a96f2b",
+            "id": 8171,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getProposalsArrayLength",
+            "nameLocation": "247:24:48",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8167,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "271:2:48"
+            },
+            "returnParameters": {
+              "id": 8170,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8169,
+                  "mutability": "mutable",
+                  "name": "length",
+                  "nameLocation": "304:6:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8171,
+                  "src": "296:14:48",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8168,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "296:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "295:16:48"
+            },
+            "scope": 8199,
+            "src": "238:74:48",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "994d43c3",
+            "id": 8178,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getProposalSignatureByIndex",
+            "nameLocation": "325:28:48",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8174,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8173,
+                  "mutability": "mutable",
+                  "name": "index",
+                  "nameLocation": "362:5:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8178,
+                  "src": "354:13:48",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8172,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "354:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "353:15:48"
+            },
+            "returnParameters": {
+              "id": 8177,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8176,
+                  "mutability": "mutable",
+                  "name": "proposalSignature",
+                  "nameLocation": "404:17:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8178,
+                  "src": "391:30:48",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 8175,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "391:5:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "390:32:48"
+            },
+            "scope": 8199,
+            "src": "316:107:48",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "a56c89b1",
+            "id": 8187,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getAttributeValue",
+            "nameLocation": "436:18:48",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8183,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8180,
+                  "mutability": "mutable",
+                  "name": "proposalSignature",
+                  "nameLocation": "463:17:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8187,
+                  "src": "455:25:48",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes10",
+                    "typeString": "bytes10"
+                  },
+                  "typeName": {
+                    "id": 8179,
+                    "name": "bytes10",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "455:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes10",
+                      "typeString": "bytes10"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8182,
+                  "mutability": "mutable",
+                  "name": "proposalAttributeKey",
+                  "nameLocation": "490:20:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8187,
+                  "src": "482:28:48",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes20",
+                    "typeString": "bytes20"
+                  },
+                  "typeName": {
+                    "id": 8181,
+                    "name": "bytes20",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "482:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes20",
+                      "typeString": "bytes20"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "454:57:48"
+            },
+            "returnParameters": {
+              "id": 8186,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8185,
+                  "mutability": "mutable",
+                  "name": "value",
+                  "nameLocation": "547:5:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8187,
+                  "src": "534:18:48",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 8184,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "534:5:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "533:20:48"
+            },
+            "scope": 8199,
+            "src": "427:127:48",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "dd596655",
+            "id": 8198,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getTargetsAndDatas",
+            "nameLocation": "567:19:48",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8190,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8189,
+                  "mutability": "mutable",
+                  "name": "proposalSignature",
+                  "nameLocation": "595:17:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8198,
+                  "src": "587:25:48",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes10",
+                    "typeString": "bytes10"
+                  },
+                  "typeName": {
+                    "id": 8188,
+                    "name": "bytes10",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "587:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes10",
+                      "typeString": "bytes10"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "586:27:48"
+            },
+            "returnParameters": {
+              "id": 8197,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8193,
+                  "mutability": "mutable",
+                  "name": "targets",
+                  "nameLocation": "653:7:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8198,
+                  "src": "636:24:48",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 8191,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "636:7:48",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 8192,
+                    "nodeType": "ArrayTypeName",
+                    "src": "636:9:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8196,
+                  "mutability": "mutable",
+                  "name": "datas",
+                  "nameLocation": "677:5:48",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8198,
+                  "src": "662:20:48",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes_memory_ptr_$dyn_memory_ptr",
+                    "typeString": "bytes[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 8194,
+                      "name": "bytes",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "662:5:48",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes_storage_ptr",
+                        "typeString": "bytes"
+                      }
+                    },
+                    "id": 8195,
+                    "nodeType": "ArrayTypeName",
+                    "src": "662:7:48",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
+                      "typeString": "bytes[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "635:48:48"
+            },
+            "scope": 8199,
+            "src": "558:126:48",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 8200,
+        "src": "62:625:48",
+        "usedErrors": []
+      }
+    ],
+    "src": "37:650:48"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.15+commit.e14f2714.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.8",
+  "updatedAt": "2022-07-21T08:10:15.536Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

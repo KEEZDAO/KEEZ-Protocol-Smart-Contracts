@@ -3,7 +3,8 @@
 pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
-import "./DaoUtils.sol";
+import "./Utils/AccessControl.sol";
+import "./Utils/DaoUtils.sol";
 
 /**
  *
@@ -12,9 +13,9 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoPermissions
- * @custom:version 0.91
+ * @custom:version 0.92
  */
-contract DaoPermissions {
+contract DaoPermissions is AccessControl {
 
   /**
    * @notice Instance of the DAO key manager.
@@ -26,10 +27,18 @@ contract DaoPermissions {
    */
   DaoUtils private utils;
 
-  constructor(LSP0ERC725Account _DAO, DaoUtils _utils) {
+  /**
+   * @notice Initializing the contract.
+   */
+  function init(LSP0ERC725Account _DAO, DaoUtils _utils, address daoAddress) external isNotInitialized() {
+    require(!initialized, "The contract is already initialized.");
     DAO = _DAO;
     utils = _utils;
+    initAccessControl(_utils, daoAddress);
+    initialized = true;
   }
+
+  // --- ATTRIBUTES
 
   /**
    * @notice Permissions.
@@ -52,44 +61,6 @@ contract DaoPermissions {
    */
   bytes32 private daoAddressesArrayKey = bytes32(keccak256("DAOPermissionsAddresses[]"));
 
-  // --- MODIFIERS
-
-  /**
-   * @notice Verifies if an Universal Profile has a certain permision.
-   */
-  modifier permissionSet(address universalProfileAddress, bytes32 checkedPermission) {
-    bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
-    require(
-      uint256(bytes32(addressPermissions)) & uint256(checkedPermission) == uint256(checkedPermission),
-      "User doesen't have the permission."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifies if an Universal Profile doesn't have a certian permission.
-   */
-  modifier permissionUnset(address universalProfileAddress, bytes32 checkedPermission) {
-    bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
-    require(
-      uint256(bytes32(addressPermissions)) & uint256(checkedPermission) == 0,
-      "User already has the permission."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifying if universal profile is a participant of the DAO.
-   */
-  modifier isParticipantOfDao(address universalProfileAddress) {
-    bytes memory addressPermissions = _getAddressDaoPermission(universalProfileAddress);
-    require(
-      bytes32(addressPermissions) != bytes32(0),
-      "This Universal Profile is not a participant of the DAO."
-    );
-    _;
-  }
-
   // --- GETTERS & SETTERS
 
   /**
@@ -111,7 +82,7 @@ contract DaoPermissions {
    *
    * @param length the length of the array of addresses that are participants to the DAO.
    */
-  function _setDaoAddressesArrayLength(uint256 length) internal {
+  function _setDaoAddressesArrayLength(uint256 length) external isDao(msg.sender) isInitialized() {
     bytes memory newLength = bytes.concat(bytes32(length));
     DAO.setData(daoAddressesArrayKey, newLength);
   }
@@ -135,7 +106,7 @@ contract DaoPermissions {
    * @param index The index of an address.
    * @param _daoAddress The address of a DAO participant.
    */
-  function _setDaoAddressByIndex(uint256 index, address _daoAddress) internal {
+  function _setDaoAddressByIndex(uint256 index, address _daoAddress) external isDao(msg.sender) isInitialized() {
     bytes16[2] memory daoAddressesArrayKeyHalfs = utils._bytes32ToTwoHalfs(daoAddressesArrayKey);
     bytes32 daoAddressKey = bytes32(bytes.concat(
       daoAddressesArrayKeyHalfs[0], bytes16(uint128(index))
@@ -170,7 +141,7 @@ contract DaoPermissions {
    * Index 3 is the RECIEVE_DELEGATE permission.
    * Index 4 is the EXECUTE permission.
    */
-  function _setAddressDaoPermission(address daoAddress, uint8 index, bool permissionAdded) internal {
+  function _setAddressDaoPermission(address daoAddress, uint8 index, bool permissionAdded) external isDao(msg.sender) isInitialized() {
     bytes32 addressPermssionsKey = bytes32(bytes.concat(
       bytes6(keccak256("DAOPermissionsAddresses")),
       bytes4(keccak256("DAOPermissions")),
@@ -198,7 +169,7 @@ contract DaoPermissions {
    *
    * @param universalProfileAddress The address of an Universal Profile.
    */
-  function checkUser(address universalProfileAddress) internal view returns(bool) {
+  function checkUser(address universalProfileAddress) external view returns(bool) {
     uint256 addressesArrayLength = _getDaoAddressesArrayLength();
     for (uint256 i = 0; i < addressesArrayLength; i++) {
       bytes memory daoAddress = _getDaoAddressByIndex(i);

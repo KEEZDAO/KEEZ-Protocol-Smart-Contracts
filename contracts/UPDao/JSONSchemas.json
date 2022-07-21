@@ -147,5 +147,30 @@
         "valueContent": "Uint256"
       }
     ]
+  },
+  {
+    "participationSchemas": [
+      {
+        "name": "ArrayOfDaos[]",
+        "key": "0x41727261794f6644616f735b5d00000000000000000000000000000000000000",
+        "keyType": "Array[]",
+        "valueType": "address[]",
+        "valueContent": "Address"
+      },
+      {
+        "name": "UPControllersForDaoArray[]:<daoAddress>",
+        "key": "0x5550436f6e74726f6c6c<address>",
+        "keyType": "Array[]",
+        "valueType": "address[]",
+        "valueContent": "Address"
+      },
+      {
+        "name": "ParticipantOfDao:<daoAddress>",
+        "key": "0x5061727469636970616e<address>",
+        "keyType": "Singleton",
+        "valueType": "boolean",
+        "valueContent": "Boolean"
+      }
+    ]
   }
 ]

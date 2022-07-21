@@ -1,0 +1,1274 @@
+{
+  "contractName": "LSP4DigitalAssetMetadata",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "dataKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "DataChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "dataKeys",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "getData",
+      "outputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "dataValues",
+          "type": "bytes[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "dataKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getData",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "dataValue",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "dataKeys",
+          "type": "bytes32[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "dataValues",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "setData",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "dataKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "dataValue",
+          "type": "bytes"
+        }
+      ],
+      "name": "setData",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"dataKey\",\"type\":\"bytes32\"}],\"name\":\"DataChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"dataKeys\",\"type\":\"bytes32[]\"}],\"name\":\"getData\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"dataValues\",\"type\":\"bytes[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"dataKey\",\"type\":\"bytes32\"}],\"name\":\"getData\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"dataValue\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"dataKeys\",\"type\":\"bytes32[]\"},{\"internalType\":\"bytes[]\",\"name\":\"dataValues\",\"type\":\"bytes[]\"}],\"name\":\"setData\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"dataKey\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"dataValue\",\"type\":\"bytes\"}],\"name\":\"setData\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Matthew Stevens\",\"details\":\"Implementation of a LSP8 compliant contract.\",\"kind\":\"dev\",\"methods\":{\"constructor\":{\"params\":{\"name_\":\"The name of the token\",\"newOwner_\":\"The owner of the token contract\",\"symbol_\":\"The symbol of the token\"}},\"getData(bytes32)\":{\"params\":{\"dataKey\":\"The key which value to retrieve\"},\"returns\":{\"dataValue\":\"The data stored at the key\"}},\"getData(bytes32[])\":{\"params\":{\"dataKeys\":\"The array of keys which values to retrieve\"},\"returns\":{\"dataValues\":\"The array of data stored at multiple keys\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"setData(bytes32,bytes)\":{\"params\":{\"dataKey\":\"The key which value to retrieve\",\"dataValue\":\"The value to set SHOULD only be callable by the owner of the contract set via ERC173 Emits a {DataChanged} event.\"}},\"setData(bytes32[],bytes[])\":{\"details\":\"Sets array of data at multiple given `dataKeys` SHOULD only be callable by the owner of the contract set via ERC173 Emits a {DataChanged} event.\",\"params\":{\"dataKeys\":\"The array of keys which values to set\",\"dataValues\":\"The array of values to set\"}},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"title\":\"LSP4DigitalAssetMetadata\",\"version\":1},\"userdoc\":{\"events\":{\"DataChanged(bytes32)\":{\"notice\":\"Emitted when data at a key is changed\"}},\"kind\":\"user\",\"methods\":{\"constructor\":{\"notice\":\"Sets the name, symbol of the token and the owner, and sets the SupportedStandards:LSP4DigitalAsset key\"},\"getData(bytes32)\":{\"notice\":\"Gets singular data at a given `dataKey`\"},\"getData(bytes32[])\":{\"notice\":\"Gets array of data at multiple given keys\"},\"setData(bytes32,bytes)\":{\"notice\":\"Sets singular data at a given `dataKey`\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4DigitalAssetMetadata.sol\":\"LSP4DigitalAssetMetadata\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@erc725/smart-contracts/contracts/ERC725Y.sol\":{\"keccak256\":\"0xe3947b1958d2a90ce0a41ce7635112f4baf24b9ad6e0a8e0d60178d7edb0355d\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://30394b85f5a84a639a7d42af44680998d1011292d3846f7e12633cbe47af20ec\",\"dweb:/ipfs/QmYQ8cCurFrbyfmqnhebzmfUbLBDCqUQKvQobFhsU2hQTZ\"]},\"@erc725/smart-contracts/contracts/ERC725YCore.sol\":{\"keccak256\":\"0x215fc8caf03c1af787a3e46db456bdc8e3a662345d40a34f20e35af220f4e77b\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://fc44c50e8440965cb7fd412be9d17cdfdb6400af8a6e0fa3e9cc9fe55b730a4a\",\"dweb:/ipfs/Qme7jiVkpW6vMjibotZoZatZFsYYg6SnDhWNkikAdUUheQ\"]},\"@erc725/smart-contracts/contracts/constants.sol\":{\"keccak256\":\"0xdf3d466e2d6f8d0f2e288ee01edb0cf7de2db9cac3c257b7d6a6284adf4b2480\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://16e4a90c8f2d245621808320ed6aa4ad7fcfd50b36df116e8447e5fc1700d7a9\",\"dweb:/ipfs/QmT4E9cSMuwpiABbdKExNn3Ef9wmjdmv3E9MuwkmkDv6BY\"]},\"@erc725/smart-contracts/contracts/custom/OwnableUnset.sol\":{\"keccak256\":\"0x410d0a0c6f9f769b79cf7d34c097c967160f5f9876453b2a1659cbb8082a4961\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8e1068d9896dfe4d2d73cd75506f52f572daa3a4f35c0f980fdd91d3faa52ecf\",\"dweb:/ipfs/QmVodeBozCKcU2vdofRtKF5RAi42q3zBNW9SEYrg7SexDP\"]},\"@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol\":{\"keccak256\":\"0x4144879c1923deaac59a07abd5dabb9d8c50b5b4522e3fb9158e0e63a3ce696b\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://810f61f5ed8fb2ac8270751188382c0f66b268dcf5e877e2d320b6dc95c44528\",\"dweb:/ipfs/QmR7GYVw79YypsAWg5jfNzNMCE3NJqersoqCkyux3MR8oa\"]},\"@erc725/smart-contracts/contracts/utils/GasLib.sol\":{\"keccak256\":\"0xd69f4d06630e47043a59e2173badd2275c6762d9109cc792d5891101686f6c2b\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://55e5b55b404e0897c84c598ab5bcc4621258c13c849c1bd55d3807dd7e25705c\",\"dweb:/ipfs/QmZgAUofnxdxbp2T3dTyULqnp4kzXWWZJ8UBWqqdxi4Ywt\"]},\"@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol\":{\"keccak256\":\"0x558b930e6e463a4430c7825f6d007337a7684916a62c79f68fef33c6eb321851\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://c96ea3fca0c18b83f949cf9f2c08ae6f4ddd12a17ae78d652ae9e7314cf25dcb\",\"dweb:/ipfs/QmYwVFYHzkPxsPnyFWCaBLJtF7rBRuK3TYffFJvfykosBL\"]},\"@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4DigitalAssetMetadata.sol\":{\"keccak256\":\"0x5c33fb49fb11ad56ef96f972d9bb8bce123141e6d4f285b79dcaee8bc7f05ddc\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://bec86dd1a72d9d0c92014879442a936d59d061d4d199ecd1b7e0bf6a4d1a07c4\",\"dweb:/ipfs/QmSURNrchBiJ7WWndS1xb4hXXrqCHoQsYjXcvtgfDZ69NZ\"]},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"keccak256\":\"0xd10975de010d89fd1c78dc5e8a9a7e7f496198085c151648f20cba166b32582b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://fb0048dee081f6fffa5f74afc3fb328483c2a30504e94a0ddd2a5114d731ec4d\",\"dweb:/ipfs/QmZptt1nmYoA5SgjwnSgWqgUSDgm4q52Yos3xhnMv3MV43\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\n// modules\nimport {ERC725Y} from \"@erc725/smart-contracts/contracts/ERC725Y.sol\";\n\n// constants\nimport \"./LSP4Constants.sol\";\n\n/**\n * @title LSP4DigitalAssetMetadata\n * @author Matthew Stevens\n * @dev Implementation of a LSP8 compliant contract.\n */\nabstract contract LSP4DigitalAssetMetadata is ERC725Y {\n    /**\n     * @notice Sets the name, symbol of the token and the owner, and sets the SupportedStandards:LSP4DigitalAsset key\n     * @param name_ The name of the token\n     * @param symbol_ The symbol of the token\n     * @param newOwner_ The owner of the token contract\n     */\n    constructor(\n        string memory name_,\n        string memory symbol_,\n        address newOwner_\n    ) ERC725Y(newOwner_) {\n        // set key SupportedStandards:LSP4DigitalAsset\n        super._setData(_LSP4_SUPPORTED_STANDARDS_KEY, _LSP4_SUPPORTED_STANDARDS_VALUE);\n\n        super._setData(_LSP4_TOKEN_NAME_KEY, bytes(name_));\n        super._setData(_LSP4_TOKEN_SYMBOL_KEY, bytes(symbol_));\n    }\n\n    function _setData(bytes32 key, bytes memory value) internal virtual override {\n        require(key != _LSP4_TOKEN_NAME_KEY, \"LSP4: cannot edit Token Name after deployment\");\n        require(key != _LSP4_TOKEN_SYMBOL_KEY, \"LSP4: cannot edit Token Symbol after deployment\");\n        super._setData(key, value);\n    }\n}\n",
+  "sourcePath": "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4DigitalAssetMetadata.sol",
+  "ast": {
+    "absolutePath": "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4DigitalAssetMetadata.sol",
+    "exportedSymbols": {
+      "ERC725Y": [
+        457
+      ],
+      "LSP4DigitalAssetMetadata": [
+        1644
+      ],
+      "_LSP4_CREATORS_ARRAY_KEY": [
+        1558
+      ],
+      "_LSP4_CREATORS_MAP_KEY_PREFIX": [
+        1561
+      ],
+      "_LSP4_METADATA_KEY": [
+        1564
+      ],
+      "_LSP4_SUPPORTED_STANDARDS_KEY": [
+        1546
+      ],
+      "_LSP4_SUPPORTED_STANDARDS_VALUE": [
+        1549
+      ],
+      "_LSP4_TOKEN_NAME_KEY": [
+        1552
+      ],
+      "_LSP4_TOKEN_SYMBOL_KEY": [
+        1555
+      ]
+    },
+    "id": 1645,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1566,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:23:19"
+      },
+      {
+        "absolutePath": "@erc725/smart-contracts/contracts/ERC725Y.sol",
+        "file": "@erc725/smart-contracts/contracts/ERC725Y.sol",
+        "id": 1568,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 1645,
+        "sourceUnit": 458,
+        "src": "68:70:19",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 1567,
+              "name": "ERC725Y",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 457,
+              "src": "76:7:19",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol",
+        "file": "./LSP4Constants.sol",
+        "id": 1569,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 1645,
+        "sourceUnit": 1565,
+        "src": "153:29:19",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 1571,
+              "name": "ERC725Y",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 457,
+              "src": "353:7:19"
+            },
+            "id": 1572,
+            "nodeType": "InheritanceSpecifier",
+            "src": "353:7:19"
+          }
+        ],
+        "canonicalName": "LSP4DigitalAssetMetadata",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 1570,
+          "nodeType": "StructuredDocumentation",
+          "src": "184:122:19",
+          "text": " @title LSP4DigitalAssetMetadata\n @author Matthew Stevens\n @dev Implementation of a LSP8 compliant contract."
+        },
+        "fullyImplemented": true,
+        "id": 1644,
+        "linearizedBaseContracts": [
+          1644,
+          457,
+          667,
+          895,
+          3918,
+          3930,
+          804
+        ],
+        "name": "LSP4DigitalAssetMetadata",
+        "nameLocation": "325:24:19",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 1612,
+              "nodeType": "Block",
+              "src": "769:275:19",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 1588,
+                        "name": "_LSP4_SUPPORTED_STANDARDS_KEY",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1546,
+                        "src": "849:29:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      {
+                        "id": 1589,
+                        "name": "_LSP4_SUPPORTED_STANDARDS_VALUE",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1549,
+                        "src": "880:31:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 1585,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967271,
+                        "src": "834:5:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_super$_LSP4DigitalAssetMetadata_$1644_$",
+                          "typeString": "type(contract super LSP4DigitalAssetMetadata)"
+                        }
+                      },
+                      "id": 1587,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "_setData",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 645,
+                      "src": "834:14:19",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_bytes32_$_t_bytes_memory_ptr_$returns$__$",
+                        "typeString": "function (bytes32,bytes memory)"
+                      }
+                    },
+                    "id": 1590,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "834:78:19",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1591,
+                  "nodeType": "ExpressionStatement",
+                  "src": "834:78:19"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 1595,
+                        "name": "_LSP4_TOKEN_NAME_KEY",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1552,
+                        "src": "938:20:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "id": 1598,
+                            "name": "name_",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 1575,
+                            "src": "966:5:19",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          ],
+                          "id": 1597,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "960:5:19",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_bytes_storage_ptr_$",
+                            "typeString": "type(bytes storage pointer)"
+                          },
+                          "typeName": {
+                            "id": 1596,
+                            "name": "bytes",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "960:5:19",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 1599,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "960:12:19",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 1592,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967271,
+                        "src": "923:5:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_super$_LSP4DigitalAssetMetadata_$1644_$",
+                          "typeString": "type(contract super LSP4DigitalAssetMetadata)"
+                        }
+                      },
+                      "id": 1594,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "_setData",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 645,
+                      "src": "923:14:19",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_bytes32_$_t_bytes_memory_ptr_$returns$__$",
+                        "typeString": "function (bytes32,bytes memory)"
+                      }
+                    },
+                    "id": 1600,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "923:50:19",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1601,
+                  "nodeType": "ExpressionStatement",
+                  "src": "923:50:19"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 1605,
+                        "name": "_LSP4_TOKEN_SYMBOL_KEY",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1555,
+                        "src": "998:22:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "id": 1608,
+                            "name": "symbol_",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 1577,
+                            "src": "1028:7:19",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          ],
+                          "id": 1607,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1022:5:19",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_bytes_storage_ptr_$",
+                            "typeString": "type(bytes storage pointer)"
+                          },
+                          "typeName": {
+                            "id": 1606,
+                            "name": "bytes",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1022:5:19",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 1609,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1022:14:19",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 1602,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967271,
+                        "src": "983:5:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_super$_LSP4DigitalAssetMetadata_$1644_$",
+                          "typeString": "type(contract super LSP4DigitalAssetMetadata)"
+                        }
+                      },
+                      "id": 1604,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "_setData",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 645,
+                      "src": "983:14:19",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_bytes32_$_t_bytes_memory_ptr_$returns$__$",
+                        "typeString": "function (bytes32,bytes memory)"
+                      }
+                    },
+                    "id": 1610,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "983:54:19",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1611,
+                  "nodeType": "ExpressionStatement",
+                  "src": "983:54:19"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 1573,
+              "nodeType": "StructuredDocumentation",
+              "src": "367:273:19",
+              "text": " @notice Sets the name, symbol of the token and the owner, and sets the SupportedStandards:LSP4DigitalAsset key\n @param name_ The name of the token\n @param symbol_ The symbol of the token\n @param newOwner_ The owner of the token contract"
+            },
+            "id": 1613,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "id": 1582,
+                    "name": "newOwner_",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 1579,
+                    "src": "758:9:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  }
+                ],
+                "id": 1583,
+                "kind": "baseConstructorSpecifier",
+                "modifierName": {
+                  "id": 1581,
+                  "name": "ERC725Y",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 457,
+                  "src": "750:7:19"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "750:18:19"
+              }
+            ],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1580,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1575,
+                  "mutability": "mutable",
+                  "name": "name_",
+                  "nameLocation": "680:5:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1613,
+                  "src": "666:19:19",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 1574,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "666:6:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1577,
+                  "mutability": "mutable",
+                  "name": "symbol_",
+                  "nameLocation": "709:7:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1613,
+                  "src": "695:21:19",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 1576,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "695:6:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1579,
+                  "mutability": "mutable",
+                  "name": "newOwner_",
+                  "nameLocation": "734:9:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1613,
+                  "src": "726:17:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1578,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "726:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "656:93:19"
+            },
+            "returnParameters": {
+              "id": 1584,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "769:0:19"
+            },
+            "scope": 1644,
+            "src": "645:399:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "baseFunctions": [
+              645
+            ],
+            "body": {
+              "id": 1642,
+              "nodeType": "Block",
+              "src": "1127:237:19",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        "id": 1624,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 1622,
+                          "name": "key",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 1615,
+                          "src": "1145:3:19",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "id": 1623,
+                          "name": "_LSP4_TOKEN_NAME_KEY",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 1552,
+                          "src": "1152:20:19",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "src": "1145:27:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4c5350343a2063616e6e6f74206564697420546f6b656e204e616d65206166746572206465706c6f796d656e74",
+                        "id": 1625,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1174:47:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_bdfb4b7e2b693ed73e7d11cf49324ceb98023f2dee87bd98ce4117638c5d3f56",
+                          "typeString": "literal_string \"LSP4: cannot edit Token Name after deployment\""
+                        },
+                        "value": "LSP4: cannot edit Token Name after deployment"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_bdfb4b7e2b693ed73e7d11cf49324ceb98023f2dee87bd98ce4117638c5d3f56",
+                          "typeString": "literal_string \"LSP4: cannot edit Token Name after deployment\""
+                        }
+                      ],
+                      "id": 1621,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "1137:7:19",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 1626,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1137:85:19",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1627,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1137:85:19"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        "id": 1631,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 1629,
+                          "name": "key",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 1615,
+                          "src": "1240:3:19",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "id": 1630,
+                          "name": "_LSP4_TOKEN_SYMBOL_KEY",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 1555,
+                          "src": "1247:22:19",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "src": "1240:29:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4c5350343a2063616e6e6f74206564697420546f6b656e2053796d626f6c206166746572206465706c6f796d656e74",
+                        "id": 1632,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1271:49:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_463a77955d970a954b30ab621d69224876f6777c411dfe25ef2782d4dddeb829",
+                          "typeString": "literal_string \"LSP4: cannot edit Token Symbol after deployment\""
+                        },
+                        "value": "LSP4: cannot edit Token Symbol after deployment"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_463a77955d970a954b30ab621d69224876f6777c411dfe25ef2782d4dddeb829",
+                          "typeString": "literal_string \"LSP4: cannot edit Token Symbol after deployment\""
+                        }
+                      ],
+                      "id": 1628,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "1232:7:19",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 1633,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1232:89:19",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1634,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1232:89:19"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 1638,
+                        "name": "key",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1615,
+                        "src": "1346:3:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      {
+                        "id": 1639,
+                        "name": "value",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1617,
+                        "src": "1351:5:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 1635,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967271,
+                        "src": "1331:5:19",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_super$_LSP4DigitalAssetMetadata_$1644_$",
+                          "typeString": "type(contract super LSP4DigitalAssetMetadata)"
+                        }
+                      },
+                      "id": 1637,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "_setData",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 645,
+                      "src": "1331:14:19",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_bytes32_$_t_bytes_memory_ptr_$returns$__$",
+                        "typeString": "function (bytes32,bytes memory)"
+                      }
+                    },
+                    "id": 1640,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1331:26:19",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1641,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1331:26:19"
+                }
+              ]
+            },
+            "id": 1643,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setData",
+            "nameLocation": "1059:8:19",
+            "nodeType": "FunctionDefinition",
+            "overrides": {
+              "id": 1619,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1118:8:19"
+            },
+            "parameters": {
+              "id": 1618,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1615,
+                  "mutability": "mutable",
+                  "name": "key",
+                  "nameLocation": "1076:3:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1643,
+                  "src": "1068:11:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 1614,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1068:7:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1617,
+                  "mutability": "mutable",
+                  "name": "value",
+                  "nameLocation": "1094:5:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1643,
+                  "src": "1081:18:19",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 1616,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1081:5:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1067:33:19"
+            },
+            "returnParameters": {
+              "id": 1620,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1127:0:19"
+            },
+            "scope": 1644,
+            "src": "1050:314:19",
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 1645,
+        "src": "307:1059:19",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:1335:19"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.15+commit.e14f2714.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.8",
+  "updatedAt": "2022-07-21T08:10:14.654Z",
+  "devdoc": {
+    "author": "Matthew Stevens",
+    "details": "Implementation of a LSP8 compliant contract.",
+    "kind": "dev",
+    "methods": {
+      "constructor": {
+        "params": {
+          "name_": "The name of the token",
+          "newOwner_": "The owner of the token contract",
+          "symbol_": "The symbol of the token"
+        }
+      },
+      "getData(bytes32)": {
+        "params": {
+          "dataKey": "The key which value to retrieve"
+        },
+        "returns": {
+          "dataValue": "The data stored at the key"
+        }
+      },
+      "getData(bytes32[])": {
+        "params": {
+          "dataKeys": "The array of keys which values to retrieve"
+        },
+        "returns": {
+          "dataValues": "The array of data stored at multiple keys"
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "setData(bytes32,bytes)": {
+        "params": {
+          "dataKey": "The key which value to retrieve",
+          "dataValue": "The value to set SHOULD only be callable by the owner of the contract set via ERC173 Emits a {DataChanged} event."
+        }
+      },
+      "setData(bytes32[],bytes[])": {
+        "details": "Sets array of data at multiple given `dataKeys` SHOULD only be callable by the owner of the contract set via ERC173 Emits a {DataChanged} event.",
+        "params": {
+          "dataKeys": "The array of keys which values to set",
+          "dataValues": "The array of values to set"
+        }
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "title": "LSP4DigitalAssetMetadata",
+    "version": 1
+  },
+  "userdoc": {
+    "events": {
+      "DataChanged(bytes32)": {
+        "notice": "Emitted when data at a key is changed"
+      }
+    },
+    "kind": "user",
+    "methods": {
+      "constructor": {
+        "notice": "Sets the name, symbol of the token and the owner, and sets the SupportedStandards:LSP4DigitalAsset key"
+      },
+      "getData(bytes32)": {
+        "notice": "Gets singular data at a given `dataKey`"
+      },
+      "getData(bytes32[])": {
+        "notice": "Gets array of data at multiple given keys"
+      },
+      "setData(bytes32,bytes)": {
+        "notice": "Sets singular data at a given `dataKey`"
+      }
+    },
+    "version": 1
+  }
+}

@@ -3,12 +3,15 @@
 pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
 import "./DaoAccountMetadata.sol";
 import "./DaoPermissions.sol";
 import "./DaoProposals.sol";
 import "./DaoVotingStrategies.sol";
 import "./DaoDelegates.sol";
-import "./DaoUtils.sol";
+import "./DaoParticipation.sol";
+import "./Utils/DaoModifiers.sol";
+import "./Utils/DaoUtils.sol";
 
 /**
  *
@@ -17,9 +20,9 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoAccount
- * @custom:version 0.91
+ * @custom:version 0.92
  */
-abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals, DaoVotingStrategies, DaoDelegates {
+contract DaoAccount is DaoModifiers {
    
   /**
     * @dev See {IERC165-supportsInterface}.
@@ -43,6 +46,36 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
   DaoUtils private utils = new DaoUtils();
 
   /**
+   * @notice Instance for the Dao Metadata smart contract.
+   */
+  DaoAccountMetadata private metadata;
+
+  /**
+   * @notice Instance for the Dao Permissions smart contract.
+   */
+  DaoPermissions private permissions;
+
+  /**
+   * @notice Instance for the Dao Proposals smart contract.
+   */
+  DaoProposals private proposals;
+
+  /**
+   * @notice Instance for the Dao Voting Strategies smart contract.
+   */
+  DaoVotingStrategies private strategies;
+
+  /**
+   * @notice Instance for the Dao Delegates smart contract.
+   */
+  DaoDelegates private delegates;
+
+  /**
+   * @notice Instance for the Dao Metadata smart contract.
+   */
+  DaoParticipation private participation;
+
+  /**
    * @notice Initialization of the Universal Profile Account as a DAO Account;
    * This smart contract will be given all controller permissions.
    * Here is where all the tools needed for a functioning DAO are initialized.
@@ -60,26 +93,86 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     uint8 quorum,
     uint8 participationRate,
     uint256 votingDelay,
-    uint256 votingPeriod
+    uint256 votingPeriod,
+    address metadataAddress,
+    address delegatesAddress,
+    address permissionsAddress,
+    address proposalsAddress,
+    address participationAddress,
+    address votingStrategiesAddress
   )
-    DaoAccountMetadata(DAO)
-    DaoPermissions(DAO, utils)
-    DaoProposals(DAO, utils, address(this))
-    DaoVotingStrategies(DAO, address(this))
-    DaoDelegates(DAO, utils)
+    DaoModifiers(
+      metadataAddress,
+      delegatesAddress,
+      permissionsAddress,
+      proposalsAddress,
+      participationAddress
+    )
   {
     require(quorum >= 0 && quorum <= 100);
     require(participationRate >= 0 && participationRate <= 100);
 
-    _setDaoName(name);
-    _setDaoDescription(description);
-    _setDaoQuorum(quorum);
-    _setDaoParticipationRate(participationRate);
-    _setDaoVotingDelay(votingDelay);
-    _setDaoVotingPeriod(votingPeriod);
+    metadata = DaoAccountMetadata(metadataAddress);
+    metadata.init(DAO, utils, address(this));
+    permissions = DaoPermissions(permissionsAddress);
+    permissions.init(DAO, utils, address(this));
+    proposals = DaoProposals(proposalsAddress);
+    proposals.init(DAO, utils, address(this));
+    delegates = DaoDelegates(delegatesAddress);
+    delegates.init(DAO, utils, address(this));
+    participation = DaoParticipation(participationAddress);
+    participation.init(utils, address(this));
+    strategies = DaoVotingStrategies(votingStrategiesAddress);
+    strategies.init(DAO, address(this));
+
+    metadata._setDaoName(name);
+    metadata._setDaoDescription(description);
+    metadata._setDaoMajority(quorum);
+    metadata._setDaoParticipationRate(participationRate);
+    metadata._setDaoVotingDelay(votingDelay);
+    metadata._setDaoVotingPeriod(votingPeriod);
   }
 
   // --- GENERAL METHODS
+
+  /**
+   * @notice Register the user for this Dao. 
+   * Setup the necessary permissions.
+   * Initializing the necessary arrays.
+   * Sets the `msg.sender` as the dao controller address for the `universalProfileAddress` if `msg.sender` != `universalProfileAddress`
+   */
+  function registerUser(address universalProfileAddress) internal {
+    //IERC725Y UP = IERC725Y(universalProfileAddress);
+    //todo add address(this) to the controller addresses of `universalProfileAddress` and set the 'setData' permission to 1 for address(this). 
+    uint256 addressesArrayLength = permissions._getDaoAddressesArrayLength();
+    permissions._setDaoAddressByIndex(addressesArrayLength, universalProfileAddress);
+    permissions._setDaoAddressesArrayLength(addressesArrayLength + 1);
+
+    participation._setDaoToArrayByIndex(
+      universalProfileAddress,
+      address(this),
+      uint128(participation._getArrayOfDaosLength(universalProfileAddress))
+    );
+    participation._setArrayOfDaosLength(
+      universalProfileAddress,
+      participation._getArrayOfDaosLength(universalProfileAddress) + 1
+    );
+    participation._toggleParticipantOfDao(universalProfileAddress, address(this), false);
+
+    if(msg.sender != universalProfileAddress) {
+      participation._setControllerByIndex(
+        universalProfileAddress,
+        address(this),
+        msg.sender,
+        uint128(participation._getControllersArrayLength(universalProfileAddress, address(this)))
+      );
+      participation._setControllersArrayLength(
+        universalProfileAddress,
+        address(this),
+        participation._getControllersArrayLength(universalProfileAddress, address(this)) + 1
+      );
+    }
+  }
   
   /**
    * @notice Add permission to an address by index.
@@ -97,16 +190,14 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     uint8 index
   ) 
     public
-    permissionSet(msg.sender, _getPermissionsByIndex(4)) /** @dev User has MASTER permission */
-    permissionUnset(universalProfileAddress, _getPermissionsByIndex(index))
+    permissionSet(msg.sender, permissions._getPermissionsByIndex(4)) /** @dev User has MASTER permission */
+    permissionUnset(universalProfileAddress, permissions._getPermissionsByIndex(index))
   {
-    if (!checkUser(universalProfileAddress)) {
-      uint256 addressesArrayLength = _getDaoAddressesArrayLength();
-      _setDaoAddressByIndex(addressesArrayLength, universalProfileAddress);
-      _setDaoAddressesArrayLength(addressesArrayLength + 1);
+    if (!participation._getParticipantOfDao(universalProfileAddress, address(this))) {
+      registerUser(universalProfileAddress);
     }
     
-    _setAddressDaoPermission(universalProfileAddress, index, true);
+    permissions._setAddressDaoPermission(universalProfileAddress, index, true);
   }
 
   /**
@@ -126,10 +217,10 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     uint8 index
   ) 
     external
-    permissionSet(universalProfileAddress, _getPermissionsByIndex(4)) /** @dev User has MASTER permission */
-    permissionSet(universalProfileAddress, _getPermissionsByIndex(index))
+    permissionSet(universalProfileAddress, permissions._getPermissionsByIndex(4)) /** @dev User has MASTER permission */
+    permissionSet(universalProfileAddress, permissions._getPermissionsByIndex(index))
   {
-    _setAddressDaoPermission(universalProfileAddress, index, false);
+    permissions._setAddressDaoPermission(universalProfileAddress, index, false);
   }
 
   /**
@@ -137,17 +228,17 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
    */
   function delegate(address delegatee)
     external
-    permissionSet(msg.sender, _getPermissionsByIndex(2))
-    permissionSet(delegatee, _getPermissionsByIndex(3))
+    permissionSet(msg.sender, permissions._getPermissionsByIndex(2))
+    permissionSet(delegatee, permissions._getPermissionsByIndex(3))
   {
-    _setDelegateeOfTheDelegator(msg.sender, delegatee);
-    _setDelegatorByIndex(
+    delegates._setDelegateeOfTheDelegator(msg.sender, delegatee);
+    delegates._setDelegatorByIndex(
       msg.sender,
       delegatee,
-      _getDelegatorsArrayLength(delegatee)
+      delegates._getDelegatorsArrayLength(delegatee)
     );
-    _setDelegatorsArrayLength(
-      _getDelegatorsArrayLength(delegatee),
+    delegates._setDelegatorsArrayLength(
+      delegates._getDelegatorsArrayLength(delegatee),
       delegatee
     );
   }
@@ -169,31 +260,40 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     bytes[] memory datas
   )
     external
-    permissionSet(msg.sender, _getPermissionsByIndex(1))
+    permissionSet(msg.sender, permissions._getPermissionsByIndex(1))
     returns(bytes10 proposalSignature)
   {
     require(targets.length == datas.length, "Provided targets and datas have different lengths.");
 
-    proposalSignature = _getProposalSignature(block.timestamp, title);
-    _setAttributeValue(proposalSignature, proposalAttributeKeys[0], bytes(title));
-    _setAttributeValue(proposalSignature, proposalAttributeKeys[1], bytes(description));
-    _setAttributeValue(proposalSignature, proposalAttributeKeys[2], bytes.concat(bytes32(block.timestamp)));
-    _setTargetsAndDatas(proposalSignature, targets, datas);
-  }
+    proposalSignature = proposals._getProposalSignature(block.timestamp, title);
 
-  /**
-   * @notice Move the proposal to the voting phase. Save the current timestamp.
-   *
-   * @param proposalSignature The bytes10 signature of a proposal.
-   */
-  function putProposalToVote(
-    bytes10 proposalSignature
-  ) 
-    external
-    votingDelayPassed(proposalSignature)
-    isParticipantOfDao(msg.sender)
-  {
-    _setAttributeValue(proposalSignature, proposalAttributeKeys[3], bytes.concat(bytes32(block.timestamp)));
+    proposals._setAttributeValue(
+      proposalSignature,
+      proposals._getProposalAttributeKeyByIndex(0),
+      bytes(title)
+    );
+    proposals._setAttributeValue(
+      proposalSignature,
+      proposals._getProposalAttributeKeyByIndex(1),
+      bytes(description)
+    );
+    proposals._setAttributeValue(
+      proposalSignature,
+      proposals._getProposalAttributeKeyByIndex(2),
+      bytes.concat(bytes32(block.timestamp))
+    );
+    proposals._setAttributeValue(
+      proposalSignature,
+      proposals._getProposalAttributeKeyByIndex(3),
+      bytes.concat(bytes32(block.timestamp + metadata._getDaoVotingDelay()))
+    );
+    proposals._setAttributeValue(
+      proposalSignature,
+      proposals._getProposalAttributeKeyByIndex(4),
+      bytes.concat(bytes32(block.timestamp + metadata._getDaoVotingPeriod()))
+    );
+
+    proposals._setTargetsAndDatas(proposalSignature, targets, datas);
   }
 
   /**
@@ -207,12 +307,12 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
   ) 
     external
     votingPeriodPassed(proposalSignature)
-    isParticipantOfDao(msg.sender)
+    isParticipantOfDao(msg.sender, address(this))
   {
-    _setAttributeValue(proposalSignature, proposalAttributeKeys[4], bytes.concat(bytes32(block.timestamp)));
+    proposals._setAttributeValue(proposalSignature, proposals._getProposalAttributeKeyByIndex(4), bytes.concat(bytes32(block.timestamp)));
   
-    (address[] memory targets, bytes[] memory datas) = _getTargetsAndDatas(proposalSignature);
-    if(_strategyOneResult(proposalSignature)) {
+    (address[] memory targets, bytes[] memory datas) = proposals._getTargetsAndDatas(proposalSignature);
+    if(strategies._strategyOneResult(proposalSignature)) {
       for (uint i = 0; i < targets.length; i++) {
         DAO.execute(
           0,
@@ -237,27 +337,26 @@ abstract contract DaoAccount is DaoAccountMetadata, DaoPermissions, DaoProposals
     uint8 voteIndex
   )
     external
-    permissionSet(msg.sender, _getPermissionsByIndex(0))
+    permissionSet(msg.sender, permissions._getPermissionsByIndex(0))
     didNotDelegate(msg.sender)
     didNotVote(msg.sender, proposalSignature)
     votingPeriodIsOn(proposalSignature)
   {
-    if(uint256(bytes32(_getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {
-      uint256 totalVotes = _getDelegatorsArrayLength(msg.sender);
-      _setAttributeValue(
+    if(uint256(bytes32(permissions._getAddressDaoPermission(msg.sender))) & (1 << 3) !=0) {
+      proposals._setAttributeValue(
         proposalSignature,
-        proposalAttributeKeys[7 + voteIndex],
+        proposals._getProposalAttributeKeyByIndex(7 + voteIndex),
         bytes.concat(bytes32(
-          uint256(bytes32(_getAttributeValue(proposalSignature, proposalAttributeKeys[7 + voteIndex]))) + totalVotes
+          uint256(bytes32(proposals._getAttributeValue(proposalSignature, proposals._getProposalAttributeKeyByIndex(7 + voteIndex)))) + delegates._getDelegatorsArrayLength(msg.sender)
         ))
       );
     }
     else {
-      _setAttributeValue(
+      proposals._setAttributeValue(
         proposalSignature,
-        proposalAttributeKeys[7 + voteIndex],
+        proposals._getProposalAttributeKeyByIndex(7 + voteIndex),
         bytes.concat(bytes32(
-          uint256(bytes32(_getAttributeValue(proposalSignature, proposalAttributeKeys[7 + voteIndex]))) + 1
+          uint256(bytes32(proposals._getAttributeValue(proposalSignature, proposals._getProposalAttributeKeyByIndex(7 + voteIndex)))) + 1
         ))
       );
     }

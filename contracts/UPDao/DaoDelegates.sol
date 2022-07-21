@@ -4,14 +4,15 @@ pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 import "./Interfaces/DaoPermissionsInterface.sol";
-import "./DaoUtils.sol";
+import "./Utils/AccessControl.sol";
+import "./Utils/DaoUtils.sol";
 
 /**
  * @author B00ste
  * @title DaoDelegates
- * @custom:version 0.91
+ * @custom:version 0.92
  */
-contract DaoDelegates {
+contract DaoDelegates is AccessControl {
 
   /**
    * @notice Instance of the DAO key manager.
@@ -28,23 +29,16 @@ contract DaoDelegates {
    */
   DaoPermissionsInterface private permissions;
 
-  constructor(LSP0ERC725Account _DAO, DaoUtils _utils) {
+  /**
+   * @notice Initializing the contract.
+   */
+  function init(LSP0ERC725Account _DAO, DaoUtils _utils, address daoAddress) external isNotInitialized() {
+    require(!initialized, "The contract is already initialized.");
     DAO = _DAO;
     utils = _utils;
-  }
-
-  // --- MODIFIERS
-
-  /**
-   * @notice Verifies that a Universal Profile did not delegate his vote.
-   */ 
-  modifier didNotDelegate(address universalProfileAddress) {
-    address delegatee = _getDelegateeOfTheDelegator(universalProfileAddress);
-    require(
-      universalProfileAddress == delegatee || bytes20(universalProfileAddress) == bytes20(0),
-      "User delegated his votes."
-    );
-    _;
+    initAccessControl(_utils, daoAddress);
+    permissions = DaoPermissionsInterface(daoAddress);
+    initialized = true;
   }
 
   // --- GETTERS & SETTERS
@@ -69,7 +63,7 @@ contract DaoDelegates {
    * @param delegator Address of the delegator.
    * @param delegatee Address of the delegatee.
    */
-  function _setDelegateeOfTheDelegator(address delegator, address delegatee) internal {
+  function _setDelegateeOfTheDelegator(address delegator, address delegatee) external isDao(msg.sender) isInitialized() {
     bytes32 delegateeOfTheDelegatorKey = bytes32(bytes.concat(
       bytes10(keccak256("Delegatee")),
       bytes2(0),
@@ -101,7 +95,7 @@ contract DaoDelegates {
    * @param length the length of the array of addresses that delegated the votes to a delegatee.
    * @param delegatee Address of the delegatee.
    */
-  function _setDelegatorsArrayLength(uint256 length, address delegatee) internal {
+  function _setDelegatorsArrayLength(uint256 length, address delegatee) external isDao(msg.sender) isInitialized() {
     bytes32 delegateesArrayOfDeleggatorsKey = bytes32(bytes.concat(
       bytes6(keccak256("VotesDelegatedArray[]")),
       bytes4(keccak256("Delegatee")),
@@ -140,7 +134,7 @@ contract DaoDelegates {
    * @param delegatee Address of the delegatee.
    * @param index A number of the array.
    */
-  function _setDelegatorByIndex(address delegator, address delegatee, uint256 index) internal {
+  function _setDelegatorByIndex(address delegator, address delegatee, uint256 index) external isDao(msg.sender) isInitialized() {
     bytes32 delegateeAndIndexKey = bytes32(bytes.concat(
       utils._bytes32ToTwoHalfs(
         bytes32(bytes.concat(

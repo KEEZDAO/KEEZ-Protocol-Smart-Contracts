@@ -1,0 +1,452 @@
+{
+  "contractName": "DaoPermissionsInterface",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "index",
+          "type": "uint8"
+        }
+      ],
+      "name": "_getPermissionsByIndex",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "permission",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "_getDaoAddressesArrayLength",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "_getDaoAddressByIndex",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "daoAddress",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "daoAddress",
+          "type": "address"
+        }
+      ],
+      "name": "_getAddressDaoPermission",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "addressPermssions",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"daoAddress\",\"type\":\"address\"}],\"name\":\"_getAddressDaoPermission\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"addressPermssions\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"_getDaoAddressByIndex\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"daoAddress\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoAddressesArrayLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"index\",\"type\":\"uint8\"}],\"name\":\"_getPermissionsByIndex\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"permission\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol\":\"DaoPermissionsInterface\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol\":{\"keccak256\":\"0xbad2e0cb0ab600a0852a0389b5995b7bc7ac6e9c4cba5df9ec1b62c23471e486\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://bb6a50ad8f7a61243aba2126263dcbccb5527ec98b66683b30dc11c080ddcaf2\",\"dweb:/ipfs/Qmbs6cFX6qFemB2fRC4G3FeMLB4sqZzEQiU23jam4QQB1M\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\ninterface DaoPermissionsInterface {\n\n  function _getPermissionsByIndex(uint8 index) external view returns(bytes32 permission);\n\n  function _getDaoAddressesArrayLength() external view returns(uint256 length);\n\n  function _getDaoAddressByIndex(uint256 index) external view returns(bytes memory daoAddress);\n\n  function _getAddressDaoPermission(address daoAddress) external view returns(bytes memory addressPermssions);\n\n}",
+  "sourcePath": "/home/b00ste/Projects/universal-profile-governance/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol",
+    "exportedSymbols": {
+      "DaoPermissionsInterface": [
+        8155
+      ]
+    },
+    "id": 8156,
+    "license": "CC0-1.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8128,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:23:47"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "DaoPermissionsInterface",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 8155,
+        "linearizedBaseContracts": [
+          8155
+        ],
+        "name": "DaoPermissionsInterface",
+        "nameLocation": "72:23:47",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "d6d09cfb",
+            "id": 8135,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getPermissionsByIndex",
+            "nameLocation": "110:22:47",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8131,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8130,
+                  "mutability": "mutable",
+                  "name": "index",
+                  "nameLocation": "139:5:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8135,
+                  "src": "133:11:47",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 8129,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "133:5:47",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "132:13:47"
+            },
+            "returnParameters": {
+              "id": 8134,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8133,
+                  "mutability": "mutable",
+                  "name": "permission",
+                  "nameLocation": "176:10:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8135,
+                  "src": "168:18:47",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 8132,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "168:7:47",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "167:20:47"
+            },
+            "scope": 8155,
+            "src": "101:87:47",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "6405184e",
+            "id": 8140,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDaoAddressesArrayLength",
+            "nameLocation": "201:27:47",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8136,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "228:2:47"
+            },
+            "returnParameters": {
+              "id": 8139,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8138,
+                  "mutability": "mutable",
+                  "name": "length",
+                  "nameLocation": "261:6:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8140,
+                  "src": "253:14:47",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8137,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "253:7:47",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "252:16:47"
+            },
+            "scope": 8155,
+            "src": "192:77:47",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "7b300866",
+            "id": 8147,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDaoAddressByIndex",
+            "nameLocation": "282:21:47",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8143,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8142,
+                  "mutability": "mutable",
+                  "name": "index",
+                  "nameLocation": "312:5:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8147,
+                  "src": "304:13:47",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8141,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "304:7:47",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "303:15:47"
+            },
+            "returnParameters": {
+              "id": 8146,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8145,
+                  "mutability": "mutable",
+                  "name": "daoAddress",
+                  "nameLocation": "354:10:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8147,
+                  "src": "341:23:47",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 8144,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "341:5:47",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "340:25:47"
+            },
+            "scope": 8155,
+            "src": "273:93:47",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "1da0d49f",
+            "id": 8154,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getAddressDaoPermission",
+            "nameLocation": "379:24:47",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8150,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8149,
+                  "mutability": "mutable",
+                  "name": "daoAddress",
+                  "nameLocation": "412:10:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8154,
+                  "src": "404:18:47",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8148,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "404:7:47",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "403:20:47"
+            },
+            "returnParameters": {
+              "id": 8153,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8152,
+                  "mutability": "mutable",
+                  "name": "addressPermssions",
+                  "nameLocation": "459:17:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8154,
+                  "src": "446:30:47",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 8151,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "446:5:47",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "445:32:47"
+            },
+            "scope": 8155,
+            "src": "370:108:47",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 8156,
+        "src": "62:419:47",
+        "usedErrors": []
+      }
+    ],
+    "src": "37:444:47"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.15+commit.e14f2714.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.8",
+  "updatedAt": "2022-07-21T08:10:15.533Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

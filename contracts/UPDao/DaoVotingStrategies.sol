@@ -12,7 +12,7 @@ import "./Interfaces/DaoProposalsInterface.sol";
  *
  * @author B00ste
  * @title DaoVotingStrategies
- * @custom:version 0.91
+ * @custom:version 0.92
  */
 contract DaoVotingStrategies {
 
@@ -31,10 +31,16 @@ contract DaoVotingStrategies {
    */
   DaoAccountMetadataInterface private metadata;
 
-  constructor(LSP0ERC725Account _DAO, address daoAddress) {
+  /**
+   * @notice Initializing the contract.
+   */
+  bool private initialized = false;
+  function init(LSP0ERC725Account _DAO, address daoAddress) external{
+    require(!initialized, "The contract is already initialized.");
+    DAO = _DAO;
     proposals = DaoProposalsInterface(daoAddress);
     metadata = DaoAccountMetadataInterface(daoAddress);
-    DAO = _DAO;
+    initialized = true;
   }
 
   function _getProposalVotes(bytes10 proposalSignature)
@@ -59,7 +65,7 @@ contract DaoVotingStrategies {
     uint256 totalVotes = totalActiveVotes + abstainVotes;
 
     if (
-      proVotes/totalActiveVotes > metadata._getDaoQuorum()/totalActiveVotes &&
+      proVotes/totalActiveVotes > metadata._getDaoMajority()/totalActiveVotes &&
       totalActiveVotes/totalVotes > metadata._getDaoParticipationRate()/totalVotes
     ) {
       return true;

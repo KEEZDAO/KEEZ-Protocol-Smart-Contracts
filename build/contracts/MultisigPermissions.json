@@ -1,0 +1,930 @@
+{
+  "contractName": "MultisigPermissions",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract LSP0ERC725Account",
+          "name": "_MULTISIG",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract LSP0ERC725Account\",\"name\":\"_MULTISIG\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"author\":\"B00ste\",\"custom:version\":\"0.1\",\"kind\":\"dev\",\"methods\":{},\"title\":\"MultisigPermissions\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"This smart contract is responsible for the permissions for the Multisig.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPMultisig/MultisigPermissions.sol\":\"MultisigPermissions\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@erc725/smart-contracts/contracts/ERC725XCore.sol\":{\"keccak256\":\"0x0dea1727273f66b0e854c346d49bacc86ad39735484a5ac07a25b280f4cdb792\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://a4170d02a2b3ec5781b17a0dcfe9f8fc75113c7923e20ca80e793bc473ed3c00\",\"dweb:/ipfs/QmW2Q9UVxZwiEkx67zqGoPC8uKVPz6apZMt7J2ALsLTM78\"]},\"@erc725/smart-contracts/contracts/ERC725YCore.sol\":{\"keccak256\":\"0x215fc8caf03c1af787a3e46db456bdc8e3a662345d40a34f20e35af220f4e77b\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://fc44c50e8440965cb7fd412be9d17cdfdb6400af8a6e0fa3e9cc9fe55b730a4a\",\"dweb:/ipfs/Qme7jiVkpW6vMjibotZoZatZFsYYg6SnDhWNkikAdUUheQ\"]},\"@erc725/smart-contracts/contracts/constants.sol\":{\"keccak256\":\"0xdf3d466e2d6f8d0f2e288ee01edb0cf7de2db9cac3c257b7d6a6284adf4b2480\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://16e4a90c8f2d245621808320ed6aa4ad7fcfd50b36df116e8447e5fc1700d7a9\",\"dweb:/ipfs/QmT4E9cSMuwpiABbdKExNn3Ef9wmjdmv3E9MuwkmkDv6BY\"]},\"@erc725/smart-contracts/contracts/custom/OwnableUnset.sol\":{\"keccak256\":\"0x410d0a0c6f9f769b79cf7d34c097c967160f5f9876453b2a1659cbb8082a4961\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8e1068d9896dfe4d2d73cd75506f52f572daa3a4f35c0f980fdd91d3faa52ecf\",\"dweb:/ipfs/QmVodeBozCKcU2vdofRtKF5RAi42q3zBNW9SEYrg7SexDP\"]},\"@erc725/smart-contracts/contracts/interfaces/IERC725X.sol\":{\"keccak256\":\"0xcb9ac83388fcacceb35734af1164e0819786f4b32b7f3e1e428dba6cd278fc97\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://ba6c27bf8723350db158b30a66467589b20033f6585308cf79b15c89101bed76\",\"dweb:/ipfs/QmS4J8bQGTivPqKQqVj27Xh4hxq3VVPbVCWPKjVanEy882\"]},\"@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol\":{\"keccak256\":\"0x4144879c1923deaac59a07abd5dabb9d8c50b5b4522e3fb9158e0e63a3ce696b\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://810f61f5ed8fb2ac8270751188382c0f66b268dcf5e877e2d320b6dc95c44528\",\"dweb:/ipfs/QmR7GYVw79YypsAWg5jfNzNMCE3NJqersoqCkyux3MR8oa\"]},\"@erc725/smart-contracts/contracts/utils/ErrorHandlerLib.sol\":{\"keccak256\":\"0xfabe3bd3eefe73e7add948aee9e9daf9604bedaaf8c4d4557674b74a6bbdad37\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://05a1b0ea2b1f5890c820794efd88d977bb5501ab9dee9aa15c1d770d04335561\",\"dweb:/ipfs/QmU7djirv1HmeHwrS16SCqRoTnN83voMA93vu2PwCWELdr\"]},\"@erc725/smart-contracts/contracts/utils/GasLib.sol\":{\"keccak256\":\"0xd69f4d06630e47043a59e2173badd2275c6762d9109cc792d5891101686f6c2b\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://55e5b55b404e0897c84c598ab5bcc4621258c13c849c1bd55d3807dd7e25705c\",\"dweb:/ipfs/QmZgAUofnxdxbp2T3dTyULqnp4kzXWWZJ8UBWqqdxi4Ywt\"]},\"@lukso/lsp-smart-contracts/contracts/Custom/ClaimOwnership.sol\":{\"keccak256\":\"0x40fdf6dbc82ad3902cd7d356b7bce1451dae8dca06522cfb03405b13b20e9a2f\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://f0c6ae883813af74633e5a8a7f1d31d9b021037ee14f4f3821be9ec3e569dfac\",\"dweb:/ipfs/Qmbs2zeXQ1s7zvFkCwET1kN6QxNEzfvLcbXcmsympfCQTZ\"]},\"@lukso/lsp-smart-contracts/contracts/Custom/ERC165Checker.sol\":{\"keccak256\":\"0x076fb61a330055d96723ad73383629e0ff2e5f903b2ba67e323318ef2e78ec7c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8bf3f35a840ad8f800f149d504082abdd08d656954d9f9066f9ca4867f9428c4\",\"dweb:/ipfs/QmNSbTbn7LceU2s6QuBKoV6vA4ujVX5nvNmwR7XqT2wE3j\"]},\"@lukso/lsp-smart-contracts/contracts/Custom/IClaimOwnership.sol\":{\"keccak256\":\"0xd5836bb3cf4a7967df66c2bb67e4081c6a2e397918d3fdd4da462ff4e67c54c1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6a5209adb63bcba94181a2604559707987adefa3613e3ae8ef4520b9f2fa2308\",\"dweb:/ipfs/QmSkaFoUvPazeeeJfzSLK7mjFRjFobktEWqbQQncGV5dng\"]},\"@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0Constants.sol\":{\"keccak256\":\"0x538700fa454e889567a0c8c14c11814bf471eafd3a84b7bbc2a323dc9e4f4455\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://9b8ffc61d10db950c710ffafd583661fe09a4e04a9a9b02a77252ca4538fb42e\",\"dweb:/ipfs/QmetniuqdrG6ERrSGj6t8RwuurWEtqKGGyKNAkozkbTAgg\"]},\"@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol\":{\"keccak256\":\"0xcd2d9e61856d65990aa784ff8298e84055f3037929c6b2c7bccb4f96f321bef1\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://05f9136ef2b4a659f65b7bf57b5fc4674476592ca21619533b13cf75e224b66a\",\"dweb:/ipfs/QmRKfzspr68P8XTwf1ghkM1EycVmugrV2fkvMnkbHHGC1Y\"]},\"@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725AccountCore.sol\":{\"keccak256\":\"0x1e43b938d8601383c0dd6ec6a3b994324697afefe76c1c33a05a990cdea8a555\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://a5f33e59978d6cf419a3384809737c9c45d390b268f8d163c83dbf407b4ad6d7\",\"dweb:/ipfs/Qme4SBtcrpDj8XSikJUpRSa8riiEMrQxQKQEii3qihwp1i\"]},\"@lukso/lsp-smart-contracts/contracts/LSP1UniversalReceiver/ILSP1UniversalReceiver.sol\":{\"keccak256\":\"0xbca7d0f76e439ee3302096f8ecaf8a506434a83c86639c95efd79e6b89d364ae\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://c4e3931e406a2e0c69bd5a7c5a677541a36dcdda01682e46bf7180bc814495a7\",\"dweb:/ipfs/QmWRZZ2XerqFttSpcCv27Fk4bTzHAVaKHFxCLYGFmYj1uK\"]},\"@lukso/lsp-smart-contracts/contracts/LSP1UniversalReceiver/ILSP1UniversalReceiverDelegate.sol\":{\"keccak256\":\"0x91cfa8fec33a3d7f4141c1188fd3d2bd167db9e8420e9b9ed07c3e1f7b8a239b\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://fd707b91f940a35052503056548ec30ab141cc16d73bd8355c6cb608f203d991\",\"dweb:/ipfs/QmXPUNVJLYMBYW4SzMzpG7MoLzAYupQK9R5yqQQ9gtzC9B\"]},\"@lukso/lsp-smart-contracts/contracts/LSP1UniversalReceiver/LSP1Constants.sol\":{\"keccak256\":\"0x37255dac370701b20dc046c41024686ccf5a88eb1e68415c30167015f6f80f17\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://fdfe8b6cd1deddcf3d3110f54b6a8bb9a73412c4f8cc40369027e82fe55322e1\",\"dweb:/ipfs/QmdwssJrfuT3nrub7M5fr8ZwT8WeAytbx8z2K9rwgjVnv4\"]},\"@openzeppelin/contracts/interfaces/IERC1271.sol\":{\"keccak256\":\"0x0705a4b1b86d7b0bd8432118f226ba139c44b9dcaba0a6eafba2dd7d0639c544\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c45b821ef9e882e57c256697a152e108f0f2ad6997609af8904cae99c9bd422e\",\"dweb:/ipfs/QmRKCJW6jjzR5UYZcLpGnhEJ75UVbH6EHkEa49sWx2SKng\"]},\"@openzeppelin/contracts/utils/Create2.sol\":{\"keccak256\":\"0x62237e1773cbf99739b7019f3772a2ff5360d56edb69751b513237f5fcd78571\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://f39caaa49151a341d9c258a5b7308856d11c8cf349062314eea1e2251f0d1918\",\"dweb:/ipfs/QmcJqGdrHEdiBfB5zuA3ykY1wc2LDNtz8Y88HPEscJe71G\"]},\"@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638\",\"dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9\"]},\"@openzeppelin/contracts/utils/cryptography/ECDSA.sol\":{\"keccak256\":\"0x84ac2d2f343df1e683da7a12bbcf70db542a7a7a0cea90a5d70fcb5e5d035481\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://73ae8e0c6f975052973265113d762629002ce33987b1933c2a378667e2816f2f\",\"dweb:/ipfs/QmQAootkVfoe4PLaYbT4Xob2dJRm3bZfbCffEHRbCYXNPF\"]},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"keccak256\":\"0xd10975de010d89fd1c78dc5e8a9a7e7f496198085c151648f20cba166b32582b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://fb0048dee081f6fffa5f74afc3fb328483c2a30504e94a0ddd2a5114d731ec4d\",\"dweb:/ipfs/QmZptt1nmYoA5SgjwnSgWqgUSDgm4q52Yos3xhnMv3MV43\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/UPMultisig/MultisigPermissions.sol\":{\"keccak256\":\"0x7096a1a66b16359af4ed5995826ea4fb37559f97f3b730b854ebb153ce2c801b\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://1c7442f6b23d2935048089e1fc98b4aea6d620af7637d9070be7962a84b7d5fa\",\"dweb:/ipfs/QmUeAHnDg2Y8R9Nv5HuZWKhFqz8DEaswH8A4Rfz45ht6qp\"]},\"solidity-bytes-utils/contracts/BytesLib.sol\":{\"keccak256\":\"0xf75784dfc94ea43668eb195d5690a1dde1b6eda62017e73a3899721583821d29\",\"license\":\"Unlicense\",\"urls\":[\"bzz-raw://ca16cef8b94f3ac75d376489a668618f6c4595a906b939d674a883f4bf426014\",\"dweb:/ipfs/QmceGU7qhyFLSejaj6i4dEtMzXDCSF3aYDtW1UeKjXQaRn\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50604051610167380380610167833981810160405281019061003291906100ed565b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505061011a565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b60006100a88261007d565b9050919050565b60006100ba8261009d565b9050919050565b6100ca816100af565b81146100d557600080fd5b50565b6000815190506100e7816100c1565b92915050565b60006020828403121561010357610102610078565b5b6000610111848285016100d8565b91505092915050565b603f806101286000396000f3fe6080604052600080fdfea2646970667358221220f1c4a7ff128f290792bbbdb40a914cec9e6ad0d64bee754262599c110d919aed64736f6c634300080f0033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220f1c4a7ff128f290792bbbdb40a914cec9e6ad0d64bee754262599c110d919aed64736f6c634300080f0033",
+  "immutableReferences": {},
+  "generatedSources": [
+    {
+      "ast": {
+        "nodeType": "YulBlock",
+        "src": "0:1499:55",
+        "statements": [
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "47:35:55",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "57:19:55",
+                  "value": {
+                    "arguments": [
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "73:2:55",
+                        "type": "",
+                        "value": "64"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mload",
+                      "nodeType": "YulIdentifier",
+                      "src": "67:5:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "67:9:55"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "memPtr",
+                      "nodeType": "YulIdentifier",
+                      "src": "57:6:55"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "allocate_unbounded",
+            "nodeType": "YulFunctionDefinition",
+            "returnVariables": [
+              {
+                "name": "memPtr",
+                "nodeType": "YulTypedName",
+                "src": "40:6:55",
+                "type": ""
+              }
+            ],
+            "src": "7:75:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "177:28:55",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "194:1:55",
+                        "type": "",
+                        "value": "0"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "197:1:55",
+                        "type": "",
+                        "value": "0"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "revert",
+                      "nodeType": "YulIdentifier",
+                      "src": "187:6:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "187:12:55"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "187:12:55"
+                }
+              ]
+            },
+            "name": "revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b",
+            "nodeType": "YulFunctionDefinition",
+            "src": "88:117:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "300:28:55",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "317:1:55",
+                        "type": "",
+                        "value": "0"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "320:1:55",
+                        "type": "",
+                        "value": "0"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "revert",
+                      "nodeType": "YulIdentifier",
+                      "src": "310:6:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "310:12:55"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "310:12:55"
+                }
+              ]
+            },
+            "name": "revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db",
+            "nodeType": "YulFunctionDefinition",
+            "src": "211:117:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "379:81:55",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "389:65:55",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "value",
+                        "nodeType": "YulIdentifier",
+                        "src": "404:5:55"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "411:42:55",
+                        "type": "",
+                        "value": "0xffffffffffffffffffffffffffffffffffffffff"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "and",
+                      "nodeType": "YulIdentifier",
+                      "src": "400:3:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "400:54:55"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "cleaned",
+                      "nodeType": "YulIdentifier",
+                      "src": "389:7:55"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "cleanup_t_uint160",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "value",
+                "nodeType": "YulTypedName",
+                "src": "361:5:55",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "cleaned",
+                "nodeType": "YulTypedName",
+                "src": "371:7:55",
+                "type": ""
+              }
+            ],
+            "src": "334:126:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "519:51:55",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "529:35:55",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "value",
+                        "nodeType": "YulIdentifier",
+                        "src": "558:5:55"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "cleanup_t_uint160",
+                      "nodeType": "YulIdentifier",
+                      "src": "540:17:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "540:24:55"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "cleaned",
+                      "nodeType": "YulIdentifier",
+                      "src": "529:7:55"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "cleanup_t_address_payable",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "value",
+                "nodeType": "YulTypedName",
+                "src": "501:5:55",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "cleaned",
+                "nodeType": "YulTypedName",
+                "src": "511:7:55",
+                "type": ""
+              }
+            ],
+            "src": "466:104:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "647:59:55",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "657:43:55",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "value",
+                        "nodeType": "YulIdentifier",
+                        "src": "694:5:55"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "cleanup_t_address_payable",
+                      "nodeType": "YulIdentifier",
+                      "src": "668:25:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "668:32:55"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "cleaned",
+                      "nodeType": "YulIdentifier",
+                      "src": "657:7:55"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "cleanup_t_contract$_LSP0ERC725Account_$1252",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "value",
+                "nodeType": "YulTypedName",
+                "src": "629:5:55",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "cleaned",
+                "nodeType": "YulTypedName",
+                "src": "639:7:55",
+                "type": ""
+              }
+            ],
+            "src": "576:130:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "781:105:55",
+              "statements": [
+                {
+                  "body": {
+                    "nodeType": "YulBlock",
+                    "src": "864:16:55",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "873:1:55",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "876:1:55",
+                              "type": "",
+                              "value": "0"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "revert",
+                            "nodeType": "YulIdentifier",
+                            "src": "866:6:55"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "866:12:55"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "866:12:55"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "value",
+                            "nodeType": "YulIdentifier",
+                            "src": "804:5:55"
+                          },
+                          {
+                            "arguments": [
+                              {
+                                "name": "value",
+                                "nodeType": "YulIdentifier",
+                                "src": "855:5:55"
+                              }
+                            ],
+                            "functionName": {
+                              "name": "cleanup_t_contract$_LSP0ERC725Account_$1252",
+                              "nodeType": "YulIdentifier",
+                              "src": "811:43:55"
+                            },
+                            "nodeType": "YulFunctionCall",
+                            "src": "811:50:55"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "eq",
+                          "nodeType": "YulIdentifier",
+                          "src": "801:2:55"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "801:61:55"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "iszero",
+                      "nodeType": "YulIdentifier",
+                      "src": "794:6:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "794:69:55"
+                  },
+                  "nodeType": "YulIf",
+                  "src": "791:89:55"
+                }
+              ]
+            },
+            "name": "validator_revert_t_contract$_LSP0ERC725Account_$1252",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "value",
+                "nodeType": "YulTypedName",
+                "src": "774:5:55",
+                "type": ""
+              }
+            ],
+            "src": "712:174:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "981:106:55",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "991:22:55",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "offset",
+                        "nodeType": "YulIdentifier",
+                        "src": "1006:6:55"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mload",
+                      "nodeType": "YulIdentifier",
+                      "src": "1000:5:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1000:13:55"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "value",
+                      "nodeType": "YulIdentifier",
+                      "src": "991:5:55"
+                    }
+                  ]
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "value",
+                        "nodeType": "YulIdentifier",
+                        "src": "1075:5:55"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "validator_revert_t_contract$_LSP0ERC725Account_$1252",
+                      "nodeType": "YulIdentifier",
+                      "src": "1022:52:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1022:59:55"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "1022:59:55"
+                }
+              ]
+            },
+            "name": "abi_decode_t_contract$_LSP0ERC725Account_$1252_fromMemory",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "offset",
+                "nodeType": "YulTypedName",
+                "src": "959:6:55",
+                "type": ""
+              },
+              {
+                "name": "end",
+                "nodeType": "YulTypedName",
+                "src": "967:3:55",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "value",
+                "nodeType": "YulTypedName",
+                "src": "975:5:55",
+                "type": ""
+              }
+            ],
+            "src": "892:195:55"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "1196:300:55",
+              "statements": [
+                {
+                  "body": {
+                    "nodeType": "YulBlock",
+                    "src": "1242:83:55",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [],
+                          "functionName": {
+                            "name": "revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b",
+                            "nodeType": "YulIdentifier",
+                            "src": "1244:77:55"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "1244:79:55"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "1244:79:55"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "dataEnd",
+                            "nodeType": "YulIdentifier",
+                            "src": "1217:7:55"
+                          },
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "1226:9:55"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "sub",
+                          "nodeType": "YulIdentifier",
+                          "src": "1213:3:55"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1213:23:55"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "1238:2:55",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "slt",
+                      "nodeType": "YulIdentifier",
+                      "src": "1209:3:55"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1209:32:55"
+                  },
+                  "nodeType": "YulIf",
+                  "src": "1206:119:55"
+                },
+                {
+                  "nodeType": "YulBlock",
+                  "src": "1335:154:55",
+                  "statements": [
+                    {
+                      "nodeType": "YulVariableDeclaration",
+                      "src": "1350:15:55",
+                      "value": {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "1364:1:55",
+                        "type": "",
+                        "value": "0"
+                      },
+                      "variables": [
+                        {
+                          "name": "offset",
+                          "nodeType": "YulTypedName",
+                          "src": "1354:6:55",
+                          "type": ""
+                        }
+                      ]
+                    },
+                    {
+                      "nodeType": "YulAssignment",
+                      "src": "1379:100:55",
+                      "value": {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "name": "headStart",
+                                "nodeType": "YulIdentifier",
+                                "src": "1451:9:55"
+                              },
+                              {
+                                "name": "offset",
+                                "nodeType": "YulIdentifier",
+                                "src": "1462:6:55"
+                              }
+                            ],
+                            "functionName": {
+                              "name": "add",
+                              "nodeType": "YulIdentifier",
+                              "src": "1447:3:55"
+                            },
+                            "nodeType": "YulFunctionCall",
+                            "src": "1447:22:55"
+                          },
+                          {
+                            "name": "dataEnd",
+                            "nodeType": "YulIdentifier",
+                            "src": "1471:7:55"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "abi_decode_t_contract$_LSP0ERC725Account_$1252_fromMemory",
+                          "nodeType": "YulIdentifier",
+                          "src": "1389:57:55"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1389:90:55"
+                      },
+                      "variableNames": [
+                        {
+                          "name": "value0",
+                          "nodeType": "YulIdentifier",
+                          "src": "1379:6:55"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "abi_decode_tuple_t_contract$_LSP0ERC725Account_$1252_fromMemory",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "1166:9:55",
+                "type": ""
+              },
+              {
+                "name": "dataEnd",
+                "nodeType": "YulTypedName",
+                "src": "1177:7:55",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "1189:6:55",
+                "type": ""
+              }
+            ],
+            "src": "1093:403:55"
+          }
+        ]
+      },
+      "contents": "{\n\n    function allocate_unbounded() -> memPtr {\n        memPtr := mload(64)\n    }\n\n    function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() {\n        revert(0, 0)\n    }\n\n    function revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() {\n        revert(0, 0)\n    }\n\n    function cleanup_t_uint160(value) -> cleaned {\n        cleaned := and(value, 0xffffffffffffffffffffffffffffffffffffffff)\n    }\n\n    function cleanup_t_address_payable(value) -> cleaned {\n        cleaned := cleanup_t_uint160(value)\n    }\n\n    function cleanup_t_contract$_LSP0ERC725Account_$1252(value) -> cleaned {\n        cleaned := cleanup_t_address_payable(value)\n    }\n\n    function validator_revert_t_contract$_LSP0ERC725Account_$1252(value) {\n        if iszero(eq(value, cleanup_t_contract$_LSP0ERC725Account_$1252(value))) { revert(0, 0) }\n    }\n\n    function abi_decode_t_contract$_LSP0ERC725Account_$1252_fromMemory(offset, end) -> value {\n        value := mload(offset)\n        validator_revert_t_contract$_LSP0ERC725Account_$1252(value)\n    }\n\n    function abi_decode_tuple_t_contract$_LSP0ERC725Account_$1252_fromMemory(headStart, dataEnd) -> value0 {\n        if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n        {\n\n            let offset := 0\n\n            value0 := abi_decode_t_contract$_LSP0ERC725Account_$1252_fromMemory(add(headStart, offset), dataEnd)\n        }\n\n    }\n\n}\n",
+      "id": 55,
+      "language": "Yul",
+      "name": "#utility.yul"
+    }
+  ],
+  "deployedGeneratedSources": [],
+  "sourceMap": "320:225:51:-:0;;;469:72;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;527:9;516:8;;:20;;;;;;;;;;;;;;;;;;469:72;320:225;;88:117:55;197:1;194;187:12;334:126;371:7;411:42;404:5;400:54;389:65;;334:126;;;:::o;466:104::-;511:7;540:24;558:5;540:24;:::i;:::-;529:35;;466:104;;;:::o;576:130::-;639:7;668:32;694:5;668:32;:::i;:::-;657:43;;576:130;;;:::o;712:174::-;811:50;855:5;811:50;:::i;:::-;804:5;801:61;791:89;;876:1;873;866:12;791:89;712:174;:::o;892:195::-;975:5;1006:6;1000:13;991:22;;1022:59;1075:5;1022:59;:::i;:::-;892:195;;;;:::o;1093:403::-;1189:6;1238:2;1226:9;1217:7;1213:23;1209:32;1206:119;;;1244:79;;:::i;:::-;1206:119;1364:1;1389:90;1471:7;1462:6;1451:9;1447:22;1389:90;:::i;:::-;1379:100;;1335:154;1093:403;;;;:::o;320:225:51:-;;;;;;;",
+  "deployedSourceMap": "320:225:51:-:0;;;;;",
+  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\nimport \"@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol\";\n\n/**\n *\n* @notice This smart contract is responsible for the permissions for the Multisig.\n *\n * @author B00ste\n * @title MultisigPermissions\n * @custom:version 0.1\n */\n\n contract MultisigPermissions {\n\n  /**\n   * @notice Unique instance of the MULTISIG Universal Profile.\n   */\n  LSP0ERC725Account private MULTISIG;\n\n  constructor(LSP0ERC725Account _MULTISIG) {\n    MULTISIG = _MULTISIG;\n  }\n\n }",
+  "sourcePath": "/home/b00ste/Projects/universal-profile-governance/contracts/UPMultisig/MultisigPermissions.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/UPMultisig/MultisigPermissions.sol",
+    "exportedSymbols": {
+      "LSP0ERC725Account": [
+        1252
+      ],
+      "LSP0ERC725AccountCore": [
+        1485
+      ],
+      "MultisigPermissions": [
+        8269
+      ],
+      "OwnableUnset": [
+        804
+      ]
+    },
+    "id": 8270,
+    "license": "CC0-1.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8251,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:23:51"
+      },
+      {
+        "absolutePath": "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol",
+        "file": "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol",
+        "id": 8252,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 8270,
+        "sourceUnit": 1253,
+        "src": "62:86:51",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "MultisigPermissions",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 8253,
+          "nodeType": "StructuredDocumentation",
+          "src": "150:167:51",
+          "text": " @notice This smart contract is responsible for the permissions for the Multisig.\n @author B00ste\n @title MultisigPermissions\n @custom:version 0.1"
+        },
+        "fullyImplemented": true,
+        "id": 8269,
+        "linearizedBaseContracts": [
+          8269
+        ],
+        "name": "MultisigPermissions",
+        "nameLocation": "329:19:51",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8254,
+              "nodeType": "StructuredDocumentation",
+              "src": "354:73:51",
+              "text": " @notice Unique instance of the MULTISIG Universal Profile."
+            },
+            "id": 8257,
+            "mutability": "mutable",
+            "name": "MULTISIG",
+            "nameLocation": "456:8:51",
+            "nodeType": "VariableDeclaration",
+            "scope": 8269,
+            "src": "430:34:51",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_LSP0ERC725Account_$1252",
+              "typeString": "contract LSP0ERC725Account"
+            },
+            "typeName": {
+              "id": 8256,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 8255,
+                "name": "LSP0ERC725Account",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 1252,
+                "src": "430:17:51"
+              },
+              "referencedDeclaration": 1252,
+              "src": "430:17:51",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_LSP0ERC725Account_$1252",
+                "typeString": "contract LSP0ERC725Account"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "body": {
+              "id": 8267,
+              "nodeType": "Block",
+              "src": "510:31:51",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 8265,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 8263,
+                      "name": "MULTISIG",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8257,
+                      "src": "516:8:51",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_LSP0ERC725Account_$1252",
+                        "typeString": "contract LSP0ERC725Account"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 8264,
+                      "name": "_MULTISIG",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8260,
+                      "src": "527:9:51",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_LSP0ERC725Account_$1252",
+                        "typeString": "contract LSP0ERC725Account"
+                      }
+                    },
+                    "src": "516:20:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_LSP0ERC725Account_$1252",
+                      "typeString": "contract LSP0ERC725Account"
+                    }
+                  },
+                  "id": 8266,
+                  "nodeType": "ExpressionStatement",
+                  "src": "516:20:51"
+                }
+              ]
+            },
+            "id": 8268,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8261,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8260,
+                  "mutability": "mutable",
+                  "name": "_MULTISIG",
+                  "nameLocation": "499:9:51",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8268,
+                  "src": "481:27:51",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_LSP0ERC725Account_$1252",
+                    "typeString": "contract LSP0ERC725Account"
+                  },
+                  "typeName": {
+                    "id": 8259,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 8258,
+                      "name": "LSP0ERC725Account",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 1252,
+                      "src": "481:17:51"
+                    },
+                    "referencedDeclaration": 1252,
+                    "src": "481:17:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_LSP0ERC725Account_$1252",
+                      "typeString": "contract LSP0ERC725Account"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "480:29:51"
+            },
+            "returnParameters": {
+              "id": 8262,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "510:0:51"
+            },
+            "scope": 8269,
+            "src": "469:72:51",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8270,
+        "src": "320:225:51",
+        "usedErrors": []
+      }
+    ],
+    "src": "37:508:51"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.15+commit.e14f2714.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.8",
+  "updatedAt": "2022-07-21T08:10:15.560Z",
+  "devdoc": {
+    "author": "B00ste",
+    "custom:version": "0.1",
+    "kind": "dev",
+    "methods": {},
+    "title": "MultisigPermissions",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "This smart contract is responsible for the permissions for the Multisig.",
+    "version": 1
+  }
+}

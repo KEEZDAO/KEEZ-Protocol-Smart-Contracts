@@ -1,0 +1,420 @@
+{
+  "contractName": "DaoDelegatesInterface",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        }
+      ],
+      "name": "_getDelegateeOfTheDelegator",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        }
+      ],
+      "name": "_getDelegatorsArrayLength",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "_getDelegatorByIndex",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegator\",\"type\":\"address\"}],\"name\":\"_getDelegateeOfTheDelegator\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"delegatee\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegatee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"_getDelegatorByIndex\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"delegator\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegatee\",\"type\":\"address\"}],\"name\":\"_getDelegatorsArrayLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPDao/Interfaces/DaoDelegatesInterface.sol\":\"DaoDelegatesInterface\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/UPDao/Interfaces/DaoDelegatesInterface.sol\":{\"keccak256\":\"0x1aa740aa7033ae933fe78a78adfc7798cee8d1fef5ec2dfebd4c6288fa68f9c5\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://3624e6be6d3c50659c6629fd24842bb48f5c052d3fd3ffc0767a5f7635215106\",\"dweb:/ipfs/QmPpTkZ2QqnZohATnZieRd1ppsBZ4sby6Tr8NuRphNzMKW\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\ninterface DaoDelegatesInterface {\n\n  function _getDelegateeOfTheDelegator(address delegator) external view returns(address delegatee);\n  \n  function _getDelegatorsArrayLength(address delegatee) external view returns(uint256 length);\n\n  function _getDelegatorByIndex(address delegatee, uint256 index) external view returns(address delegator);\n  \n}",
+  "sourcePath": "/home/b00ste/Projects/universal-profile-governance/contracts/UPDao/Interfaces/DaoDelegatesInterface.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/UPDao/Interfaces/DaoDelegatesInterface.sol",
+    "exportedSymbols": {
+      "DaoDelegatesInterface": [
+        8126
+      ]
+    },
+    "id": 8127,
+    "license": "CC0-1.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8102,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:23:46"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "DaoDelegatesInterface",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 8126,
+        "linearizedBaseContracts": [
+          8126
+        ],
+        "name": "DaoDelegatesInterface",
+        "nameLocation": "72:21:46",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "1b311a4b",
+            "id": 8109,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDelegateeOfTheDelegator",
+            "nameLocation": "108:27:46",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8105,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8104,
+                  "mutability": "mutable",
+                  "name": "delegator",
+                  "nameLocation": "144:9:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8109,
+                  "src": "136:17:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8103,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "136:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "135:19:46"
+            },
+            "returnParameters": {
+              "id": 8108,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8107,
+                  "mutability": "mutable",
+                  "name": "delegatee",
+                  "nameLocation": "185:9:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8109,
+                  "src": "177:17:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8106,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "177:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "176:19:46"
+            },
+            "scope": 8126,
+            "src": "99:97:46",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "98f35174",
+            "id": 8116,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDelegatorsArrayLength",
+            "nameLocation": "211:25:46",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8112,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8111,
+                  "mutability": "mutable",
+                  "name": "delegatee",
+                  "nameLocation": "245:9:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8116,
+                  "src": "237:17:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8110,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "237:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "236:19:46"
+            },
+            "returnParameters": {
+              "id": 8115,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8114,
+                  "mutability": "mutable",
+                  "name": "length",
+                  "nameLocation": "286:6:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8116,
+                  "src": "278:14:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8113,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "278:7:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "277:16:46"
+            },
+            "scope": 8126,
+            "src": "202:92:46",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "bae744a5",
+            "id": 8125,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDelegatorByIndex",
+            "nameLocation": "307:20:46",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8121,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8118,
+                  "mutability": "mutable",
+                  "name": "delegatee",
+                  "nameLocation": "336:9:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8125,
+                  "src": "328:17:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8117,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "328:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8120,
+                  "mutability": "mutable",
+                  "name": "index",
+                  "nameLocation": "355:5:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8125,
+                  "src": "347:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8119,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "347:7:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "327:34:46"
+            },
+            "returnParameters": {
+              "id": 8124,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8123,
+                  "mutability": "mutable",
+                  "name": "delegator",
+                  "nameLocation": "392:9:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8125,
+                  "src": "384:17:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8122,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "384:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "383:19:46"
+            },
+            "scope": 8126,
+            "src": "298:105:46",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 8127,
+        "src": "62:346:46",
+        "usedErrors": []
+      }
+    ],
+    "src": "37:371:46"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.15+commit.e14f2714.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.8",
+  "updatedAt": "2022-07-21T08:10:15.522Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

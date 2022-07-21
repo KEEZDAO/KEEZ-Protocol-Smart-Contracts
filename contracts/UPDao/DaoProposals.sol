@@ -4,7 +4,8 @@ pragma solidity ^0.8.0;
 
 import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 import "./Interfaces/DaoAccountMetadataInterface.sol";
-import "./DaoUtils.sol";
+import "./Utils/AccessControl.sol";
+import "./Utils/DaoUtils.sol";
 
 /**
  *
@@ -13,9 +14,9 @@ import "./DaoUtils.sol";
  *
  * @author B00ste
  * @title DaoProposals
- * @custom:version 0.91
+ * @custom:version 0.92
  */
-contract DaoProposals {
+contract DaoProposals is AccessControl {
 
   // --- GENERAL ATTRIBUTES
 
@@ -34,20 +35,19 @@ contract DaoProposals {
    */
   DaoAccountMetadataInterface private metadata;
 
-  // --- PROPOSAL ATTRIBUTES
-  
   /**
-   * @notice Initializing the Proposals smart contract.
+   * @notice Initializing the contract.
    */
-  constructor(
-    LSP0ERC725Account _DAO,
-    DaoUtils _utils,
-    address daoAddress
-  ) {
+  function init(LSP0ERC725Account _DAO, DaoUtils _utils, address daoAddress) external isNotInitialized() {
+    require(!initialized, "The contract is already initialized.");
     DAO = _DAO;
     utils = _utils;
-    metadata = DaoAccountMetadataInterface(daoAddress); 
+    initAccessControl(_utils, daoAddress);
+    metadata = DaoAccountMetadataInterface(daoAddress);
+    initialized = true;
   }
+
+  // --- ATTRIBUTES
 
   /**
    * @notice Proposals array key.
@@ -57,65 +57,26 @@ contract DaoProposals {
   /**
    * @notice Proposal attribute key.
    */  
-  bytes20[9] internal proposalAttributeKeys = [
+  bytes20[9] private proposalAttributeKeys = [
     bytes20(keccak256("Title")),
     bytes20(keccak256("Description")),
     bytes20(keccak256("CreationTimestamp")),
     bytes20(keccak256("VotingTimestamp")),
-    bytes20(keccak256("EndTimestamp")),
+    bytes20(keccak256("EndTimestamp")), //todo add ending delay.
     bytes20(keccak256("Targets[]")),
     bytes20(keccak256("Datas[]")),
     bytes20(keccak256("AgainstVotes")),
     bytes20(keccak256("ProVotes"))
   ];
 
-  // --- MODIFIERS
-
-  /**
-   * @notice Verifying if the voting delay has passed. 
-   */
-  modifier votingDelayPassed(bytes10 proposalSignature) {
-    require(
-      metadata._getDaoVotingDelay() + uint256(bytes32(_getAttributeValue(proposalSignature, proposalAttributeKeys[2]))) < block.timestamp,
-      "The voting delay is not yeat over."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifying if the voting period has passed. 
-   */
-  modifier votingPeriodPassed(bytes10 proposalSignature) {
-    require(
-      metadata._getDaoVotingPeriod() + uint256(bytes32(_getAttributeValue(proposalSignature, proposalAttributeKeys[3]))) < block.timestamp,
-      "The voting delay is not yet over."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifying if the voting period is still on.
-   */
-  modifier votingPeriodIsOn(bytes10 proposalSignature) {
-    require(
-      metadata._getDaoVotingPeriod() + uint256(bytes32(_getAttributeValue(proposalSignature, proposalAttributeKeys[3]))) > block.timestamp,
-      "Voting period is already over."
-    );
-    _;
-  }
-
-  /**
-   * @notice Verifying if the user didn't vote.
-   */
-  modifier didNotVote(address universalProfileAddress, bytes10 proposalSignature) {
-    require(
-      !_getVotedStatus(universalProfileAddress, proposalSignature),
-      "User did already vote."
-    );
-    _;
-  }
-
   // --- GETTERS & SETTERS
+
+  /**
+   * @notice Get proposal attribute key.
+   */
+  function _getProposalAttributeKeyByIndex(uint8 index) external view returns(bytes20 key) {
+    key = proposalAttributeKeys[index];
+  }
 
   /**
    * @notice Get proposal signature.
@@ -137,7 +98,7 @@ contract DaoProposals {
   /**
    * @notice Set the proposals array lenngth.
    */
-  function _setProposalsArrayLength(uint256 length) internal {
+  function _setProposalsArrayLength(uint256 length) external isDao(msg.sender) isInitialized() {
     bytes memory newLength = bytes.concat(bytes32(length));
     DAO.setData(proposalsArrayKey, newLength);
   }
@@ -156,7 +117,7 @@ contract DaoProposals {
   /**
    * @notice Set Proposal by index.
    */
-  function _setProposalSignatureByIndex(uint256 index, bytes10 _proposalSignature) internal {
+  function _setProposalSignatureByIndex(uint256 index, bytes10 _proposalSignature) external isDao(msg.sender) isInitialized() {
     bytes16[2] memory daoProposalsArrayKeyHalfs = utils._bytes32ToTwoHalfs(proposalsArrayKey);
     bytes32 proposalKey = bytes32(bytes.concat(
       daoProposalsArrayKeyHalfs[0], bytes16(uint128(index))
@@ -168,7 +129,7 @@ contract DaoProposals {
   /**
    * @notice Get the key for a proposal attribute.
    */
-  function _getAttributeKey(bytes10 proposalSignature, bytes20 proposalAttributeKey) internal pure returns(bytes32 key) {
+  function _getAttributeKey(bytes10 proposalSignature, bytes20 proposalAttributeKey) public pure returns(bytes32 key) {
     key = bytes32(bytes.concat(
       proposalSignature,
       bytes2(0),
@@ -187,7 +148,7 @@ contract DaoProposals {
   /**
    * @notice Set attribute value.
    */
-  function _setAttributeValue(bytes10 proposalSignature, bytes20 proposalAttributeKey, bytes memory value) internal {
+  function _setAttributeValue(bytes10 proposalSignature, bytes20 proposalAttributeKey, bytes memory value) external isDao(msg.sender) isInitialized() {
     bytes32 key = _getAttributeKey(proposalSignature, proposalAttributeKey);
     DAO.setData(key, value);
   }
@@ -216,7 +177,7 @@ contract DaoProposals {
   /**
    * @notice Set the targets and datas for execution of a proposal.
    */
-  function _setTargetsAndDatas(bytes10 proposalSignature, address[] memory targets, bytes[] memory datas) internal {
+  function _setTargetsAndDatas(bytes10 proposalSignature, address[] memory targets, bytes[] memory datas) external isDao(msg.sender) isInitialized() {
     bytes32 targetsKey = _getAttributeKey(proposalSignature, proposalAttributeKeys[5]);
     bytes32 datasKey = _getAttributeKey(proposalSignature, proposalAttributeKeys[6]);
     uint256 arrayLength = targets.length;
@@ -258,7 +219,7 @@ contract DaoProposals {
   /**
    * @notice Set voted status of a Universal Profile for a proposal.
    */
-  function _setVotedStatus(address universalProfileAddress, bytes10 proposalSignature) internal {
+  function _setVotedStatus(address universalProfileAddress, bytes10 proposalSignature) external isDao(msg.sender) isInitialized() {
     bytes32 key = bytes32(bytes.concat(
       bytes10(proposalSignature),
       bytes2(0),
