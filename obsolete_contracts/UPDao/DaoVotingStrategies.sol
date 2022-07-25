@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import "./LSP0ERC725Account.sol";
 import "./Interfaces/DaoAccountMetadataInterface.sol";
 import "./Interfaces/DaoProposalsInterface.sol";
 

@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import "./LSP0ERC725Account.sol";
+import "./LSP6KeyManager.sol";
 import "./Interfaces/DaoPermissionsInterface.sol";
 import "./Utils/AccessControl.sol";
 import "./Utils/DaoUtils.sol";
@@ -23,11 +24,17 @@ contract DaoAccountMetadata is AccessControl {
   LSP0ERC725Account private DAO;
 
   /**
+   * @notice Initialize the Key Manager of the DAO.
+   */
+  LSP6KeyManager private KEY_MANAGER;
+
+  /**
    * @notice Initializing the contract.
    */
-  function init(LSP0ERC725Account _DAO, DaoUtils _utils, address daoAddress) external isNotInitialized() {
+  function init(LSP0ERC725Account _DAO, LSP6KeyManager _KEY_MANAGER, DaoUtils _utils, address daoAddress) external isNotInitialized() {
     require(!initialized, "The contract is already initialized.");
     DAO = _DAO;
+    KEY_MANAGER = _KEY_MANAGER;
     initAccessControl(_utils, daoAddress);
     initialized = true;
   }
@@ -77,7 +84,7 @@ contract DaoAccountMetadata is AccessControl {
    * @notice Set the name of the DAO.
    */
   function _setDaoName(string memory name) external isDao(msg.sender) isInitialized() {
-    DAO.setData(nameKey, bytes(name));
+    KEY_MANAGER.execute(abi.encodeWithSignature("setData(bytes32,bytes)", nameKey, bytes(name)));
   }
 
   /**
@@ -91,7 +98,7 @@ contract DaoAccountMetadata is AccessControl {
    * @notice Set the description of the DAO.
    */
   function _setDaoDescription(string memory description) external isDao(msg.sender) isInitialized() {
-    DAO.setData(descriptionKey, bytes(description));
+    KEY_MANAGER.execute(abi.encodeWithSignature("setData(bytes32,bytes)", descriptionKey, bytes(description)));
   }
 
   /**
@@ -105,7 +112,7 @@ contract DaoAccountMetadata is AccessControl {
    * @notice Set the majority of the DAO.
    */
   function _setDaoMajority(uint8 majority) external isDao(msg.sender) isInitialized() {
-    DAO.setData(majorityKey, bytes.concat(bytes1(majority)));
+    KEY_MANAGER.execute(abi.encodeWithSignature("setData(bytes32,bytes)", majorityKey, bytes.concat(bytes1(majority))));
   }
 
   /**
@@ -119,7 +126,7 @@ contract DaoAccountMetadata is AccessControl {
    * @notice Set the participation rate of the DAO.
    */
   function _setDaoParticipationRate(uint8 participationRate) external isDao(msg.sender) isInitialized() {
-    DAO.setData(participationRateKey, bytes.concat(bytes1(participationRate)));
+    KEY_MANAGER.execute(abi.encodeWithSignature("setData(bytes32,bytes)", participationRateKey, bytes.concat(bytes1(participationRate))));
   }
 
   /**
@@ -133,7 +140,7 @@ contract DaoAccountMetadata is AccessControl {
    * @notice Set the voting delay of the DAO.
    */
   function _setDaoVotingDelay(uint256 votingDelay) external isDao(msg.sender) isInitialized() {
-    DAO.setData(votingDelayKey, bytes.concat(bytes32(votingDelay)));
+    KEY_MANAGER.execute(abi.encodeWithSignature("setData(bytes32,bytes)", votingDelayKey, bytes.concat(bytes32(votingDelay))));
   }
 
   /**
@@ -147,7 +154,7 @@ contract DaoAccountMetadata is AccessControl {
    * @notice Set the voting period of the DAO.
    */
   function _setDaoVotingPeriod(uint256 votingPeriod) external isDao(msg.sender) isInitialized() {
-    DAO.setData(votingPeriodKey, bytes.concat(bytes32(votingPeriod)));
+    KEY_MANAGER.execute(abi.encodeWithSignature("setData(bytes32,bytes)", votingPeriodKey, bytes.concat(bytes32(votingPeriod))));
   }
 
 }

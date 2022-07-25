@@ -1,6 +1,6 @@
 [
   {
-    "metadataSchemas": [
+    "daoMetadataSchemas": [
       {
         "name": "Name",
         "key": "0x55e49609591f684ecf6f2909c9e20c2439b990887b9c3fe108b154c9077d85cf",
@@ -46,7 +46,7 @@
     ]
   },
   {
-    "permissionsSchemas": [
+    "daoPermissionsSchemas": [
       {
         "name": "DAOPermissionsAddresses[]",
         "key": "0x72ba3778f5d93e8643176651d8174361d2ba28345f5eaa8b6a10f65dbfcf7c91",
@@ -64,7 +64,7 @@
     ]
   },
   {
-    "delegateSchemas": [
+    "daoDelegateSchemas": [
       {
         "name": "Delegatee:<address>",
         "key": "0xe9506e3d2587fc04e3280000<address>",
@@ -75,14 +75,14 @@
       {
         "name": "VotesDelegatedArray[]:Delegatee:<address>",
         "key": "0x321d588394b2e9506e3d0000<address>",
-        "keyType": "Array",
+        "keyType": "MappingWithGrouping",
         "valueType": "address",
         "valueContent": "Address"
       }
     ]
   },
   {
-    "proposalsSchemas": [
+    "daoProposalsSchemas": [
       {
         "name": "<creationTimestamp>:<title>:Title",
         "key": "<creationTimestamp><title>5469746c65000000000000000000000000000000",
@@ -121,14 +121,14 @@
       {
         "name": "<creationTimestamp>:<title>:Targets[]",
         "key": "<creationTimestamp><title>546172676574735b5d0000000000000000000000",
-        "keyType": "Array",
+        "keyType": "MappingWithGrouping",
         "valueType": "uint256[]",
         "valueContent": "Uint256"
       },
       {
         "name": "<creationTimestamp>:<title>:Datas[]",
         "key": "<creationTimestamp><title>44617461735b5d00000000000000000000000000",
-        "keyType": "Array",
+        "keyType": "MappingWithGrouping",
         "valueType": "uint256[]",
         "valueContent": "Uint256"
       },
@@ -149,7 +149,7 @@
     ]
   },
   {
-    "participationSchemas": [
+    "daoParticipationSchemas": [
       {
         "name": "ArrayOfDaos[]",
         "key": "0x41727261794f6644616f735b5d00000000000000000000000000000000000000",
@@ -160,7 +160,7 @@
       {
         "name": "UPControllersForDaoArray[]:<daoAddress>",
         "key": "0x5550436f6e74726f6c6c<address>",
-        "keyType": "Array[]",
+        "keyType": "MappingWithGrouping",
         "valueType": "address[]",
         "valueContent": "Address"
       },

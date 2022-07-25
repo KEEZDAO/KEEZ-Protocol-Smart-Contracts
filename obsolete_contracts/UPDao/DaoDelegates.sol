@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import "./LSP0ERC725Account.sol";
 import "./Interfaces/DaoPermissionsInterface.sol";
 import "./Utils/AccessControl.sol";
 import "./Utils/DaoUtils.sol";
@@ -17,7 +17,7 @@ contract DaoDelegates is AccessControl {
   /**
    * @notice Instance of the DAO key manager.
    */
-  LSP0ERC725Account private DAO;
+  address private UNIVERSAL_PROFILE;
 
   /**
    * @notice Instance for the utils of a Universal Profile DAO.
@@ -32,9 +32,9 @@ contract DaoDelegates is AccessControl {
   /**
    * @notice Initializing the contract.
    */
-  function init(LSP0ERC725Account _DAO, DaoUtils _utils, address daoAddress) external isNotInitialized() {
+  function init(address _UNIVERSAL_PROFILE, DaoUtils _utils, address daoAddress) external isNotInitialized() {
     require(!initialized, "The contract is already initialized.");
-    DAO = _DAO;
+    UNIVERSAL_PROFILE = _UNIVERSAL_PROFILE;
     utils = _utils;
     initAccessControl(_utils, daoAddress);
     permissions = DaoPermissionsInterface(daoAddress);
@@ -54,7 +54,7 @@ contract DaoDelegates is AccessControl {
       bytes2(0),
       bytes20(delegator)
     ));
-    delegatee = address(bytes20(DAO.getData(delegateeOfTheDelegatorKey)));
+    delegatee = address(bytes20(LSP0ERC725Account(UNIVERSAL_PROFILE).getData(delegateeOfTheDelegatorKey)));
   }
 
   /**
@@ -70,7 +70,7 @@ contract DaoDelegates is AccessControl {
       bytes20(delegator)
     ));
     bytes memory delegateeOfTheDelegatorValue = bytes.concat(bytes20(delegatee)); 
-    DAO.setData(delegateeOfTheDelegatorKey, delegateeOfTheDelegatorValue);
+    LSP0ERC725Account(UNIVERSAL_PROFILE).setData(delegateeOfTheDelegatorKey, delegateeOfTheDelegatorValue);
   }
 
   /**
@@ -79,7 +79,7 @@ contract DaoDelegates is AccessControl {
    * @param delegatee Address of the delegatee.
    */
   function _getDelegatorsArrayLength(address delegatee) public view returns(uint256 length) {
-    length = uint256(bytes32(DAO.getData(      
+    length = uint256(bytes32(UNIVERSAL_PROFILE.getData(      
       bytes32(bytes.concat(
         bytes6(keccak256("VotesDelegatedArray[]")),
         bytes4(keccak256("Delegatee")),
@@ -103,7 +103,7 @@ contract DaoDelegates is AccessControl {
       bytes20(delegatee)
     ));
     bytes memory newLength = bytes.concat(bytes32(length));
-    DAO.setData(delegateesArrayOfDeleggatorsKey, newLength);
+    LSP0ERC725Account(UNIVERSAL_PROFILE).setData(delegateesArrayOfDeleggatorsKey, newLength);
   }
 
   /**
@@ -124,7 +124,7 @@ contract DaoDelegates is AccessControl {
       )[0],
       bytes16(uint128(index))
     ));
-    delegator = address(bytes20(DAO.getData(delegateeAndIndexKey)));
+    delegator = address(bytes20(LSP0ERC725Account(UNIVERSAL_PROFILE).getData(delegateeAndIndexKey)));
   }
 
   /**
@@ -147,7 +147,7 @@ contract DaoDelegates is AccessControl {
       bytes16(uint128(index))
     ));
     bytes memory delegateeAndIndexValue = bytes.concat(bytes20(delegator));
-    DAO.setData(delegateeAndIndexKey, delegateeAndIndexValue);
+    LSP0ERC725Account(UNIVERSAL_PROFILE).setData(delegateeAndIndexKey, delegateeAndIndexValue);
   }
   
 }

@@ -37,6 +37,19 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "name": "_setDaoAddressesArrayLength",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "index",
           "type": "uint256"
         }
@@ -50,6 +63,24 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_daoAddress",
+          "type": "address"
+        }
+      ],
+      "name": "_setDaoAddressByIndex",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -70,9 +101,51 @@
       ],
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "daoAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "index",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "permissionAdded",
+          "type": "bool"
+        }
+      ],
+      "name": "_setAddressDaoPermission",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "universalProfileAddress",
+          "type": "address"
+        }
+      ],
+      "name": "checkUser",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"daoAddress\",\"type\":\"address\"}],\"name\":\"_getAddressDaoPermission\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"addressPermssions\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"_getDaoAddressByIndex\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"daoAddress\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoAddressesArrayLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"index\",\"type\":\"uint8\"}],\"name\":\"_getPermissionsByIndex\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"permission\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol\":\"DaoPermissionsInterface\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol\":{\"keccak256\":\"0xbad2e0cb0ab600a0852a0389b5995b7bc7ac6e9c4cba5df9ec1b62c23471e486\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://bb6a50ad8f7a61243aba2126263dcbccb5527ec98b66683b30dc11c080ddcaf2\",\"dweb:/ipfs/Qmbs6cFX6qFemB2fRC4G3FeMLB4sqZzEQiU23jam4QQB1M\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"daoAddress\",\"type\":\"address\"}],\"name\":\"_getAddressDaoPermission\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"addressPermssions\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"_getDaoAddressByIndex\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"daoAddress\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoAddressesArrayLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"index\",\"type\":\"uint8\"}],\"name\":\"_getPermissionsByIndex\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"permission\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"daoAddress\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"index\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"permissionAdded\",\"type\":\"bool\"}],\"name\":\"_setAddressDaoPermission\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_daoAddress\",\"type\":\"address\"}],\"name\":\"_setDaoAddressByIndex\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"_setDaoAddressesArrayLength\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"universalProfileAddress\",\"type\":\"address\"}],\"name\":\"checkUser\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol\":\"DaoPermissionsInterface\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol\":{\"keccak256\":\"0x05012e40de57ac3fb1d972f0b74b251aeb0a0f847f86f1cb6821fe49ab0a4e4a\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://481355c78e2cbd671f9b5843f3b8949fd53a3b53c0d467ca1dcf952ee19cde22\",\"dweb:/ipfs/Qma8pkqWpm5CPr6dLCB3TGPftSxv54hBZLBYQiqiXugEUR\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -80,21 +153,21 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\ninterface DaoPermissionsInterface {\n\n  function _getPermissionsByIndex(uint8 index) external view returns(bytes32 permission);\n\n  function _getDaoAddressesArrayLength() external view returns(uint256 length);\n\n  function _getDaoAddressByIndex(uint256 index) external view returns(bytes memory daoAddress);\n\n  function _getAddressDaoPermission(address daoAddress) external view returns(bytes memory addressPermssions);\n\n}",
+  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\ninterface DaoPermissionsInterface {\n\n  function _getPermissionsByIndex(uint8 index) external view returns(bytes32 permission);\n\n  function _getDaoAddressesArrayLength() external view returns(uint256 length);\n  function _setDaoAddressesArrayLength(uint256 length) external;\n\n  function _getDaoAddressByIndex(uint256 index) external view returns(bytes memory daoAddress);\n  function _setDaoAddressByIndex(uint256 index, address _daoAddress) external;\n\n  function _getAddressDaoPermission(address daoAddress) external view returns(bytes memory addressPermssions);\n  function _setAddressDaoPermission(address daoAddress, uint8 index, bool permissionAdded) external;\n  \n  function checkUser(address universalProfileAddress) external view returns(bool);\n\n}",
   "sourcePath": "/home/b00ste/Projects/universal-profile-governance/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol",
   "ast": {
     "absolutePath": "project:/contracts/UPDao/Interfaces/DaoPermissionsInterface.sol",
     "exportedSymbols": {
       "DaoPermissionsInterface": [
-        8155
+        6242
       ]
     },
-    "id": 8156,
+    "id": 6243,
     "license": "CC0-1.0",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8128,
+        "id": 6187,
         "literals": [
           "solidity",
           "^",
@@ -102,7 +175,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "37:23:47"
+        "src": "37:23:33"
       },
       {
         "abstract": false,
@@ -111,36 +184,36 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 8155,
+        "id": 6242,
         "linearizedBaseContracts": [
-          8155
+          6242
         ],
         "name": "DaoPermissionsInterface",
-        "nameLocation": "72:23:47",
+        "nameLocation": "72:23:33",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "functionSelector": "d6d09cfb",
-            "id": 8135,
+            "id": 6194,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getPermissionsByIndex",
-            "nameLocation": "110:22:47",
+            "nameLocation": "110:22:33",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8131,
+              "id": 6190,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8130,
+                  "id": 6189,
                   "mutability": "mutable",
                   "name": "index",
-                  "nameLocation": "139:5:47",
+                  "nameLocation": "139:5:33",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8135,
-                  "src": "133:11:47",
+                  "scope": 6194,
+                  "src": "133:11:33",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -148,10 +221,10 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 8129,
+                    "id": 6188,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "133:5:47",
+                    "src": "133:5:33",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -160,21 +233,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "132:13:47"
+              "src": "132:13:33"
             },
             "returnParameters": {
-              "id": 8134,
+              "id": 6193,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8133,
+                  "id": 6192,
                   "mutability": "mutable",
                   "name": "permission",
-                  "nameLocation": "176:10:47",
+                  "nameLocation": "176:10:33",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8135,
-                  "src": "168:18:47",
+                  "scope": 6194,
+                  "src": "168:18:33",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -182,10 +255,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 8132,
+                    "id": 6191,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "168:7:47",
+                    "src": "168:7:33",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -194,42 +267,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "167:20:47"
+              "src": "167:20:33"
             },
-            "scope": 8155,
-            "src": "101:87:47",
+            "scope": 6242,
+            "src": "101:87:33",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "6405184e",
-            "id": 8140,
+            "id": 6199,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getDaoAddressesArrayLength",
-            "nameLocation": "201:27:47",
+            "nameLocation": "201:27:33",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8136,
+              "id": 6195,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "228:2:47"
+              "src": "228:2:33"
             },
             "returnParameters": {
-              "id": 8139,
+              "id": 6198,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8138,
+                  "id": 6197,
                   "mutability": "mutable",
                   "name": "length",
-                  "nameLocation": "261:6:47",
+                  "nameLocation": "261:6:33",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8140,
-                  "src": "253:14:47",
+                  "scope": 6199,
+                  "src": "253:14:33",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -237,10 +310,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8137,
+                    "id": 6196,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "253:7:47",
+                    "src": "253:7:33",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -249,36 +322,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "252:16:47"
+              "src": "252:16:33"
             },
-            "scope": 8155,
-            "src": "192:77:47",
+            "scope": 6242,
+            "src": "192:77:33",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "functionSelector": "7b300866",
-            "id": 8147,
+            "functionSelector": "348289c6",
+            "id": 6204,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "_getDaoAddressByIndex",
-            "nameLocation": "282:21:47",
+            "name": "_setDaoAddressesArrayLength",
+            "nameLocation": "281:27:33",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8143,
+              "id": 6202,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8142,
+                  "id": 6201,
                   "mutability": "mutable",
-                  "name": "index",
-                  "nameLocation": "312:5:47",
+                  "name": "length",
+                  "nameLocation": "317:6:33",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8147,
-                  "src": "304:13:47",
+                  "scope": 6204,
+                  "src": "309:14:33",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -286,10 +359,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8141,
+                    "id": 6200,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "304:7:47",
+                    "src": "309:7:33",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -298,21 +371,76 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "303:15:47"
+              "src": "308:16:33"
             },
             "returnParameters": {
-              "id": 8146,
+              "id": 6203,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "333:0:33"
+            },
+            "scope": 6242,
+            "src": "272:62:33",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "7b300866",
+            "id": 6211,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDaoAddressByIndex",
+            "nameLocation": "347:21:33",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6207,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8145,
+                  "id": 6206,
+                  "mutability": "mutable",
+                  "name": "index",
+                  "nameLocation": "377:5:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6211,
+                  "src": "369:13:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6205,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "369:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "368:15:33"
+            },
+            "returnParameters": {
+              "id": 6210,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6209,
                   "mutability": "mutable",
                   "name": "daoAddress",
-                  "nameLocation": "354:10:47",
+                  "nameLocation": "419:10:33",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8147,
-                  "src": "341:23:47",
+                  "scope": 6211,
+                  "src": "406:23:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -320,10 +448,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 8144,
+                    "id": 6208,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "341:5:47",
+                    "src": "406:5:33",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -332,36 +460,63 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "340:25:47"
+              "src": "405:25:33"
             },
-            "scope": 8155,
-            "src": "273:93:47",
+            "scope": 6242,
+            "src": "338:93:33",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "functionSelector": "1da0d49f",
-            "id": 8154,
+            "functionSelector": "77a14c35",
+            "id": 6218,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "_getAddressDaoPermission",
-            "nameLocation": "379:24:47",
+            "name": "_setDaoAddressByIndex",
+            "nameLocation": "443:21:33",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8150,
+              "id": 6216,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8149,
+                  "id": 6213,
                   "mutability": "mutable",
-                  "name": "daoAddress",
-                  "nameLocation": "412:10:47",
+                  "name": "index",
+                  "nameLocation": "473:5:33",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8154,
-                  "src": "404:18:47",
+                  "scope": 6218,
+                  "src": "465:13:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6212,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "465:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6215,
+                  "mutability": "mutable",
+                  "name": "_daoAddress",
+                  "nameLocation": "488:11:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6218,
+                  "src": "480:19:33",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -369,10 +524,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 8148,
+                    "id": 6214,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "404:7:47",
+                    "src": "480:7:33",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -382,21 +537,77 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "403:20:47"
+              "src": "464:36:33"
             },
             "returnParameters": {
-              "id": 8153,
+              "id": 6217,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "509:0:33"
+            },
+            "scope": 6242,
+            "src": "434:76:33",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "1da0d49f",
+            "id": 6225,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getAddressDaoPermission",
+            "nameLocation": "523:24:33",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6221,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8152,
+                  "id": 6220,
+                  "mutability": "mutable",
+                  "name": "daoAddress",
+                  "nameLocation": "556:10:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6225,
+                  "src": "548:18:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6219,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "548:7:33",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "547:20:33"
+            },
+            "returnParameters": {
+              "id": 6224,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6223,
                   "mutability": "mutable",
                   "name": "addressPermssions",
-                  "nameLocation": "459:17:47",
+                  "nameLocation": "603:17:33",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8154,
-                  "src": "446:30:47",
+                  "scope": 6225,
+                  "src": "590:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -404,10 +615,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 8151,
+                    "id": 6222,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "446:5:47",
+                    "src": "590:5:33",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -416,21 +627,215 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "445:32:47"
+              "src": "589:32:33"
             },
-            "scope": 8155,
-            "src": "370:108:47",
+            "scope": 6242,
+            "src": "514:108:33",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "21298b42",
+            "id": 6234,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setAddressDaoPermission",
+            "nameLocation": "634:24:33",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6232,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6227,
+                  "mutability": "mutable",
+                  "name": "daoAddress",
+                  "nameLocation": "667:10:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6234,
+                  "src": "659:18:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6226,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "659:7:33",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6229,
+                  "mutability": "mutable",
+                  "name": "index",
+                  "nameLocation": "685:5:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6234,
+                  "src": "679:11:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 6228,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "679:5:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6231,
+                  "mutability": "mutable",
+                  "name": "permissionAdded",
+                  "nameLocation": "697:15:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6234,
+                  "src": "692:20:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6230,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "692:4:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "658:55:33"
+            },
+            "returnParameters": {
+              "id": 6233,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "722:0:33"
+            },
+            "scope": 6242,
+            "src": "625:98:33",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "1e9d48cf",
+            "id": 6241,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "checkUser",
+            "nameLocation": "738:9:33",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6237,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6236,
+                  "mutability": "mutable",
+                  "name": "universalProfileAddress",
+                  "nameLocation": "756:23:33",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6241,
+                  "src": "748:31:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6235,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "748:7:33",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "747:33:33"
+            },
+            "returnParameters": {
+              "id": 6240,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6239,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6241,
+                  "src": "803:4:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6238,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "803:4:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "802:6:33"
+            },
+            "scope": 6242,
+            "src": "729:80:33",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 8156,
-        "src": "62:419:47",
+        "scope": 6243,
+        "src": "62:750:33",
         "usedErrors": []
       }
     ],
-    "src": "37:444:47"
+    "src": "37:775:33"
   },
   "compiler": {
     "name": "solc",
@@ -438,7 +843,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:15.533Z",
+  "updatedAt": "2022-07-21T22:30:42.382Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

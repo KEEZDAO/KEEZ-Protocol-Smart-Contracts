@@ -15,6 +15,19 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "name": "_setDaoName",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "_getDaoDescription",
       "outputs": [
@@ -28,16 +41,42 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        }
+      ],
+      "name": "_setDaoDescription",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
-      "name": "_getDaoQuorum",
+      "name": "_getDaoMajority",
       "outputs": [
         {
           "internalType": "uint8",
-          "name": "quorum",
+          "name": "majority",
           "type": "uint8"
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "majority",
+          "type": "uint8"
+        }
+      ],
+      "name": "_setDaoMajority",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -54,6 +93,19 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "participationRate",
+          "type": "uint8"
+        }
+      ],
+      "name": "_setDaoParticipationRate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "_getDaoVotingDelay",
       "outputs": [
@@ -64,6 +116,19 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "votingDelay",
+          "type": "uint256"
+        }
+      ],
+      "name": "_setDaoVotingDelay",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -78,9 +143,22 @@
       ],
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "votingPeriod",
+          "type": "uint256"
+        }
+      ],
+      "name": "_setDaoVotingPeriod",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"_getDaoDescription\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoParticipationRate\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"participationRate\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoQuorum\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"quorum\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoVotingDelay\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"votingDelay\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoVotingPeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"votingPeriod\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPDao/Interfaces/DaoAccountMetadataInterface.sol\":\"DaoAccountMetadataInterface\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/UPDao/Interfaces/DaoAccountMetadataInterface.sol\":{\"keccak256\":\"0x7624784cf1914ba51ce66839557499ed8a604afa2c6a3b9789d752d35e687a24\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://407bef45a030988df6b404557939b367cf3f1b00a3b12c85957334a637a074b7\",\"dweb:/ipfs/QmUumP1cbdXvHwHcPwetkTVRRvj4br39xFpTFQ8GdUr4Nm\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"_getDaoDescription\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoMajority\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"majority\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoParticipationRate\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"participationRate\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoVotingDelay\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"votingDelay\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_getDaoVotingPeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"votingPeriod\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"}],\"name\":\"_setDaoDescription\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"majority\",\"type\":\"uint8\"}],\"name\":\"_setDaoMajority\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"name\":\"_setDaoName\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"participationRate\",\"type\":\"uint8\"}],\"name\":\"_setDaoParticipationRate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"votingDelay\",\"type\":\"uint256\"}],\"name\":\"_setDaoVotingDelay\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"votingPeriod\",\"type\":\"uint256\"}],\"name\":\"_setDaoVotingPeriod\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/UPDao/Interfaces/DaoAccountMetadataInterface.sol\":\"DaoAccountMetadataInterface\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/UPDao/Interfaces/DaoAccountMetadataInterface.sol\":{\"keccak256\":\"0xbd45725595e24c0708b4271e07a5dacc9aa42e5e91cd4d7fc5e89b7f2481a963\",\"license\":\"CC0-1.0\",\"urls\":[\"bzz-raw://fd736f7e560273df9cf8e279d7e11f7421f4eb5be6c72007ca44b1df76559d7f\",\"dweb:/ipfs/QmexMYGMnHzBE7CzX8gUBvAvjuUdo8psr1aT44DjBM2Hip\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -88,21 +166,21 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\ninterface DaoAccountMetadataInterface {\n  \n  function _getDaoName() external view returns(string memory name);\n\n  function _getDaoDescription() external view returns(string memory description);\n\n  function _getDaoQuorum() external view returns(uint8 quorum);\n\n  function _getDaoParticipationRate() external view returns(uint8 participationRate);\n\n  function _getDaoVotingDelay() external view returns(uint256 votingDelay);\n\n  function _getDaoVotingPeriod() external view returns(uint256 votingPeriod);\n\n}",
+  "source": "// SPDX-License-Identifier: CC0-1.0\n\npragma solidity ^0.8.0;\n\ninterface DaoAccountMetadataInterface {\n\n  function _getDaoName() external view returns(string memory name);\n  function _setDaoName(string memory name) external;\n  \n  function _getDaoDescription() external view returns(string memory description);\n  function _setDaoDescription(string memory description) external;\n\n  function _getDaoMajority() external view returns(uint8 majority);\n  function _setDaoMajority(uint8 majority) external;\n\n  function _getDaoParticipationRate() external view returns(uint8 participationRate);\n  function _setDaoParticipationRate(uint8 participationRate) external;\n\n  function _getDaoVotingDelay() external view returns(uint256 votingDelay);\n  function _setDaoVotingDelay(uint256 votingDelay) external;\n\n  function _getDaoVotingPeriod() external view returns(uint256 votingPeriod);\n  function _setDaoVotingPeriod(uint256 votingPeriod) external;\n\n}",
   "sourcePath": "/home/b00ste/Projects/universal-profile-governance/contracts/UPDao/Interfaces/DaoAccountMetadataInterface.sol",
   "ast": {
     "absolutePath": "project:/contracts/UPDao/Interfaces/DaoAccountMetadataInterface.sol",
     "exportedSymbols": {
       "DaoAccountMetadataInterface": [
-        8100
+        6036
       ]
     },
-    "id": 8101,
+    "id": 6037,
     "license": "CC0-1.0",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8069,
+        "id": 5975,
         "literals": [
           "solidity",
           "^",
@@ -110,7 +188,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "37:23:45"
+        "src": "37:23:30"
       },
       {
         "abstract": false,
@@ -119,42 +197,42 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 8100,
+        "id": 6036,
         "linearizedBaseContracts": [
-          8100
+          6036
         ],
         "name": "DaoAccountMetadataInterface",
-        "nameLocation": "72:27:45",
+        "nameLocation": "72:27:30",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "functionSelector": "6291ebfa",
-            "id": 8074,
+            "id": 5980,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getDaoName",
-            "nameLocation": "116:11:45",
+            "nameLocation": "114:11:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8070,
+              "id": 5976,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "127:2:45"
+              "src": "125:2:30"
             },
             "returnParameters": {
-              "id": 8073,
+              "id": 5979,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8072,
+                  "id": 5978,
                   "mutability": "mutable",
                   "name": "name",
-                  "nameLocation": "166:4:45",
+                  "nameLocation": "164:4:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8074,
-                  "src": "152:18:45",
+                  "scope": 5980,
+                  "src": "150:18:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -162,10 +240,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 8071,
+                    "id": 5977,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "152:6:45",
+                    "src": "150:6:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -174,42 +252,97 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "151:20:45"
+              "src": "149:20:30"
             },
-            "scope": 8100,
-            "src": "107:65:45",
+            "scope": 6036,
+            "src": "105:65:30",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "a31f641a",
+            "id": 5985,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setDaoName",
+            "nameLocation": "182:11:30",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5983,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5982,
+                  "mutability": "mutable",
+                  "name": "name",
+                  "nameLocation": "208:4:30",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5985,
+                  "src": "194:18:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5981,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "194:6:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "193:20:30"
+            },
+            "returnParameters": {
+              "id": 5984,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "222:0:30"
+            },
+            "scope": 6036,
+            "src": "173:50:30",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "444f81d4",
-            "id": 8079,
+            "id": 5990,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getDaoDescription",
-            "nameLocation": "185:18:45",
+            "nameLocation": "238:18:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8075,
+              "id": 5986,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "203:2:45"
+              "src": "256:2:30"
             },
             "returnParameters": {
-              "id": 8078,
+              "id": 5989,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8077,
+                  "id": 5988,
                   "mutability": "mutable",
                   "name": "description",
-                  "nameLocation": "242:11:45",
+                  "nameLocation": "295:11:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8079,
-                  "src": "228:25:45",
+                  "scope": 5990,
+                  "src": "281:25:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -217,10 +350,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 8076,
+                    "id": 5987,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "228:6:45",
+                    "src": "281:6:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -229,42 +362,97 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "227:27:45"
+              "src": "280:27:30"
             },
-            "scope": 8100,
-            "src": "176:79:45",
+            "scope": 6036,
+            "src": "229:79:30",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "functionSelector": "6df584df",
-            "id": 8084,
+            "functionSelector": "cfb58f7d",
+            "id": 5995,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "_getDaoQuorum",
-            "nameLocation": "268:13:45",
+            "name": "_setDaoDescription",
+            "nameLocation": "320:18:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8080,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "281:2:45"
-            },
-            "returnParameters": {
-              "id": 8083,
+              "id": 5993,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8082,
+                  "id": 5992,
                   "mutability": "mutable",
-                  "name": "quorum",
-                  "nameLocation": "312:6:45",
+                  "name": "description",
+                  "nameLocation": "353:11:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8084,
-                  "src": "306:12:45",
+                  "scope": 5995,
+                  "src": "339:25:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5991,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "339:6:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "338:27:30"
+            },
+            "returnParameters": {
+              "id": 5994,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "374:0:30"
+            },
+            "scope": 6036,
+            "src": "311:64:30",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "a218a205",
+            "id": 6000,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDaoMajority",
+            "nameLocation": "388:15:30",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5996,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "403:2:30"
+            },
+            "returnParameters": {
+              "id": 5999,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5998,
+                  "mutability": "mutable",
+                  "name": "majority",
+                  "nameLocation": "434:8:30",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6000,
+                  "src": "428:14:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -272,10 +460,10 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 8081,
+                    "id": 5997,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "306:5:45",
+                    "src": "428:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -284,42 +472,97 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "305:14:45"
+              "src": "427:16:30"
             },
-            "scope": 8100,
-            "src": "259:61:45",
+            "scope": 6036,
+            "src": "379:65:30",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "57c0cb57",
+            "id": 6005,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setDaoMajority",
+            "nameLocation": "456:15:30",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6003,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6002,
+                  "mutability": "mutable",
+                  "name": "majority",
+                  "nameLocation": "478:8:30",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6005,
+                  "src": "472:14:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 6001,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "472:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "471:16:30"
+            },
+            "returnParameters": {
+              "id": 6004,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "496:0:30"
+            },
+            "scope": 6036,
+            "src": "447:50:30",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "754b1528",
-            "id": 8089,
+            "id": 6010,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getDaoParticipationRate",
-            "nameLocation": "333:24:45",
+            "nameLocation": "510:24:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8085,
+              "id": 6006,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "357:2:45"
+              "src": "534:2:30"
             },
             "returnParameters": {
-              "id": 8088,
+              "id": 6009,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8087,
+                  "id": 6008,
                   "mutability": "mutable",
                   "name": "participationRate",
-                  "nameLocation": "388:17:45",
+                  "nameLocation": "565:17:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8089,
-                  "src": "382:23:45",
+                  "scope": 6010,
+                  "src": "559:23:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -327,10 +570,10 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 8086,
+                    "id": 6007,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "382:5:45",
+                    "src": "559:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -339,42 +582,97 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "381:25:45"
+              "src": "558:25:30"
             },
-            "scope": 8100,
-            "src": "324:83:45",
+            "scope": 6036,
+            "src": "501:83:30",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "0205c373",
+            "id": 6015,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setDaoParticipationRate",
+            "nameLocation": "596:24:30",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6013,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6012,
+                  "mutability": "mutable",
+                  "name": "participationRate",
+                  "nameLocation": "627:17:30",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6015,
+                  "src": "621:23:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 6011,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "621:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "620:25:30"
+            },
+            "returnParameters": {
+              "id": 6014,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "654:0:30"
+            },
+            "scope": 6036,
+            "src": "587:68:30",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "f0deb28d",
-            "id": 8094,
+            "id": 6020,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getDaoVotingDelay",
-            "nameLocation": "420:18:45",
+            "nameLocation": "668:18:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8090,
+              "id": 6016,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "438:2:45"
+              "src": "686:2:30"
             },
             "returnParameters": {
-              "id": 8093,
+              "id": 6019,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8092,
+                  "id": 6018,
                   "mutability": "mutable",
                   "name": "votingDelay",
-                  "nameLocation": "471:11:45",
+                  "nameLocation": "719:11:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8094,
-                  "src": "463:19:45",
+                  "scope": 6020,
+                  "src": "711:19:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -382,10 +680,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8091,
+                    "id": 6017,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "463:7:45",
+                    "src": "711:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -394,42 +692,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "462:21:45"
+              "src": "710:21:30"
             },
-            "scope": 8100,
-            "src": "411:73:45",
+            "scope": 6036,
+            "src": "659:73:30",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "functionSelector": "ef64d317",
-            "id": 8099,
+            "functionSelector": "024ff616",
+            "id": 6025,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "_getDaoVotingPeriod",
-            "nameLocation": "497:19:45",
+            "name": "_setDaoVotingDelay",
+            "nameLocation": "744:18:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8095,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "516:2:45"
-            },
-            "returnParameters": {
-              "id": 8098,
+              "id": 6023,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8097,
+                  "id": 6022,
                   "mutability": "mutable",
-                  "name": "votingPeriod",
-                  "nameLocation": "549:12:45",
+                  "name": "votingDelay",
+                  "nameLocation": "771:11:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8099,
-                  "src": "541:20:45",
+                  "scope": 6025,
+                  "src": "763:19:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -437,10 +729,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8096,
+                    "id": 6021,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "541:7:45",
+                    "src": "763:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -449,21 +741,137 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "540:22:45"
+              "src": "762:21:30"
             },
-            "scope": 8100,
-            "src": "488:75:45",
+            "returnParameters": {
+              "id": 6024,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "792:0:30"
+            },
+            "scope": 6036,
+            "src": "735:58:30",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "ef64d317",
+            "id": 6030,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getDaoVotingPeriod",
+            "nameLocation": "806:19:30",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6026,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "825:2:30"
+            },
+            "returnParameters": {
+              "id": 6029,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6028,
+                  "mutability": "mutable",
+                  "name": "votingPeriod",
+                  "nameLocation": "858:12:30",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6030,
+                  "src": "850:20:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6027,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "850:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "849:22:30"
+            },
+            "scope": 6036,
+            "src": "797:75:30",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "6f5e3519",
+            "id": 6035,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setDaoVotingPeriod",
+            "nameLocation": "884:19:30",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6033,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6032,
+                  "mutability": "mutable",
+                  "name": "votingPeriod",
+                  "nameLocation": "912:12:30",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6035,
+                  "src": "904:20:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6031,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "904:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "903:22:30"
+            },
+            "returnParameters": {
+              "id": 6034,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "934:0:30"
+            },
+            "scope": 6036,
+            "src": "875:60:30",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 8101,
-        "src": "62:504:45",
+        "scope": 6037,
+        "src": "62:876:30",
         "usedErrors": []
       }
     ],
-    "src": "37:529:45"
+    "src": "37:901:30"
   },
   "compiler": {
     "name": "solc",
@@ -471,7 +879,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:15.520Z",
+  "updatedAt": "2022-07-21T22:30:42.365Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},
