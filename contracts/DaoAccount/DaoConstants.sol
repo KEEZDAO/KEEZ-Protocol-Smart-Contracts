@@ -64,10 +64,10 @@ bytes32 constant _KEY_TOKENGATED = 0xa45b1e711ab5d2d7654c92da78c9148c51fb0a58b11
 
 
 // bytes10(keccak256("DelegtateTo")) + bytes2(0)
-bytes12 constant _KEY_DELEGATEVOTE = 0x000000000000000000000000;
+bytes12 constant _KEY_DELEGATEVOTE = 0x000000000000000000000000; // DelegateTo:<address> --> address
 
 // bytes10(keccak256("AddressDelegates[]")) + bytes2(0)
-bytes12 constant _KEY_ADDRESSDELEGATES_ARRAY_PREFIX = 0xc3f797d5c8ae536b82a60000; //AddressDelegates[]:<address> --> uint128 (ArrayLength)
+bytes12 constant _KEY_ADDRESSDELEGATES_ARRAY_PREFIX = 0xc3f797d5c8ae536b82a60000; // AddressDelegates[]:<address> --> uint128 (ArrayLength)
 
 // AddressDelegates[index]
 // _SPLIT_BYTES32_IN_TWO_HALFS(AddressDelegates[]:<address>) + bytes16(index) --> address
@@ -106,10 +106,10 @@ bytes22 constant _KEY_PROPOSAL_TARGETSARRAY_SUFFIX = 0x0000ba6d4933d1a0fbfd29728
 // bytes2(0) + bytes20(keccak256("DatasArray[]")) --> bytes[]
 bytes22 constant _KEY_PROPOSAL_DATASARRAY_SUFFIX = 0x0000478499bb6846f8a28632137c772be842c41b3105;
 
-// bytes2(0) + bytes20(keccak256("ProposalChoicesArray[]")) --> string[]
-bytes22 constant _KEY_PROPOSAL_PROPOSALCHOICESARRAY_SUFFIX = 0x00008141b895c75785b22c0f5986707a8c7666793227;
+// bytes2(0) + bytes20(keccak256("ProposalChoices")) --> uint8
+bytes22 constant _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX = 0x00008141b895c75785b22c0f5986707a8c7666793227;
 
-// bytes2(0) + bytes20(keccak256("MaximumChoicesPerVote")) --> uint256
+// bytes2(0) + bytes20(keccak256("MaximumChoicesPerVote")) --> uint8
 bytes22 constant _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX = 0x0000ed458cca63dcf8476211a40ad15420dcabc377f0;
 
 // ParticipantVoteKey := bytes10(ProposalSignature) + bytes2(0) + bytes20(participantAddress)

@@ -9,6 +9,8 @@ import {
   NotAuthorised
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Errors.sol";
 import {
+  _LSP6KEY_ADDRESSPERMISSIONS_ARRAY,
+  _LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX,
   _LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX,
   _PERMISSION_VOTE,
   _PERMISSION_PROPOSE,
@@ -34,7 +36,7 @@ import {
   _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX,
   _KEY_PROPOSAL_TARGETSARRAY_SUFFIX,
   _KEY_PROPOSAL_DATASARRAY_SUFFIX,
-  _KEY_PROPOSAL_PROPOSALCHOICESARRAY_SUFFIX,
+  _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX,
   _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX,
   _KEY_PARTICIPANT_VOTE,
 
@@ -50,7 +52,7 @@ import {
  *
  * @author B00ste
  * @title DaoKeyManager
- * @custom:version 0.92
+ * @custom:version 1
  */
 contract DaoKeyManager {
 
@@ -166,8 +168,8 @@ contract DaoKeyManager {
     string memory description,
     address[] memory targets,
     bytes[] memory datas,
-    bytes32[] memory choices,
-    uint8 maximumChoicesPerVote
+    uint8 choices,
+    uint8 choicesPerVote
   ) external {
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
     require(
@@ -175,18 +177,18 @@ contract DaoKeyManager {
       "targets.length must be equal to datas.length"
     );
     require(
-      choices.length <= 16 &&
-      maximumChoicesPerVote <= 16,
+      choices <= 16 &&
+      choicesPerVote <= 16,
       "You can have maximum 16 choices."
     );
 
+    uint256 arraysLength = 2 * targets.length;
     bytes10 KEY_PROPOSAL_PREFIX = _KEY_PROPOSAL_PREFIX(uint48(block.timestamp), title);
-    bytes32[] memory keys = new bytes32[](targets.length + datas.length + choices.length + 4);
-    bytes[] memory values = new bytes[](targets.length + datas.length + choices.length + 4);
+    bytes32[] memory keys = new bytes32[](arraysLength + 7);
+    bytes[] memory values = new bytes[](arraysLength + 7);
 
-    uint256 maxLength = targets.length > choices.length ? targets.length : choices.length ;
-    for (uint16 i = 0; i < maxLength; i++) {
-      if (i < targets.length) {
+    if(arraysLength > 0){
+      for (uint16 i = 0; i < targets.length; i++) {
         keys[i] = bytes32(bytes.concat(
           _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX)))[0],
           bytes16(uint128(i))
@@ -198,25 +200,24 @@ contract DaoKeyManager {
 
         values[i] = bytes.concat(bytes20(targets[i]));
         values[i + targets.length] = datas[i];
-      }
-      if (i < choices.length) {
-        keys[i + (2 * targets.length)] = bytes32(bytes.concat(
-          _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_PROPOSALCHOICESARRAY_SUFFIX)))[0],
-          bytes16(uint128(i))
-        ));
-
-        values[i + (2 * targets.length)] = bytes.concat(choices[i]);
-      }
+      } 
     }
-    keys[0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_TITLE_SUFFIX));
-    keys[0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_DESCRIPTION_SUFFIX));
-    keys[0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX));
-    keys[0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX));
 
-    values[0] = bytes(title);
-    values[0] = bytes(description);
-    values[0] = bytes.concat(bytes6(uint48(block.timestamp)));
-    values[0] = bytes.concat(bytes1(maximumChoicesPerVote));
+    keys[arraysLength + 0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX));
+    keys[arraysLength + 1] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_DATASARRAY_SUFFIX));
+    keys[arraysLength + 2] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_TITLE_SUFFIX));
+    keys[arraysLength + 3] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_DESCRIPTION_SUFFIX));
+    keys[arraysLength + 4] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX));
+    keys[arraysLength + 5] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX));
+    keys[arraysLength + 6] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX));
+
+    values[arraysLength + 0] = bytes.concat(bytes32(targets.length));
+    values[arraysLength + 1] = bytes.concat(bytes32(datas.length));
+    values[arraysLength + 2] = bytes(title);
+    values[arraysLength + 3] = bytes(description);
+    values[arraysLength + 4] = bytes.concat(bytes6(uint48(block.timestamp)));
+    values[arraysLength + 5] = bytes.concat(bytes1(choices));
+    values[arraysLength + 6] = bytes.concat(bytes1(choicesPerVote));
 
     _setData(keys, values);
   }
@@ -224,7 +225,12 @@ contract DaoKeyManager {
   /**
    * @notice Execute the calldata of the Proposal if there is one.
    */
-  function executeProposal(bytes10 proposalSignature) external {
+  function executeProposal(
+    bytes10 proposalSignature
+  )
+    external
+    returns(bool success, bytes memory res)
+  {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE, "EXECUTE");
     require(
       uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX))))
@@ -233,13 +239,109 @@ contract DaoKeyManager {
       < block.timestamp,
       "The proposal's time did not expire."
     );
-    // ToDo verify if the proposal has passed and execute the datas if necessary.
+    require(
+      uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
+        bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX))
+      ))) > 0,
+      "There are no methods to execute."
+    );
+
+    /**
+     * @dev Count all the votes by accessing the choices of all of the participants
+     * of the DAO.
+     * 1. Get the user address and verify its permissions.
+     * 2. If `user` has vote permission and did not delegate his vote
+     * we will save his number of votes as 1 and save his choices for later use.
+     * 3. We verify if the `user` has the RECIEVEDELEGATE permission and if so
+     * we will increase his number of votes by the number of votes delegated to him.
+     * 4. After we got all the needed info we can add the number of votes to the choises of the `user`
+     */  
+    uint8 nrOfChoices =  uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX)))));
+    uint256 totalUsers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY)));
+    uint256[] memory votesByChoiceIndex = new uint256[](nrOfChoices);
+    for (uint128 i = 0; i < totalUsers; i++) {
+      address user = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(
+        bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(i)))
+      )));
+      bytes32 permissions = _getPermissions(user);
+      bytes20 delegatedTo = bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(
+        bytes32(bytes.concat(_KEY_DELEGATEVOTE, bytes20(user)))
+      ));
+      if (permissions & _PERMISSION_VOTE != 0) {
+        bytes2 choices;
+        uint256 votes;
+        if (delegatedTo == bytes20(0)) {
+          votes = 1;
+          choices = bytes2(IERC725Y(UNIVERSAL_PROFILE).getData(
+            _KEY_PARTICIPANT_VOTE(proposalSignature, user)
+          ));
+        }
+        else {
+          votes = 0;
+        }
+        if (permissions & _PERMISSION_RECIEVEDELEGATE != 0) {
+          votes += uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
+            bytes32(bytes.concat(_KEY_ADDRESSDELEGATES_ARRAY_PREFIX, bytes20(user)))
+          )));
+        }
+        for(uint8 j = 0; j < nrOfChoices; j++) {
+          choices & bytes2(uint16(1 << j)) != 0 ? votesByChoiceIndex[j] += votes : 0;
+        }
+      }
+    }
+
+    /**
+     * @dev We split all the choices between `negativeVotes` and `positiveVotes`
+     *  ____________________________________
+     * |  1  |  2  |  3  | 4 | 5  | 6  | 7  |
+     * | -42 | -28 | -14 | 0 | 14 | 28 | 42 |
+     * |_____|_____|_____|___|____|____|____|
+     *
+     */
+    uint256 totalVotes;
+    uint256 negativeVotes;
+    uint256 positiveVotes;
+    for (uint256 i = 0; i < nrOfChoices; i++) {
+      totalVotes += votesByChoiceIndex[i];
+      if (i < nrOfChoices/2) {
+        negativeVotes += ((nrOfChoices/2 - i) * 100/nrOfChoices);
+      }
+      else {
+        positiveVotes += ((i - nrOfChoices/2) * 100/nrOfChoices);
+      }
+    }
+
+    uint256 majority = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_MAJORITY)));
+    uint256 participationRate = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
+      _KEY_PARTICIPATIONRATE
+    )));
+
+    /**
+     * @dev Check if the proposal has passed and execute the saved methods.
+     */
+    if(
+      totalVotes/totalUsers > participationRate/totalUsers &&
+      positiveVotes/totalVotes > majority/totalVotes
+    ) {
+      bytes32 targetsKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX));
+      bytes32 datasKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_DATASARRAY_SUFFIX));
+      uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)));
+      for (uint256 i = 0; i < arrayLength; i++) {
+        (success, res) = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)))
+        .call(IERC725Y(UNIVERSAL_PROFILE).getData(datasKey));
+      }
+    }
+
   }
 
   /**
    * @notice Vote on a proposal.
    */
-  function vote(bytes10 proposalSignature, bytes30 voteDescription, bytes32[] memory choicesArray) external {
+  function vote(
+    bytes10 proposalSignature,
+    bytes30 voteDescription,
+    uint8[] memory choicesArray
+  ) external {
     _verifyPermission(msg.sender, _PERMISSION_VOTE, "VOTE");
     require(
       uint256(bytes32(
@@ -259,16 +361,16 @@ contract DaoKeyManager {
     uint16 choices = 0;
     for(uint128 i = 0; i < choicesArray.length; i++) {
       if(
-      bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
+      uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(
         bytes32(bytes.concat(
           _SPLIT_BYTES32_IN_TWO_HALFS(
             bytes32(bytes.concat(
-              proposalSignature, _KEY_PROPOSAL_PROPOSALCHOICESARRAY_SUFFIX
+              proposalSignature, _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX
             ))
           )[0],
           bytes16(i)
         ))
-      )) == choicesArray[i]
+      ))) == choicesArray[i]
       ) {
         choices = choices + uint16(1 << i);
       }
@@ -310,7 +412,10 @@ contract DaoKeyManager {
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
   }
 
-  function _setData(bytes32[] memory _keys, bytes[] memory _values) internal {
+  function _setData(
+    bytes32[] memory _keys,
+    bytes[] memory _values
+  ) internal {
     require(_keys.length == _values.length);
     require(_keys.length > 0);
     if(_keys.length == 1) {
