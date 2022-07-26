@@ -5,12 +5,16 @@ pragma solidity ^0.8.0;
 import {LSP0ERC725Account} from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 import {LSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6KeyManager.sol";
 import {DaoKeyManager} from "./DaoAccount/DaoKeyManager.sol";
-import {VaultKeyManager} from "./DaoVault/VaultKeyManager.sol";
+import {VaultKeyManager} from "./Vault/VaultKeyManager.sol";
+import {MultisigKeyManager} from "./Multisig/MultisigKeyManager.sol";
 import {
   _LSP6KEY_ADDRESSPERMISSIONS_ARRAY,
   _LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX,
   _LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
+import {
+  ErrorWithNumber
+} from "./DaoCreatorErrors.sol";
 
 /**
  *
@@ -31,6 +35,7 @@ contract DaoCreator {
     address KEY_MANAGER;
     address DAO_KEY_MANAGER;
     address VAULT_KEY_MANAGER;
+    address MULTISIG_KEY_MANAGER;
 
     // Up to 16 phases for creating a DAO.
     bytes2 phases;
@@ -40,15 +45,25 @@ contract DaoCreator {
    * @notice Mapping for storing user progress.
    */
   mapping (address => UserProgress) userProgress;
+
+  /**
+   * @notice Get all the addresses of the contracts that a user has created.
+   */
+  function getAddresses() external view returns(address[5] memory addresses) {
+    addresses = [
+      userProgress[msg.sender].UNIVERSAL_PROFILE,
+      userProgress[msg.sender].KEY_MANAGER,
+      userProgress[msg.sender].DAO_KEY_MANAGER,
+      userProgress[msg.sender].VAULT_KEY_MANAGER,
+      userProgress[msg.sender].MULTISIG_KEY_MANAGER
+    ];
+  }
   
   /**
    * @notice Create the Universal Profile for the DAO.
    */
   function createUniversalProfile() external {
-    require(
-      (uint16(userProgress[msg.sender].phases)) & (1 << 0) == 0,
-      "Universal Profile is already initialized."
-    );
+    if (uint16(userProgress[msg.sender].phases) & (1 << 0) != 0) revert ErrorWithNumber(0x0001);
     userProgress[msg.sender].UNIVERSAL_PROFILE = payable(new LSP0ERC725Account(address(this)));
     userProgress[msg.sender].phases = bytes2(uint16(1));
   }
@@ -57,11 +72,8 @@ contract DaoCreator {
    * @notice Create the Key Manager of the Universal Profile
    */
   function createUniversalProfileKeyManager() external {
-    require(
-      (uint16(userProgress[msg.sender].phases)) & (1 << 0) != 0 &&
-      (uint16(userProgress[msg.sender].phases)) & (1 << 1) == 0,
-      "Universal profile not initialized or Universal Profile Key manager already initialized."
-    );
+    if (uint16(userProgress[msg.sender].phases) & (1 << 0) == 0) revert ErrorWithNumber(0x0002);
+    if (uint16(userProgress[msg.sender].phases) & (1 << 1) != 0) revert ErrorWithNumber(0x0003);
     userProgress[msg.sender].KEY_MANAGER = address(new LSP6KeyManager(userProgress[msg.sender].UNIVERSAL_PROFILE));
     userProgress[msg.sender].phases = bytes2(uint16(userProgress[msg.sender].phases) << 1);
   }
@@ -70,11 +82,8 @@ contract DaoCreator {
    * @notice Create the DAO Key manager.
    */
   function createDaoKeyManager() external {
-    require(
-      (uint16(userProgress[msg.sender].phases)) & (1 << 1) != 0 &&
-      (uint16(userProgress[msg.sender].phases)) & (1 << 2) == 0,
-      "Universal Profile Key Manager not initialized or DAO Key Manager already initialized."
-    );
+    if (uint16(userProgress[msg.sender].phases) & (1 << 1) == 0) revert ErrorWithNumber(0x0004);
+    if (uint16(userProgress[msg.sender].phases) & (1 << 2) != 0) revert ErrorWithNumber(0x0005);
     userProgress[msg.sender].DAO_KEY_MANAGER = address(new DaoKeyManager(
       userProgress[msg.sender].UNIVERSAL_PROFILE,
       userProgress[msg.sender].KEY_MANAGER
@@ -86,11 +95,8 @@ contract DaoCreator {
    * @notice Create Vault Key Manager.
    */
   function createVaultKeyManager() external {
-    require(
-      (uint16(userProgress[msg.sender].phases)) & (1 << 2) != 0 &&
-      (uint16(userProgress[msg.sender].phases)) & (1 << 3) == 0,
-      "DAO Key Manager not initialized or Vault Key Manager already initialized."
-    );
+    if (uint16(userProgress[msg.sender].phases) & (1 << 2) == 0) revert ErrorWithNumber(0x0006);
+    if (uint16(userProgress[msg.sender].phases) & (1 << 3) != 0) revert ErrorWithNumber(0x0007);
     userProgress[msg.sender].VAULT_KEY_MANAGER = address(new VaultKeyManager());
     userProgress[msg.sender].phases = bytes2(uint16(userProgress[msg.sender].phases) << 1);
   }
@@ -99,11 +105,8 @@ contract DaoCreator {
    * @notice Give 7FFF permissions to DaoKeyManager and to VaultKeyManager.
    */
   function giveMaxPermissionsToDaoAndVault() external {
-    require(
-      (uint16(userProgress[msg.sender].phases)) & (1 << 3) != 0 &&
-      (uint16(userProgress[msg.sender].phases)) & (1 << 4) == 0,
-      "Vault Key Manager not initialized or permissions already given."
-    );
+    if (uint16(userProgress[msg.sender].phases) & (1 << 3) == 0) revert ErrorWithNumber(0x0008);
+    if (uint16(userProgress[msg.sender].phases) & (1 << 4) != 0) revert ErrorWithNumber(0x0009);
     bytes32[] memory keys = new bytes32[](7);
     keys[0] = _LSP6KEY_ADDRESSPERMISSIONS_ARRAY;
     keys[1] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(0)));
@@ -141,11 +144,8 @@ contract DaoCreator {
    * and claimOwnership() of UNIVERSAL_PROFILE from KEY_MANAGER.
    */
   function transferOwnership() external {
-    require(
-      (uint16(userProgress[msg.sender].phases)) & (1 << 4) != 0 &&
-      (uint16(userProgress[msg.sender].phases)) & (1 << 5) == 0,
-      "Permissions not given or Ownership already transfered."
-    );
+    if (uint16(userProgress[msg.sender].phases) & (1 << 4) == 0) revert ErrorWithNumber(0x000A);
+    if (uint16(userProgress[msg.sender].phases) & (1 << 5) != 0) revert ErrorWithNumber(0x000B);
     LSP0ERC725Account(userProgress[msg.sender].UNIVERSAL_PROFILE).transferOwnership(
       userProgress[msg.sender].KEY_MANAGER
     );

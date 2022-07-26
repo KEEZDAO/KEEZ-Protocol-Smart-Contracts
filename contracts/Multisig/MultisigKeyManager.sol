@@ -9,6 +9,10 @@ import {
   NotAuthorised
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Errors.sol";
 import {
+  _ERC1271_MAGICVALUE,
+  _ERC1271_FAILVALUE
+} from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0Constants.sol";
+import {
   _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
 
   _PERMISSION_VOTE,
@@ -58,21 +62,19 @@ contract MultisigKeyManager {
   ) external {
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
 
+
   }
 
   /**
    * @notice Sign a proposal.
    */
   function signProposal(
-    bytes32 proposalSignature,
+    bytes32 _hash,
+    bytes memory _signature,
     bool response
   ) external {
-    if (response) {
-
-    }
-    else {
-        git
-    }
+    bytes4 res = LSP6KeyManager(KEY_MANAGER).isValidSignature(_hash, _signature);
+    
   }
 
   /**

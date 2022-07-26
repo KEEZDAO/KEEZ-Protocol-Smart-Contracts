@@ -6,6 +6,6 @@ module.exports = async function(deployer) {
   const daoCreator = await DaoCreator.deployed();
 
   daoCreator.createUniversalProfile();
-  daoCreator.createDaoKeymanager();
+  daoCreator.createUniversalProfileKeyManager();
 
 };

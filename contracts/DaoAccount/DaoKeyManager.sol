@@ -45,6 +45,9 @@ import {
 
   _SPLIT_BYTES32_IN_TWO_HALFS
 } from "./DaoConstants.sol";
+import {
+  ErrorWithNumber
+} from "../DaoCreatorErrors.sol";
 
 /**
  *
@@ -172,15 +175,9 @@ contract DaoKeyManager {
     uint8 choicesPerVote
   ) external {
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
-    require(
-      targets.length == datas.length,
-      "targets.length must be equal to datas.length"
-    );
-    require(
-      choices <= 16 &&
-      choicesPerVote <= 16,
-      "You can have maximum 16 choices."
-    );
+    if (targets.length != datas.length) revert ErrorWithNumber(0x000C);
+    if (choices > 16) revert ErrorWithNumber(0x000D);
+    if (choicesPerVote > choices) revert ErrorWithNumber(0x000E);
 
     uint256 arraysLength = 2 * targets.length;
     bytes10 KEY_PROPOSAL_PREFIX = _KEY_PROPOSAL_PREFIX(uint48(block.timestamp), title);
@@ -232,19 +229,17 @@ contract DaoKeyManager {
     returns(bool success, bytes memory res)
   {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE, "EXECUTE");
-    require(
+    if (
       uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX))))
       + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_VOTINGDELAY))))
       + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_VOTINGPERIOD))))
-      < block.timestamp,
-      "The proposal's time did not expire."
-    );
-    require(
+      > block.timestamp
+    ) revert ErrorWithNumber(0x000F);
+    if (
       uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
         bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX))
-      ))) > 0,
-      "There are no methods to execute."
-    );
+      ))) == 0
+    ) revert ErrorWithNumber(0x0010);
 
     /**
      * @dev Count all the votes by accessing the choices of all of the participants
@@ -343,20 +338,18 @@ contract DaoKeyManager {
     uint8[] memory choicesArray
   ) external {
     _verifyPermission(msg.sender, _PERMISSION_VOTE, "VOTE");
-    require(
+    if (
       uint256(bytes32(
         IERC725Y(UNIVERSAL_PROFILE).getData(
           _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender)
         )
-      )) == 0,
-      "User already voted."
-    );
-    require(
+      )) != 0
+    ) revert ErrorWithNumber(0x0011);
+    if (
       uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(
         bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX))
-      ))) >= choicesArray.length,
-      "You have more choices than allowed."
-    );
+      ))) < choicesArray.length
+    ) revert ErrorWithNumber(0x0012);
 
     uint16 choices = 0;
     for(uint128 i = 0; i < choicesArray.length; i++) {
