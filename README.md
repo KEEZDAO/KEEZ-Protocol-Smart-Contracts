@@ -2,7 +2,7 @@
 
 | Error number | Error explanation |
 | ----------- | ----------- |
-||
+
 | This are the errors that you can get while using `DaoCreator.js` |
 ||
 | `0x0001` | Universal Profile is already initialized. |

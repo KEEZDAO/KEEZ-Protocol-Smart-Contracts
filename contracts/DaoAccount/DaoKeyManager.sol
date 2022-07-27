@@ -167,7 +167,7 @@ contract DaoKeyManager {
    * @notice Create a proposal.
    */
   function createProposal(
-    string memory title,
+    bytes32 title,
     string memory description,
     address[] memory targets,
     bytes[] memory datas,
@@ -210,7 +210,7 @@ contract DaoKeyManager {
 
     values[arraysLength + 0] = bytes.concat(bytes32(targets.length));
     values[arraysLength + 1] = bytes.concat(bytes32(datas.length));
-    values[arraysLength + 2] = bytes(title);
+    values[arraysLength + 2] = bytes.concat(title);
     values[arraysLength + 3] = bytes(description);
     values[arraysLength + 4] = bytes.concat(bytes6(uint48(block.timestamp)));
     values[arraysLength + 5] = bytes.concat(bytes1(choices));

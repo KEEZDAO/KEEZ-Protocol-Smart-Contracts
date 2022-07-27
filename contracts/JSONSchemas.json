@@ -2,8 +2,8 @@
   {
     "daoMetadataSchemas": [
       {
-        "name": "Name",
-        "key": "0x55e49609591f684ecf6f2909c9e20c2439b990887b9c3fe108b154c9077d85cf",
+        "name": "Title",
+        "key": "0x3f82a2b5852cbedcda3d9062384397479ac9a00dae9991874d842bec7aab98ce",
         "keyType": "Singleton",
         "valueType": "string",
         "valueContent": "String"
@@ -16,8 +16,8 @@
         "valueContent": "String"
       },
       {
-        "name": "Quorum",
-        "key": "0x1c990d1606629a2681dbc22754450a119d5896cd739732a966bd0a2e08647359",
+        "name": "Majority",
+        "key": "0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127",
         "keyType": "Singleton",
         "valueType": "uint8",
         "valueContent": "Uint8"
@@ -42,21 +42,28 @@
         "keyType": "Singleton",
         "valueType": "uint256",
         "valueContent": "Uint256"
+      }   ,
+      {
+        "name": "TokenGatedDao",
+        "key": "0xd08ca3a83d59467dd8ba57e940549874ea8310a1ebfb4396959235b00035d777",
+        "keyType": "Singleton",
+        "valueType": "bytes1",
+        "valueContent": "BitArray"
       }    
     ]
   },
   {
     "daoPermissionsSchemas": [
       {
-        "name": "DAOPermissionsAddresses[]",
-        "key": "0x72ba3778f5d93e8643176651d8174361d2ba28345f5eaa8b6a10f65dbfcf7c91",
+        "name": "AddressPermissions[]",
+        "key": "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
         "keyType": "Array",
         "valueType": "address",
         "valueContent": "Address"
       },
       {
-        "name": "DAOPermissionsAddresses:DAOPermissions:<address>",
-        "key": "0x6f1212b29e0dd553aa040000<address>",
+        "name": "AddressPermissions:DaoPermissions:<address>",
+        "key": "0x4b80742de2bfb3cc0e490000<address>",
         "keyType": "MappingWithGrouping",
         "valueType": "bytes32",
         "valueContent": "BitArray"
@@ -66,17 +73,17 @@
   {
     "daoDelegateSchemas": [
       {
-        "name": "Delegatee:<address>",
-        "key": "0xe9506e3d2587fc04e3280000<address>",
+        "name": "DelegateTo:<address>",
+        "key": "0x0a30e74a6c7868e400140000<address>",
         "keyType": "Mapping",
         "valueType": "address",
         "valueContent": "Address"
       },
       {
-        "name": "VotesDelegatedArray[]:Delegatee:<address>",
-        "key": "0x321d588394b2e9506e3d0000<address>",
-        "keyType": "MappingWithGrouping",
-        "valueType": "address",
+        "name": "AddressDelegates[]:<address>",
+        "key": "0xc3f797d5c8ae536b82a60000<address>",
+        "keyType": "Array[]",
+        "valueType": "address[]",
         "valueContent": "Address"
       }
     ]
@@ -85,66 +92,63 @@
     "daoProposalsSchemas": [
       {
         "name": "<creationTimestamp>:<title>:Title",
-        "key": "<creationTimestamp><title>5469746c65000000000000000000000000000000",
+        "key": "<creationTimestamp><title>0x00003f82a2b5852cbedcda3d9062384397479ac9a00d",
         "keyType": "Singleton",
-        "valueType": "string",
-        "valueContent": "String"
+        "valueType": "bytes32",
+        "valueContent": "Bytes32"
       },
       {
         "name": "<creationTimestamp>:<title>:Description",
-        "key": "<creationTimestamp><title>4465736372697074696f6e000000000000000000",
+        "key": "<creationTimestamp><title>0x000095e794640ff3efd16bfe738f1a9bf2886d166af5",
         "keyType": "Singleton",
         "valueType": "string",
         "valueContent": "String"
       },
       {
         "name": "<creationTimestamp>:<title>:CreationTimestamp",
-        "key": "<creationTimestamp><title>4372656174696f6e54696d657374616d70000000",
-        "keyType": "Singleton",
-        "valueType": "uint256",
-        "valueContent": "Uint256"
-      },
-      {
-        "name": "<creationTimestamp>:<title>:VotingTimestamp",
-        "key": "<creationTimestamp><title>566f74696e6754696d657374616d700000000000",
-        "keyType": "Singleton",
-        "valueType": "uint256",
-        "valueContent": "Uint256"
-      },
-      {
-        "name": "<creationTimestamp>:<title>:EndTimestamp",
-        "key": "<creationTimestamp><title>456e6454696d657374616d700000000000000000",
+        "key": "<creationTimestamp><title>0x0000bd3132afbfa232f7d171a873f7e52e32c666b06d",
         "keyType": "Singleton",
         "valueType": "uint256",
         "valueContent": "Uint256"
       },
       {
         "name": "<creationTimestamp>:<title>:Targets[]",
-        "key": "<creationTimestamp><title>546172676574735b5d0000000000000000000000",
-        "keyType": "MappingWithGrouping",
-        "valueType": "uint256[]",
-        "valueContent": "Uint256"
+        "key": "<creationTimestamp><title>0x0000ba6d4933d1a0fbfd29728a3ed8d0a7aca50635b5",
+        "keyType": "Array[]",
+        "valueType": "address[]",
+        "valueContent": "Address"
       },
       {
         "name": "<creationTimestamp>:<title>:Datas[]",
-        "key": "<creationTimestamp><title>44617461735b5d00000000000000000000000000",
-        "keyType": "MappingWithGrouping",
-        "valueType": "uint256[]",
-        "valueContent": "Uint256"
+        "key": "<creationTimestamp><title>0x0000478499bb6846f8a28632137c772be842c41b3105",
+        "keyType": "Array[]",
+        "valueType": "bytes[]",
+        "valueContent": "Bytes"
       },
       {
-        "name": "<creationTimestamp>:<title>:AgainstVotes",
-        "key": "<creationTimestamp><title>416761696e7374566f7465730000000000000000",
+        "name": "<creationTimestamp>:<title>:ProposalChoices",
+        "key": "<creationTimestamp><title>0x0000e5dd8acc7154a678a0a3fa3fe2d65b8700bf702c",
         "keyType": "Singleton",
-        "valueType": "uint256",
-        "valueContent": "Uint256"
+        "valueType": "uint8",
+        "valueContent": "Uint8"
       },
       {
-        "name": "<creationTimestamp>:<title>:ProVotes",
-        "key": "<creationTimestamp><title>50726f566f746573000000000000000000000000",
+        "name": "<creationTimestamp>:<title>:MaximumChoicesPerVote",
+        "key": "<creationTimestamp><title>0x0000ed458cca63dcf8476211a40ad15420dcabc377f0",
         "keyType": "Singleton",
-        "valueType": "uint256",
-        "valueContent": "Uint256"
+        "valueType": "uint8",
+        "valueContent": "Uint8"
+      }
+    ]
+  },
+  {
+    "daoVotingSchemas": [
+      {
+        "name": "<creationTimestamp>:<title>:<address>",
+        "key": "<creationTimestamp><title><address>",
+        "keyType": "Singleton",
+        "valueType": "bytes32",
+        "valueContent": "bytes30(VoteDescription) + bytes2(ChoicesBitArray)"
       }
     ]
   },
