@@ -1,10 +1,11 @@
 ## Methods
 
 ### ``` function togglePermissions(address _to, bytes32[] memory _permissions) ```
-
-| Method description | Toggle permissions of an address. |
-| Param: `_to` | The Universal's Profile address whose permission will be toggled |
-| Param: `_permission` | The permission that will be toggled |
+|   Method properties  |                            Explanation                            |
+|        :---:         |                               :---:                               |
+| Method description   | Toggle permissions of an address.                                 |
+| Param: `_to`         | The Universal's Profile address whose permission will be toggled. |
+| Param: `_permission` | The permission that will be toggled.                              |
 
 #### Possible permissions
 
@@ -45,8 +46,10 @@ The `AddressPermissions:DaoPermissions:<address>` key will return a BitArray whi
 
 ### ``` function delegate(address delegatee) ```
 
-| Method description | Delegate your vote. |
-| Param: `delegatee` | The address that will recieve the delate from `msg.sender` |
+|  Method properties |                        Explanation                          |
+|       :---:        |                           :---:                             |
+| Method description | Delegate your vote.                                         |
+| Param: `delegatee` | The address that will recieve the delate from `msg.sender`. |
 
 #### Modified keys.(JSON Schema)
 
@@ -72,13 +75,15 @@ The `AddressPermissions:DaoPermissions:<address>` key will return a BitArray whi
 
 ### ``` function createProposal(bytes32 title, string memory description, address[] memory targets, bytes[] memory datas, uint8 choices, uint8 choicesPerVote) ```
 
-| Method description | Create a Proposal |
-| Param: `title` | The title of the proposal. (32 characters max.) |
-| Param: `description` | The description of the proposal. |
-| Param: `targets` | An array of address where the calldata will be executed if the proposal passes. |
-| Param: `datas` | The calldata that will be executed if the proposal passses. |
-| Param: `choices` | The number of possible choices of the vote. |
-| Param: `choicesPerVote` | The number of choices allowed to be chosen on vote. |
+|     Method properties   |                                   Explanation                                   |
+|          :---:          |                                      :---:                                      |
+| Method description      | Create a Proposal.                                                              |
+| Param: `title`          | The title of the proposal. (32 characters max.)                                 |
+| Param: `description`    | The description of the proposal.                                                |
+| Param: `targets`        | An array of address where the calldata will be executed if the proposal passes. |
+| Param: `datas`          | The calldata that will be executed if the proposal passses.                     |
+| Param: `choices`        | The number of possible choices of the vote.                                     |
+| Param: `choicesPerVote` | The number of choices allowed to be chosen on vote.                             |
 
 #### Modified keys.(JSON Schema)
 
@@ -161,10 +166,12 @@ The `AddressPermissions:DaoPermissions:<address>` key will return a BitArray whi
 
 ### ``` function vote(bytes10 proposalSignature, bytes30 voteDescription, uint8[] memory choicesArray) ```
 
-| Method description | Vote on a proposal. |
-| Param: `proposalSignature` | The uniquie signature of each proposal. |
-| Param: `voteDescription` | Brief description of the vote. (30 characters max) |
-| Param: `choicesArray` | A BitArray `bytes2` variable ( e.g. BitArray(`0101 0011 0010 0111`) = bytes2(`0x5327`)), there are 16 different choices and !16 different possibilities. |
+|      Method properties     |                    Explanation                      |
+|            :---:           |                       :---:                         |
+| Method description         | Vote on a proposal.                                 |
+| Param: `proposalSignature` | The uniquie signature of each proposal.             |
+| Param: `voteDescription`   | Brief description of the vote. (30 characters max). |
+| Param: `choicesArray`      | A BitArray `bytes2` variable ( e.g. BitArray(`0101 0011 0010 0111`) = bytes2(`0x5327`)), there are 16 different choices and !16 different possibilities. |
 
 #### Modified keys.(JSON Schema)
 
