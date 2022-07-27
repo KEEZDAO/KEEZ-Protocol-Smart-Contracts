@@ -18,7 +18,7 @@
         1201
       ],
       "IERC165": [
-        3930
+        5288
       ]
     },
     "id": 1202,
@@ -43,7 +43,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 1202,
-        "sourceUnit": 3931,
+        "sourceUnit": 5289,
         "src": "523:80:10",
         "symbolAliases": [
           {
@@ -52,7 +52,7 @@
               "name": "IERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3930,
+              "referencedDeclaration": 5288,
               "src": "531:7:10",
               "typeDescriptions": {}
             },
@@ -164,10 +164,10 @@
                                 "name": "IERC165",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 3930,
+                                "referencedDeclaration": 5288,
                                 "src": "1447:7:10",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_type$_t_contract$_IERC165_$3930_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IERC165_$5288_$",
                                   "typeString": "type(contract IERC165)"
                                 }
                               }
@@ -175,7 +175,7 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_type$_t_contract$_IERC165_$3930_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IERC165_$5288_$",
                                   "typeString": "type(contract IERC165)"
                                 }
                               ],
@@ -201,7 +201,7 @@
                             "src": "1442:13:10",
                             "tryCall": false,
                             "typeDescriptions": {
-                              "typeIdentifier": "t_magic_meta_type_t_contract$_IERC165_$3930",
+                              "typeIdentifier": "t_magic_meta_type_t_contract$_IERC165_$5288",
                               "typeString": "type(contract IERC165)"
                             }
                           },
@@ -1933,10 +1933,10 @@
                             "name": "IERC165",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3930,
+                            "referencedDeclaration": 5288,
                             "src": "4882:7:10",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_IERC165_$3930_$",
+                              "typeIdentifier": "t_type$_t_contract$_IERC165_$5288_$",
                               "typeString": "type(contract IERC165)"
                             }
                           },
@@ -1947,7 +1947,7 @@
                           "lValueRequested": false,
                           "memberName": "supportsInterface",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3929,
+                          "referencedDeclaration": 5287,
                           "src": "4882:25:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_declaration_view$_t_bytes4_$returns$_t_bool_$",
@@ -2557,7 +2557,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.598Z",
+  "updatedAt": "2022-07-27T13:31:58.556Z",
   "devdoc": {
     "details": "Library used to query support of an interface declared via {IERC165}. Note that these functions return the actual result of the query: they do not `revert` if an interface is not supported. It is up to the caller to decide what to do in these cases.",
     "kind": "dev",

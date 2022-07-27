@@ -123,6 +123,9 @@ function _KEY_PARTICIPANT_VOTE(bytes10 proposalSignature, address participantAdd
 ///      https://github.com/ERC725Alliance/ERC725/blob/main/implementations/contracts/interfaces/IERC725Y.sol
 bytes4 constant setDataSingleSelector = bytes4(keccak256("setData(bytes32,bytes)"));
 bytes4 constant setDataMultipleSelector = bytes4(keccak256("setData(bytes32[],bytes[])"));
+bytes4 constant getDataSingleSelector = bytes4(keccak256("getData(bytes32)"));
+bytes4 constant getDataMultipleSelector = bytes4(keccak256("getData(bytes32[])"));
+bytes4 constant execute = bytes4(keccak256("execute(bytes)"));
 
 // Input: 0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3
 // Output: [0xdf30dba06db6a30e65354d9a64c60986, 0x1f089545ca58c6b4dbe31a5f338cb0e3]

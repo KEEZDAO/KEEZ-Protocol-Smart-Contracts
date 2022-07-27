@@ -379,7 +379,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.589Z",
+  "updatedAt": "2022-07-27T13:31:58.547Z",
   "devdoc": {
     "details": "When calling other contracts via low-level calls like `contract.call{ ... }(data)`, errors need to be handled manually. This library will correctly handle the built-in Error(string) and Panic(uint256) as well as custom errors introduced in Solidity 0.8.4.",
     "kind": "dev",

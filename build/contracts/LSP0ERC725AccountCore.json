@@ -395,7 +395,7 @@
         998
       ],
       "ECDSA": [
-        3894
+        5252
       ],
       "ERC165Checker": [
         1201
@@ -407,7 +407,7 @@
         667
       ],
       "IERC1271": [
-        2833
+        4213
       ],
       "ILSP1UniversalReceiver": [
         1512
@@ -465,7 +465,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 1486,
-        "sourceUnit": 2834,
+        "sourceUnit": 4214,
         "src": "78:73:14",
         "symbolAliases": [
           {
@@ -474,7 +474,7 @@
               "name": "IERC1271",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 2833,
+              "referencedDeclaration": 4213,
               "src": "86:8:14",
               "typeDescriptions": {}
             },
@@ -540,7 +540,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 1486,
-        "sourceUnit": 3895,
+        "sourceUnit": 5253,
         "src": "366:75:14",
         "symbolAliases": [
           {
@@ -549,7 +549,7 @@
               "name": "ECDSA",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3894,
+              "referencedDeclaration": 5252,
               "src": "374:5:14",
               "typeDescriptions": {}
             },
@@ -850,7 +850,7 @@
               "id": 1290,
               "name": "IERC1271",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 2833,
+              "referencedDeclaration": 4213,
               "src": "1537:8:14"
             },
             "id": 1291,
@@ -884,14 +884,14 @@
         "linearizedBaseContracts": [
           1485,
           1512,
-          2833,
+          4213,
           998,
           667,
           895,
           432,
           846,
-          3918,
-          3930,
+          5276,
+          5288,
           804,
           1215
         ],
@@ -1787,7 +1787,7 @@
           },
           {
             "baseFunctions": [
-              2832
+              4212
             ],
             "body": {
               "id": 1418,
@@ -2011,10 +2011,10 @@
                                   "name": "ECDSA",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3894,
+                                  "referencedDeclaration": 5252,
                                   "src": "4221:5:14",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_type$_t_contract$_ECDSA_$3894_$",
+                                    "typeIdentifier": "t_type$_t_contract$_ECDSA_$5252_$",
                                     "typeString": "type(library ECDSA)"
                                   }
                                 },
@@ -2025,7 +2025,7 @@
                                 "lValueRequested": false,
                                 "memberName": "recover",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 3643,
+                                "referencedDeclaration": 5001,
                                 "src": "4221:13:14",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$",
@@ -2268,10 +2268,10 @@
                                   "name": "IERC1271",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 2833,
+                                  "referencedDeclaration": 4213,
                                   "src": "4031:8:14",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_type$_t_contract$_IERC1271_$2833_$",
+                                    "typeIdentifier": "t_type$_t_contract$_IERC1271_$4213_$",
                                     "typeString": "type(contract IERC1271)"
                                   }
                                 },
@@ -2286,7 +2286,7 @@
                                 "src": "4031:16:14",
                                 "tryCall": false,
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_IERC1271_$2833",
+                                  "typeIdentifier": "t_contract$_IERC1271_$4213",
                                   "typeString": "contract IERC1271"
                                 }
                               },
@@ -2297,7 +2297,7 @@
                               "lValueRequested": false,
                               "memberName": "isValidSignature",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 2832,
+                              "referencedDeclaration": 4212,
                               "src": "4031:33:14",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_external_view$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_bytes4_$",
@@ -3338,7 +3338,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.642Z",
+  "updatedAt": "2022-07-27T13:31:58.613Z",
   "devdoc": {
     "author": "Fabian Vogelsteller <fabian@lukso.network>, Jean Cavallera (CJ42), Yamen Merhi (YamenMerhi)",
     "details": "Bundles ERC725X and ERC725Y, ERC1271 and LSP1UniversalReceiver and allows receiving native tokens",

@@ -48,6 +48,10 @@ module.exports = {
       //  gas: 6000000,           // Gas sent with each transaction (default: ~6700000))
       //  gasPrice: 1000000000,  // 20 gwei (in wei) (default: 100 gwei)
     },
+    live: {
+      host: "https://rpc.l16.lukso.network",
+      network_id: 2828
+    },
     dashboard: {
       host: "0.0.0.0",
       port: 2020

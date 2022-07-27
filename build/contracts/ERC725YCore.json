@@ -174,7 +174,7 @@
     "absolutePath": "@erc725/smart-contracts/contracts/ERC725YCore.sol",
     "exportedSymbols": {
       "ERC165": [
-        3918
+        5276
       ],
       "ERC725YCore": [
         667
@@ -183,7 +183,7 @@
         937
       ],
       "IERC165": [
-        3930
+        5288
       ],
       "IERC725Y": [
         895
@@ -217,7 +217,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 668,
-        "sourceUnit": 3931,
+        "sourceUnit": 5289,
         "src": "78:80:2",
         "symbolAliases": [
           {
@@ -226,7 +226,7 @@
               "name": "IERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3930,
+              "referencedDeclaration": 5288,
               "src": "86:7:2",
               "typeDescriptions": {}
             },
@@ -292,7 +292,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 668,
-        "sourceUnit": 3919,
+        "sourceUnit": 5277,
         "src": "280:78:2",
         "symbolAliases": [
           {
@@ -301,7 +301,7 @@
               "name": "ERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3918,
+              "referencedDeclaration": 5276,
               "src": "288:6:2",
               "typeDescriptions": {}
             },
@@ -380,7 +380,7 @@
               "id": 475,
               "name": "ERC165",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 3918,
+              "referencedDeclaration": 5276,
               "src": "911:6:2"
             },
             "id": 476,
@@ -414,8 +414,8 @@
         "linearizedBaseContracts": [
           667,
           895,
-          3918,
-          3930,
+          5276,
+          5288,
           804
         ],
         "name": "ERC725YCore",
@@ -2390,8 +2390,8 @@
           },
           {
             "baseFunctions": [
-              3917,
-              3929
+              5275,
+              5287
             ],
             "body": {
               "id": 665,
@@ -2494,7 +2494,7 @@
                         "lValueRequested": false,
                         "memberName": "supportsInterface",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 3917,
+                        "referencedDeclaration": 5275,
                         "src": "2967:23:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_view$_t_bytes4_$returns$_t_bool_$",
@@ -2551,14 +2551,14 @@
                   "id": 650,
                   "name": "IERC165",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 3930,
+                  "referencedDeclaration": 5288,
                   "src": "2867:7:2"
                 },
                 {
                   "id": 651,
                   "name": "ERC165",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 3918,
+                  "referencedDeclaration": 5276,
                   "src": "2876:6:2"
                 }
               ],
@@ -2652,7 +2652,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.573Z",
+  "updatedAt": "2022-07-27T13:31:58.530Z",
   "devdoc": {
     "author": "Fabian Vogelsteller <fabian@lukso.network>",
     "details": "Contract module which provides the ability to set arbitrary data key/value pairs that can be changed over time It is intended to standardise certain data key/value pairs to allow automated read and writes from/to the contract storage",

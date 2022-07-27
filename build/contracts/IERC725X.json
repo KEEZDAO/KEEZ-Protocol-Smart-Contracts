@@ -125,7 +125,7 @@
     "absolutePath": "@erc725/smart-contracts/contracts/interfaces/IERC725X.sol",
     "exportedSymbols": {
       "IERC165": [
-        3930
+        5288
       ],
       "IERC725X": [
         846
@@ -153,7 +153,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 847,
-        "sourceUnit": 3931,
+        "sourceUnit": 5289,
         "src": "75:80:5",
         "symbolAliases": [
           {
@@ -162,7 +162,7 @@
               "name": "IERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3930,
+              "referencedDeclaration": 5288,
               "src": "83:7:5",
               "typeDescriptions": {}
             },
@@ -179,7 +179,7 @@
               "id": 810,
               "name": "IERC165",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 3930,
+              "referencedDeclaration": 5288,
               "src": "563:7:5"
             },
             "id": 811,
@@ -200,7 +200,7 @@
         "id": 846,
         "linearizedBaseContracts": [
           846,
-          3930
+          5288
         ],
         "name": "IERC725X",
         "nameLocation": "551:8:5",
@@ -633,7 +633,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.583Z",
+  "updatedAt": "2022-07-27T13:31:58.539Z",
   "devdoc": {
     "details": "ERC725X provides the ability to call arbitrary functions at any other smart contract and itself, including using `delegatecall`, `staticcall`, as well creating contracts using `create` and `create2` This is the basis for a smart contract based account system, but could also be used as a proxy account system",
     "events": {

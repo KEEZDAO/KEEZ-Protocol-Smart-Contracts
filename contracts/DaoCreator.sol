@@ -14,7 +14,7 @@ import {
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
 import {
   ErrorWithNumber
-} from "./DaoCreatorErrors.sol";
+} from "./Errors.sol";
 
 /**
  *
@@ -81,12 +81,27 @@ contract DaoCreator {
   /**
    * @notice Create the DAO Key manager.
    */
-  function createDaoKeyManager() external {
+  function createDaoKeyManager(/*
+    string memory title,
+    string memory description,
+    uint8 majority,
+    uint8 participationRate,
+    uint48 votingDelay,
+    uint48 votingPeriod,
+    bytes1 tokenGated
+  */) external {
     if (uint16(userProgress[msg.sender].phases) & (1 << 1) == 0) revert ErrorWithNumber(0x0004);
     if (uint16(userProgress[msg.sender].phases) & (1 << 2) != 0) revert ErrorWithNumber(0x0005);
     userProgress[msg.sender].DAO_KEY_MANAGER = address(new DaoKeyManager(
       userProgress[msg.sender].UNIVERSAL_PROFILE,
-      userProgress[msg.sender].KEY_MANAGER
+      userProgress[msg.sender].KEY_MANAGER/*,
+      title,
+      description,
+      majority,
+      participationRate,
+      votingDelay,
+      votingPeriod,
+      tokenGated*/
     ));
     userProgress[msg.sender].phases = bytes2(uint16(userProgress[msg.sender].phases) << 1);
   }

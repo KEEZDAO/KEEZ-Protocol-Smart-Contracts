@@ -177,13 +177,13 @@
     "absolutePath": "@erc725/smart-contracts/contracts/ERC725XCore.sol",
     "exportedSymbols": {
       "BytesLib": [
-        8670
+        8876
       ],
       "Create2": [
-        3261
+        4619
       ],
       "ERC165": [
-        3918
+        5276
       ],
       "ERC725XCore": [
         432
@@ -192,7 +192,7 @@
         919
       ],
       "IERC165": [
-        3930
+        5288
       ],
       "IERC725X": [
         846
@@ -241,7 +241,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 433,
-        "sourceUnit": 3931,
+        "sourceUnit": 5289,
         "src": "78:80:0",
         "symbolAliases": [
           {
@@ -250,7 +250,7 @@
               "name": "IERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3930,
+              "referencedDeclaration": 5288,
               "src": "86:7:0",
               "typeDescriptions": {}
             },
@@ -291,7 +291,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 433,
-        "sourceUnit": 3262,
+        "sourceUnit": 4620,
         "src": "225:66:0",
         "symbolAliases": [
           {
@@ -300,7 +300,7 @@
               "name": "Create2",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3261,
+              "referencedDeclaration": 4619,
               "src": "233:7:0",
               "typeDescriptions": {}
             },
@@ -316,7 +316,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 433,
-        "sourceUnit": 8671,
+        "sourceUnit": 8877,
         "src": "292:69:0",
         "symbolAliases": [
           {
@@ -325,7 +325,7 @@
               "name": "BytesLib",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 8670,
+              "referencedDeclaration": 8876,
               "src": "300:8:0",
               "typeDescriptions": {}
             },
@@ -366,7 +366,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 433,
-        "sourceUnit": 3919,
+        "sourceUnit": 5277,
         "src": "435:78:0",
         "symbolAliases": [
           {
@@ -375,7 +375,7 @@
               "name": "ERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3918,
+              "referencedDeclaration": 5276,
               "src": "443:6:0",
               "typeDescriptions": {}
             },
@@ -514,7 +514,7 @@
               "id": 26,
               "name": "ERC165",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 3918,
+              "referencedDeclaration": 5276,
               "src": "1303:6:0"
             },
             "id": 27,
@@ -548,8 +548,8 @@
         "linearizedBaseContracts": [
           432,
           846,
-          3918,
-          3930,
+          5276,
+          5288,
           804
         ],
         "name": "ERC725XCore",
@@ -1365,10 +1365,10 @@
                                       "name": "BytesLib",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 8670,
+                                      "referencedDeclaration": 8876,
                                       "src": "3993:8:0",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_type$_t_contract$_BytesLib_$8670_$",
+                                        "typeIdentifier": "t_type$_t_contract$_BytesLib_$8876_$",
                                         "typeString": "type(library BytesLib)"
                                       }
                                     },
@@ -1379,7 +1379,7 @@
                                     "lValueRequested": false,
                                     "memberName": "toBytes32",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 8635,
+                                    "referencedDeclaration": 8841,
                                     "src": "3993:18:0",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes32_$",
@@ -1549,10 +1549,10 @@
                                       "name": "BytesLib",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 8670,
+                                      "referencedDeclaration": 8876,
                                       "src": "4073:8:0",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_type$_t_contract$_BytesLib_$8670_$",
+                                        "typeIdentifier": "t_type$_t_contract$_BytesLib_$8876_$",
                                         "typeString": "type(library BytesLib)"
                                       }
                                     },
@@ -1563,7 +1563,7 @@
                                     "lValueRequested": false,
                                     "memberName": "slice",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 8401,
+                                    "referencedDeclaration": 8607,
                                     "src": "4073:14:0",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
@@ -1682,10 +1682,10 @@
                                       "name": "Create2",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 3261,
+                                      "referencedDeclaration": 4619,
                                       "src": "4155:7:0",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_type$_t_contract$_Create2_$3261_$",
+                                        "typeIdentifier": "t_type$_t_contract$_Create2_$4619_$",
                                         "typeString": "type(library Create2)"
                                       }
                                     },
@@ -1696,7 +1696,7 @@
                                     "lValueRequested": false,
                                     "memberName": "deploy",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 3201,
+                                    "referencedDeclaration": 4559,
                                     "src": "4155:14:0",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$",
@@ -5769,8 +5769,8 @@
           },
           {
             "baseFunctions": [
-              3917,
-              3929
+              5275,
+              5287
             ],
             "body": {
               "id": 430,
@@ -5873,7 +5873,7 @@
                         "lValueRequested": false,
                         "memberName": "supportsInterface",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 3917,
+                        "referencedDeclaration": 5275,
                         "src": "7840:23:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_view$_t_bytes4_$returns$_t_bool_$",
@@ -5930,14 +5930,14 @@
                   "id": 415,
                   "name": "IERC165",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 3930,
+                  "referencedDeclaration": 5288,
                   "src": "7740:7:0"
                 },
                 {
                   "id": 416,
                   "name": "ERC165",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 3918,
+                  "referencedDeclaration": 5276,
                   "src": "7749:6:0"
                 }
               ],
@@ -6031,7 +6031,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.527Z",
+  "updatedAt": "2022-07-27T13:31:58.479Z",
   "devdoc": {
     "author": "Fabian Vogelsteller <fabian@lukso.network>",
     "details": "Implementation of a contract module which provides the ability to call arbitrary functions at any other smart contract and itself, including using `delegatecall`, `staticcall` as well creating contracts using `create` and `create2` This is the basis for a smart contract based account system, but could also be used as a proxy account system",

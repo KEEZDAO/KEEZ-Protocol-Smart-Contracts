@@ -122,7 +122,7 @@
     "absolutePath": "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol",
     "exportedSymbols": {
       "IERC165": [
-        3930
+        5288
       ],
       "IERC725Y": [
         895
@@ -150,7 +150,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 896,
-        "sourceUnit": 3931,
+        "sourceUnit": 5289,
         "src": "75:80:6",
         "symbolAliases": [
           {
@@ -159,7 +159,7 @@
               "name": "IERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 3930,
+              "referencedDeclaration": 5288,
               "src": "83:7:6",
               "typeDescriptions": {}
             },
@@ -176,7 +176,7 @@
               "id": 852,
               "name": "IERC165",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 3930,
+              "referencedDeclaration": 5288,
               "src": "486:7:6"
             },
             "id": 853,
@@ -197,7 +197,7 @@
         "id": 895,
         "linearizedBaseContracts": [
           895,
-          3930
+          5288
         ],
         "name": "IERC725Y",
         "nameLocation": "474:8:6",
@@ -657,7 +657,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.586Z",
+  "updatedAt": "2022-07-27T13:31:58.542Z",
   "devdoc": {
     "details": "ERC725Y provides the ability to set arbitrary data key/value pairs that can be changed over time It is intended to standardise certain data key/value pairs to allow automated read and writes from/to the contract storage",
     "events": {

@@ -1,3 +1,7 @@
+## To automatically create a dao run:
+On the L16 network `truffle deploy --network live`.
+On the development network `truffle develop` and then `truffle deploy --network development`.
+
 ## Errors
 
 ### This are the errors that you can get while using `DaoCreator.js`

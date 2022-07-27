@@ -3,7 +3,8 @@
 pragma solidity ^0.8.0;
 
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
-import {LSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6KeyManager.sol";
+import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/ILSP6KeyManager.sol";
+import {IDaoKeyManager} from "./IDaoKeyManager.sol";
 import {
   NoPermissionsSet,
   NotAuthorised
@@ -42,12 +43,11 @@ import {
 
   setDataSingleSelector,
   setDataMultipleSelector,
+  execute,
 
   _SPLIT_BYTES32_IN_TWO_HALFS
 } from "./DaoConstants.sol";
-import {
-  ErrorWithNumber
-} from "../DaoCreatorErrors.sol";
+import {ErrorWithNumber} from "../Errors.sol";
 
 /**
  *
@@ -57,7 +57,7 @@ import {
  * @title DaoKeyManager
  * @custom:version 1
  */
-contract DaoKeyManager {
+contract DaoKeyManager is IDaoKeyManager {
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -70,19 +70,16 @@ contract DaoKeyManager {
   address private KEY_MANAGER;
 
   /**
-   * @notice Address of the creator.
+   * @dev
    */
-  address private CREATOR;
-
   constructor(
     address payable _UNIVERSAL_PROFILE,
     address _KEY_MANAGER
   ) {
-    CREATOR = msg.sender;
     UNIVERSAL_PROFILE = _UNIVERSAL_PROFILE;
     KEY_MANAGER = _KEY_MANAGER;
   }
-  function initialize(
+  function init(
     string memory title,
     string memory description,
     uint8 majority,
@@ -91,7 +88,6 @@ contract DaoKeyManager {
     uint48 votingPeriod,
     bytes1 tokenGated
   ) external {
-    require(msg.sender == CREATOR);
 
     bytes32[] memory keys = new bytes32[](7);
     keys[0] = _KEY_TITLE;
@@ -112,16 +108,16 @@ contract DaoKeyManager {
     values[6] = bytes.concat(tokenGated);
 
     _setData(keys, values);
-  }
 
+  }
 
   // --- General Methods.
 
 
   /**
-   * @notice Toggle permissions of an address.
+   * @inheritdoc IDaoKeyManager
    */
-  function togglePermissions(address _to, bytes32[] memory _permissions) external {
+  function togglePermissions(address _to, bytes32[] memory _permissions) external override {
     _verifyPermission(msg.sender, _PERMISSION_MASTER, "MASTER");
 
     bytes32 permissions = _getPermissions(_to);
@@ -142,9 +138,9 @@ contract DaoKeyManager {
   }
 
   /**
-   * @notice Delegate your vote.
+   * @inheritdoc IDaoKeyManager
    */
-  function delegate(address delegatee) external {
+  function delegate(address delegatee) external override {
     _verifyPermission(msg.sender, _PERMISSION_SENDDELEGATE, "SENDDELEGATE");
     _verifyPermission(delegatee, _PERMISSION_RECIEVEDELEGATE, "RECIEVEDELEGATE");
 
@@ -160,11 +156,11 @@ contract DaoKeyManager {
     values[1] = bytes.concat(bytes16(arrayLength + 1));
     values[2] = bytes.concat(bytes20(delegatee));
   
-    IERC725Y(UNIVERSAL_PROFILE).setData(keys, values);
+    _setData(keys, values);
   }
 
   /**
-   * @notice Create a proposal.
+   * @inheritdoc IDaoKeyManager
    */
   function createProposal(
     bytes32 title,
@@ -173,7 +169,7 @@ contract DaoKeyManager {
     bytes[] memory datas,
     uint8 choices,
     uint8 choicesPerVote
-  ) external {
+  ) external override {
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
     if (targets.length != datas.length) revert ErrorWithNumber(0x000C);
     if (choices > 16) revert ErrorWithNumber(0x000D);
@@ -220,13 +216,13 @@ contract DaoKeyManager {
   }
 
   /**
-   * @notice Execute the calldata of the Proposal if there is one.
+   * @inheritdoc IDaoKeyManager
    */
   function executeProposal(
     bytes10 proposalSignature
   )
-    external
-    returns(bool success, bytes memory res)
+    external override
+    returns(bool[] memory success, bytes[] memory results)
   {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE, "EXECUTE");
     if (
@@ -321,8 +317,10 @@ contract DaoKeyManager {
       bytes32 targetsKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX));
       bytes32 datasKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_DATASARRAY_SUFFIX));
       uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)));
+      success = new bool[](arrayLength);
+      results = new bytes[](arrayLength);
       for (uint256 i = 0; i < arrayLength; i++) {
-        (success, res) = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)))
+        (success[i], results[i]) = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)))
         .call(IERC725Y(UNIVERSAL_PROFILE).getData(datasKey));
       }
     }
@@ -330,13 +328,13 @@ contract DaoKeyManager {
   }
 
   /**
-   * @notice Vote on a proposal.
+   * @inheritdoc IDaoKeyManager
    */
   function vote(
     bytes10 proposalSignature,
     bytes30 voteDescription,
     uint8[] memory choicesArray
-  ) external {
+  ) external override {
     _verifyPermission(msg.sender, _PERMISSION_VOTE, "VOTE");
     if (
       uint256(bytes32(
@@ -379,7 +377,9 @@ contract DaoKeyManager {
 
   // --- Internal Methods.
 
-
+  /**
+   * @dev
+   */
   function _getPermissions(
     address _from
   )
@@ -393,6 +393,9 @@ contract DaoKeyManager {
     ))));
   }
 
+  /**
+   * @dev
+   */
   function _verifyPermission(
     address _from,
     bytes32 _permission,
@@ -405,21 +408,29 @@ contract DaoKeyManager {
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
   }
 
+  /**
+   * @dev
+   */
   function _setData(
     bytes32[] memory _keys,
     bytes[] memory _values
-  ) internal {
+  ) internal returns(bytes memory result) {
     require(_keys.length == _values.length);
     require(_keys.length > 0);
+    
     if(_keys.length == 1) {
-      LSP6KeyManager(KEY_MANAGER).execute(abi.encodeWithSelector(
-        setDataSingleSelector, _keys[0], _values[0]
-      ));
+      result = ILSP6KeyManager(KEY_MANAGER).execute(
+        abi.encodeWithSelector(
+          setDataSingleSelector, _keys[0], _values[0]
+        )
+      );
     }
     else {
-      LSP6KeyManager(KEY_MANAGER).execute(abi.encodeWithSelector(
-        setDataMultipleSelector, _keys, _values
-      ));
+      result = ILSP6KeyManager(KEY_MANAGER).execute(
+        abi.encodeWithSelector(
+          setDataMultipleSelector, _keys, _values
+        )
+      );
     }
   }
 

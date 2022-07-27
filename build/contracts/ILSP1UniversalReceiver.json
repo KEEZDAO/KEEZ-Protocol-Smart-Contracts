@@ -409,7 +409,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.649Z",
+  "updatedAt": "2022-07-27T13:31:58.621Z",
   "devdoc": {
     "details": "LSP1UniversalReceiver allows to receive arbitrary messages and to be informed when assets are sent or received",
     "events": {

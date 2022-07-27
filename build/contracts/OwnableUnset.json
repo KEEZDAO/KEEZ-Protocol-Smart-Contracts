@@ -1228,7 +1228,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-21T08:10:14.579Z",
+  "updatedAt": "2022-07-27T13:31:58.535Z",
   "devdoc": {
     "details": "modified version of OpenZeppelin implementation, where: - _setOwner(address) function is internal, so this function can be used in constructor of contracts implementation (instead of using transferOwnership(address) - the contract does not inherit from Context contract",
     "kind": "dev",
