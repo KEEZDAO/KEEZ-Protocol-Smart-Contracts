@@ -37,27 +37,20 @@ bytes32 constant _PERMISSION_MASTER           = 0x000000000000000000000000000000
 // --- DAO ACCOUNT METDATA KEYS
 
 
-// keccak256("Title")
-bytes32 constant _KEY_TITLE = 0x3f82a2b5852cbedcda3d9062384397479ac9a00dae9991874d842bec7aab98ce; // --> string
+// bytes32(keccak256("DaoMetadataJSON")) --> Website
+bytes32 constant _KEY_JSON_DAO = 0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127;
 
-// keccak256("Description")
-bytes32 constant _KEY_DESCRIPTION = 0x95e794640ff3efd16bfe738f1a9bf2886d166af549121f57d6e14af6b513f45d; // --> string
-
-// keccak256("Majority")
+// bytes32(keccak256("Majority")) --> uint8
 bytes32 constant _KEY_MAJORITY = 0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127; // --> uint8
 
-// keccak256("ParticipationRate")
+// bytes32(keccak256("ParticipationRate")) --> uint8
 bytes32 constant _KEY_PARTICIPATIONRATE = 0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9; // --> uint8
 
-// keccak256("VotingDelay")
-bytes32 constant _KEY_VOTINGDELAY = 0x5bd05fa174be6a4aa4a8222f8837a27a381de14e7797cf7945df58b0626e6c3d; // --> uint256
+// bytes32(keccak256("VotingDelay")) --> uint256
+bytes32 constant _KEY_MINIMUMVOTINGDELAY = 0x5bd05fa174be6a4aa4a8222f8837a27a381de14e7797cf7945df58b0626e6c3d; // --> uint256
 
-// keccak256("VotingPeriod")
-bytes32 constant _KEY_VOTINGPERIOD = 0xd08ca3a83d59467dd8ba57e940549874ea8310a1ebfb4396959235b00035d777; // --> uint256
-
-// keccak256("TokenGatedDao")
-// non-token = 0000 0000; transferable-token = 0000 0001; non-transferable-token = 0000 0010;
-bytes32 constant _KEY_TOKENGATED = 0xa45b1e711ab5d2d7654c92da78c9148c51fb0a58b116afda9fbf612c88e9680d; // --> bytes1(BitArray)
+// bytes32(keccak256("VotingPeriod")) --> uint256
+bytes32 constant _KEY_MINIMUMVOTINGPERIOD = 0xd08ca3a83d59467dd8ba57e940549874ea8310a1ebfb4396959235b00035d777; // --> uint256
 
 
 // --- DAO DELEGATING KEYS
@@ -87,15 +80,18 @@ function _KEY_ADDRESSDELEGATES_ARRAY_INDEX_PREFIX(address delegateeAddress) pure
 // To access the Proposal Data you need the bytes10(ProposalSignature) + bytes22(DataSuffix)
 
 // ProposalSignature := bytes6(uint48(creationTimestamp)) + bytes4(keccak256(bytes(Title)))
-function _KEY_PROPOSAL_PREFIX(uint48 creationTimestamp, bytes32 title) pure returns(bytes10 KEY_PREFIX) {
-  KEY_PREFIX = bytes10(bytes.concat(bytes6(uint48(creationTimestamp)), bytes4(keccak256(bytes.concat(title)))));
+function _KEY_PROPOSAL_PREFIX(uint48 creationTimestamp, string memory title) pure returns(bytes10 KEY_PREFIX) {
+  KEY_PREFIX = bytes10(bytes.concat(bytes6(uint48(creationTimestamp)), bytes4(keccak256(bytes(title)))));
 }
 
-// bytes2(0) + bytes20(keccak256("Title")) --> bytes32
-bytes22 constant _KEY_PROPOSAL_TITLE_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+// bytes2(0) + bytes20(keccak256("ProposalMetadataJSON")) --> Website
+bytes22 constant _KEY_PROPOSAL_JSON_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
 
-// bytes2(0) + bytes20(keccak256("Description")) --> string
-bytes22 constant _KEY_PROPOSAL_DESCRIPTION_SUFFIX = 0x000095e794640ff3efd16bfe738f1a9bf2886d166af5;
+// bytes2(0) + bytes20(keccak256("ProposalDelay")) --> uint256
+bytes22 constant _KEY_PROPOSAL_VOTINGDELAY_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+
+// bytes2(0) + bytes20(keccak256("ProposalPeriod")) --> uint256
+bytes22 constant _KEY_PROPOSAL_VOTINGPERIOD_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
 
 // bytes2(0) + bytes20(keccak256("CreationTimestamp")) --> uint256
 bytes22 constant _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX = 0x0000bd3132afbfa232f7d171a873f7e52e32c666b06d;

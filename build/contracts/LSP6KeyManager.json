@@ -24556,14 +24556,34 @@
   },
   "networks": {
     "5777": {
-      "events": {},
+      "events": {
+        "0x6b9340454526f665e369d7ac17353d0b73774a4a80f746b959ece8130e0f1d72": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "_value",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes4",
+              "name": "_selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "Executed",
+          "type": "event"
+        }
+      },
       "links": {},
-      "address": "0x4b689D41da7C7ac27400F025BF51a31bA714A724",
-      "transactionHash": "0xc86616995d5c05a0b39fc7ad1cb1a0a1c508de6e785485cdfa0fcd7917466e56"
+      "address": "0xc6fb79B9AFe203dD34ADAb7A7581B1a06470e600",
+      "transactionHash": "0xb245536732435799a648d71f56837f852f7e0bdfdef9e50d6f1c0f5a79d405bb"
     }
   },
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-27T15:35:25.163Z",
+  "updatedAt": "2022-07-28T18:38:29.060Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Fabian Vogelsteller <frozeman>, Jean Cavallera (CJ42), Yamen Merhi (YamenMerhi)",

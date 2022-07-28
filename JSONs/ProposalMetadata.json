@@ -1,0 +1,14 @@
+{
+  "title": "Random Proposal title",
+  "description": "blah blah blah ... blah blah blah ... blah blah blah ... blah blah blah ... ",
+  "proposalPicturesLinks": [
+    "https://somerandomlink.com"
+  ],
+  "choices": [
+    "Hard no",
+    "No",
+    "Meh",
+    "Yes",
+    "Hard yes"
+  ]
+}

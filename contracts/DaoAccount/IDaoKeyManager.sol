@@ -25,7 +25,7 @@ interface IDaoKeyManager {
   /**
    * @notice Create a proposal.
    */
-  function createProposal(bytes32 title, string memory description, address[] memory targets, bytes[] memory datas, uint8 choices, uint8 choicesPerVote) external;
+  function createProposal(string memory title, string memory metadataLink, uint48 votingDelay, uint48 votingPeriod, address[] memory targets, bytes[] memory datas, uint8 choices, uint8 choicesPerVote) external;
 
   /**
    * @notice Execute the calldata of the Proposal if there is one.

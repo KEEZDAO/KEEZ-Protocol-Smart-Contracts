@@ -25178,12 +25178,12 @@
         }
       },
       "links": {},
-      "address": "0x89f2BD3C6eB6f53cb4a3351afaf5c9809a1Fb0D1",
-      "transactionHash": "0xf05675c0223c61286556202fb53b99a6b83d9d3a1a9c2fc5391c85b648427080"
+      "address": "0x6d3d8c1546b1e077e278d41F3724D9026De141cE",
+      "transactionHash": "0x1d548bd6d42dd739b9821a656ce6ce8f15fbb89f78f61e8359daeb36132c1fcb"
     }
   },
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-27T15:35:25.111Z",
+  "updatedAt": "2022-07-28T18:38:29.001Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Fabian Vogelsteller <fabian@lukso.network>, Jean Cavallera (CJ42), Yamen Merhi (YamenMerhi)",
