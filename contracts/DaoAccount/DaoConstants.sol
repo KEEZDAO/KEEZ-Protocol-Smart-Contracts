@@ -109,7 +109,7 @@ bytes22 constant _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX = 0x0000e5dd8acc7154a678a0
 bytes22 constant _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX = 0x0000ed458cca63dcf8476211a40ad15420dcabc377f0;
 
 // ParticipantVoteKey := bytes10(ProposalSignature) + bytes2(0) + bytes20(participantAddress)
-// --> bytes30 vote description and bytes2 16 different choices in BitArray
+// --> BitArray with the users choices.
 function _KEY_PARTICIPANT_VOTE(bytes10 proposalSignature, address participantAddress) pure returns(bytes32 KEY) {
   KEY = bytes32(bytes.concat(bytes10(proposalSignature), bytes2(0), bytes20(participantAddress)));
 }

@@ -35,6 +35,6 @@ interface IDaoKeyManager {
   /**
    * @notice Vote on a proposal.
    */
-  function vote(bytes10 proposalSignature, bytes30 voteDescription, uint8[] memory choicesArray) external;
+  function vote(bytes10 proposalSignature, uint256[] memory choicesArray) external;
 
 }

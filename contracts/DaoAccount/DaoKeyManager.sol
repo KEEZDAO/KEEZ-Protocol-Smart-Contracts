@@ -27,6 +27,7 @@ import {
 
   _KEY_DELEGATEVOTE,
   _KEY_ADDRESSDELEGATES_ARRAY_PREFIX,
+  _KEY_ADDRESSDELEGATES_ARRAY_INDEX_PREFIX,
 
   _KEY_PROPOSAL_PREFIX,
   _KEY_PROPOSAL_JSON_SUFFIX,
@@ -41,7 +42,6 @@ import {
 
   setDataSingleSelector,
   setDataMultipleSelector,
-  execute,
 
   _SPLIT_BYTES32_IN_TWO_HALFS
 } from "./DaoConstants.sol";
@@ -53,7 +53,7 @@ import {ErrorWithNumber} from "../Errors.sol";
  *
  * @author B00ste
  * @title DaoKeyManager
- * @custom:version 1
+ * @custom:version 1.1
  */
 contract DaoKeyManager is IDaoKeyManager {
 
@@ -108,6 +108,7 @@ contract DaoKeyManager is IDaoKeyManager {
   /**
    * @inheritdoc IDaoKeyManager
    */
+  // ToDo remove delegate.
   function delegate(address delegatee) external override {
     _verifyPermission(msg.sender, _PERMISSION_SENDDELEGATE, "SENDDELEGATE");
     _verifyPermission(delegatee, _PERMISSION_RECIEVEDELEGATE, "RECIEVEDELEGATE");
@@ -215,11 +216,8 @@ contract DaoKeyManager is IDaoKeyManager {
      * @dev Count all the votes by accessing the choices of all of the participants
      * of the DAO.
      * 1. Get the user address and verify its permissions.
-     * 2. If `user` has vote permission and did not delegate his vote
-     * we will save his number of votes as 1 and save his choices for later use.
-     * 3. We verify if the `user` has the RECIEVEDELEGATE permission and if so
-     * we will increase his number of votes by the number of votes delegated to him.
-     * 4. After we got all the needed info we can add the number of votes to the choises of the `user`
+     * 2. If `user` has vote permission or send delegate permission
+     * we will save his number of votes as 1 and save his choices.
      */  
     uint8 nrOfChoices =  uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX)))));
     uint256 totalUsers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY)));
@@ -229,26 +227,12 @@ contract DaoKeyManager is IDaoKeyManager {
         bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(i)))
       )));
       bytes32 permissions = _getPermissions(user);
-      bytes20 delegatedTo = bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(_KEY_DELEGATEVOTE, bytes20(user)))
-      ));
-      if (permissions & _PERMISSION_VOTE != 0) {
-        bytes2 choices;
-        uint256 votes;
-        if (delegatedTo == bytes20(0)) {
-          votes = 1;
-          choices = bytes2(IERC725Y(UNIVERSAL_PROFILE).getData(
-            _KEY_PARTICIPANT_VOTE(proposalSignature, user)
-          ));
-        }
-        else {
-          votes = 0;
-        }
-        if (permissions & _PERMISSION_RECIEVEDELEGATE != 0) {
-          votes += uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
-            bytes32(bytes.concat(_KEY_ADDRESSDELEGATES_ARRAY_PREFIX, bytes20(user)))
-          )));
-        }
+      if (permissions & _PERMISSION_VOTE != 0 || permissions & _PERMISSION_SENDDELEGATE != 0) {
+        bytes2 choices = bytes2(IERC725Y(UNIVERSAL_PROFILE).getData(
+          _KEY_PARTICIPANT_VOTE(proposalSignature, user)
+        ));
+        uint256 votes = 1;
+
         for(uint8 j = 0; j < nrOfChoices; j++) {
           choices & bytes2(uint16(1 << j)) != 0 ? votesByChoiceIndex[j] += votes : 0;
         }
@@ -306,8 +290,7 @@ contract DaoKeyManager is IDaoKeyManager {
    */
   function vote(
     bytes10 proposalSignature,
-    bytes30 voteDescription,
-    uint8[] memory choicesArray
+    uint256[] memory choicesArray
   ) external override {
     _verifyPermission(msg.sender, _PERMISSION_VOTE, "VOTE");
     if (
@@ -323,36 +306,73 @@ contract DaoKeyManager is IDaoKeyManager {
       ))) < choicesArray.length
     ) revert ErrorWithNumber(0x0009);
 
-    uint16 choices = 0;
+    // Create a BitArray of the voters choices.
+    uint256 choices = 0;
     for(uint128 i = 0; i < choicesArray.length; i++) {
-      if(
-      uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(
-          _SPLIT_BYTES32_IN_TWO_HALFS(
-            bytes32(bytes.concat(
-              proposalSignature, _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX
-            ))
-          )[0],
-          bytes16(i)
-        ))
-      ))) == choicesArray[i]
-      ) {
-        choices = choices + uint16(1 << i);
-      }
+      choices = choices + (1 << i);
     }
 
-    bytes32[] memory keys = new bytes32[](1);
-    keys[0] = _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender);
-    bytes[] memory values = new bytes[](1);
-    values[0] = bytes.concat(voteDescription, bytes2(choices));
+    // Initialize the keys and values array.
+    bytes32[] memory keys;
+    bytes[] memory values;
+
+    /**
+     * @dev Set the `_KEY_PARTICIPANT_VOTE` for the voter and his delegators if the voter has
+     * `_PERMISSION_RECIEVEDELEGATE` with the choices BitArray of the voter.
+     */
+    if (_getPermissions(msg.sender) & _PERMISSION_RECIEVEDELEGATE != 0) {
+      uint256 delegates = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
+        _KEY_ADDRESSDELEGATES_ARRAY_PREFIX, bytes20(msg.sender)
+      )))));
+
+      keys = new bytes32[](delegates + 1);
+      values = new bytes[](delegates + 1);
+      uint256 arrayLength = 0;
+
+      /**
+       * @dev Get each delegator address and save the choices to that address
+       * only if it doesn't have other choices already saved.
+       */
+      for (uint128 i = 0; i < delegates; i++){
+        address delegator = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(
+          bytes32(bytes.concat(
+            _KEY_ADDRESSDELEGATES_ARRAY_INDEX_PREFIX(msg.sender), bytes16(i)
+          ))
+        )));
+
+        if (
+          uint256(bytes32(
+            IERC725Y(UNIVERSAL_PROFILE).getData(
+              _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender)
+            )
+          )) == 0
+        ) {
+          keys[arrayLength++] = _KEY_PARTICIPANT_VOTE(proposalSignature, delegator);
+          values[arrayLength++] = bytes.concat(bytes32(choices));
+        }
+
+
+      }
+
+      keys[arrayLength] = _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender);
+      values[arrayLength] = bytes.concat(bytes32(choices));
+    }
+    else {
+      keys = new bytes32[](1);
+      values = new bytes[](1);
+
+      keys[0] = _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender);
+      values[0] = bytes.concat(bytes32(choices));
+    }
     _setData(keys, values);
   }
 
 
   // --- Internal Methods.
 
+
   /**
-   * @dev
+   * @dev Get the BitArray permissions of an address.
    */
   function _getPermissions(
     address _from
@@ -368,7 +388,7 @@ contract DaoKeyManager is IDaoKeyManager {
   }
 
   /**
-   * @dev
+   * @dev Verify if an address has certain permission and revert if not.
    */
   function _verifyPermission(
     address _from,
@@ -383,7 +403,7 @@ contract DaoKeyManager is IDaoKeyManager {
   }
 
   /**
-   * @dev
+   * @dev Set the data to the Universal Profile.
    */
   function _setData(
     bytes32[] memory _keys,
