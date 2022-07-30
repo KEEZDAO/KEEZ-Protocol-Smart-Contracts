@@ -10,6 +10,10 @@ import {
   NotAuthorised
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Errors.sol";
 import {
+  setDataSingleSelector,
+  setDataMultipleSelector
+} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
+import {
   _LSP6KEY_ADDRESSPERMISSIONS_ARRAY,
   _LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX,
   _LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX,
@@ -39,9 +43,6 @@ import {
   _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX,
   _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX,
   _KEY_PARTICIPANT_VOTE,
-
-  setDataSingleSelector,
-  setDataMultipleSelector,
 
   _SPLIT_BYTES32_IN_TWO_HALFS
 } from "./DaoConstants.sol";
@@ -116,11 +117,11 @@ contract DaoKeyManager is IDaoKeyManager {
     bytes32 arrayKey = bytes32(bytes.concat(_KEY_ADDRESSDELEGATES_ARRAY_PREFIX, bytes20(delegatee)));
     uint128 arrayLength = uint128(bytes16(IERC725Y(UNIVERSAL_PROFILE).getData(arrayKey)));
 
-    bytes32[] memory keys = new bytes32[](2);
+    bytes32[] memory keys = new bytes32[](3);
     keys[0] = bytes32(bytes.concat(_SPLIT_BYTES32_IN_TWO_HALFS(arrayKey)[0], bytes16(arrayLength)));
     keys[1] = arrayKey;
     keys[2] = bytes32(bytes.concat(_KEY_DELEGATEVOTE, bytes20(msg.sender)));
-    bytes[] memory values = new bytes[](2);
+    bytes[] memory values = new bytes[](3);
     values[0] = bytes.concat(bytes20(msg.sender));
     values[1] = bytes.concat(bytes16(arrayLength + 1));
     values[2] = bytes.concat(bytes20(delegatee));
@@ -275,8 +276,6 @@ contract DaoKeyManager is IDaoKeyManager {
       bytes32 targetsKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX));
       bytes32 datasKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_DATASARRAY_SUFFIX));
       uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)));
-      success = new bool[](arrayLength);
-      results = new bytes[](arrayLength);
       for (uint256 i = 0; i < arrayLength; i++) {
         (success[i], results[i]) = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)))
         .call(IERC725Y(UNIVERSAL_PROFILE).getData(datasKey));
@@ -324,7 +323,7 @@ contract DaoKeyManager is IDaoKeyManager {
       uint256 delegates = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
         _KEY_ADDRESSDELEGATES_ARRAY_PREFIX, bytes20(msg.sender)
       )))));
-
+      
       keys = new bytes32[](delegates + 1);
       values = new bytes[](delegates + 1);
       uint256 arrayLength = 0;
@@ -360,7 +359,6 @@ contract DaoKeyManager is IDaoKeyManager {
     else {
       keys = new bytes32[](1);
       values = new bytes[](1);
-
       keys[0] = _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender);
       values[0] = bytes.concat(bytes32(choices));
     }

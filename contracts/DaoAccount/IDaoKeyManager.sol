@@ -14,6 +14,9 @@ interface IDaoKeyManager {
 
   /**
    * @notice Toggle permissions of an address.
+   *
+   * @param _to The Universal's Profile address whose permission will be toggled.
+   * @param _permissions The array of permissions that will be toggled.
    */
   function togglePermissions(address _to, bytes32[] memory _permissions) external;
 

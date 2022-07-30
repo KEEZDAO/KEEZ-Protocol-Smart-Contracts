@@ -3,21 +3,32 @@
 pragma solidity ^0.8.0;
 
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
-import {LSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6KeyManager.sol";
+import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/ILSP6KeyManager.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {
   NoPermissionsSet,
   NotAuthorised
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Errors.sol";
 import {
-  _ERC1271_MAGICVALUE,
-  _ERC1271_FAILVALUE
-} from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0Constants.sol";
+  setDataSingleSelector,
+  setDataMultipleSelector
+} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
 import {
   _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
 
   _PERMISSION_VOTE,
-  _PERMISSION_PROPOSE
+  _PERMISSION_PROPOSE,
+
+  _MULTISIG_PARTICIPANTS_KEY,
+  _MULTISIG_PARTICIPANTS_KEY_PREFIX,
+
+  _MULTISIG_PROPOSAL_SIGNATURE,
+  _MULTISIG_TARGETS_SUFFIX,
+  _MULTISIG_PROPOSAL_TARGETS_KEY,
+  _MULTISIG_DATAS_SUFFIX,
+  _MULTISIG_PROPOSAL_DATAS_KEY
 } from "./MultisigConstants.sol";
+import {ErrorWithNumber} from "../Errors.sol";
 
 /**
  *
@@ -25,9 +36,10 @@ import {
  *
  * @author B00ste
  * @title MultisigKeyManager
- * @custom:version 0.92
+ * @custom:version
  */
 contract MultisigKeyManager {
+  using ECDSA for bytes32;
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -52,39 +64,112 @@ contract MultisigKeyManager {
     KEY_MANAGER = _KEY_MANAGER;
   }
 
+  // ToDo Move this to the interface of this contract.
+  event ProposalCreated(bytes32 proposalSignature);
 
   /**
    * @notice Propose to execute methods on behalf of the multisig.
    */
   function proposeExecution(
+    string memory _title,
     address[] memory _targets,
     bytes[] memory _datas
-  ) external {
+  )
+    external
+  {
+    if(_targets.length != _datas.length) revert ErrorWithNumber(0x0001);
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
 
+    uint48 currentTimestamp = uint48(block.timestamp);
 
+    uint128 totalLength = uint128(_targets.length * 2);
+    bytes32[] memory keys = new bytes32[](totalLength + 2);
+    bytes[] memory values = new bytes[](totalLength + 2);
+
+    for (uint128 i = 0; i < _targets.length ; i++) {
+      keys[i] = bytes32(bytes.concat(
+        bytes16(_MULTISIG_PROPOSAL_TARGETS_KEY(_title, currentTimestamp)),
+        bytes16(i)
+      ));
+      values[i] = bytes.concat(bytes20(_targets[i]));
+
+      keys[i + _targets.length] = bytes32(bytes.concat(
+        bytes16(_MULTISIG_PROPOSAL_DATAS_KEY(_title, currentTimestamp)),
+        bytes16(i)
+      ));
+      values[i + _targets.length] = _datas[i];
+    }
+    keys[0] = _MULTISIG_PROPOSAL_TARGETS_KEY(_title, currentTimestamp);
+    values[0] = bytes.concat(bytes32(_targets.length));
+    keys[1] = _MULTISIG_PROPOSAL_DATAS_KEY(_title, currentTimestamp);
+    values[1] = bytes.concat(bytes32(_datas.length));
+
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        keys, values
+      )
+    );
+
+    emit ProposalCreated(_MULTISIG_PROPOSAL_SIGNATURE(_title, currentTimestamp));
   }
 
   /**
-   * @notice Sign a proposal.
+   * @notice Create a unique hash for every proposal which should be hashed. 
    */
-  function signProposal(
-    bytes32 _hash,
-    bytes memory _signature,
-    bool response
-  ) external {
-    bytes4 res = LSP6KeyManager(KEY_MANAGER).isValidSignature(_hash, _signature);
-    
+  function getProposalHash(
+    address _signer,
+    bytes32 _proposalSignature,
+    bool _response
+  ) public view returns(bytes32 _hash) {
+    _hash = keccak256(abi.encodePacked(
+      _signer,
+      _proposalSignature,
+      _response
+    ));
   }
 
   /**
    * @notice Execute a proposal if you have all the necessary signatures.
    */
   function execute(
-    bytes[] memory membersSignatures,
-    string[] memory signedMessages
-  ) external {
-    // ToDo verify if there are enought signatures on-chain and off-chain 
+    bytes32 _proposalSignature,
+    bytes[] memory _signatures,
+    address[] memory _signers
+  )
+    external
+  {
+    // ToDo verify the result of the signatures.
+    if (_signatures.length != _signers.length) revert ErrorWithNumber(0x0010);
+
+    uint256 positiveResponses;
+    for(uint256 i = 0; i < _signatures.length; i++) {
+      bytes32 _hash = getProposalHash(_signers[i], _proposalSignature, true);
+      address recoveredAddress = _hash.recover(_signatures[i]);
+
+      if(recoveredAddress == _signers[i]) {
+        positiveResponses++;
+      }
+    }
+
+    // ToDo compaer the positiveNumbers to the quorum needed for execution.
+    if(positiveResponses > 5) {
+      // ToDo fix this to execute the datas of the proposals at targets.
+      ILSP6KeyManager(KEY_MANAGER).execute(
+        abi.encodeWithSignature(
+          "execute(uint256,address,uint256,bytes)",
+          1,
+          _tokenAddress,
+          0,
+          abi.encodeWithSignature(
+            "authorizeOperator(address,uint256)",
+            address(this),
+            _to,
+            _amount
+          )
+        )
+      );
+    }
 
   }
 

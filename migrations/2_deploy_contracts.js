@@ -16,7 +16,7 @@ module.exports = async function(deployer, networks, accounts) {
   await deployer.deploy(DaoKeyManager, UNIVERSAL_PROFILE.address, KEY_MANAGER.address);
   const DAO_KEY_MANAGER = await DaoKeyManager.deployed();
 
-  await deployer.deploy(VaultKeyManager);
+  await deployer.deploy(VaultKeyManager, UNIVERSAL_PROFILE.address, KEY_MANAGER.address);
   const VAULT_KEY_MANAGER = await VaultKeyManager.deployed();
 
   await deployer.deploy(MultisigKeyManager, UNIVERSAL_PROFILE.address, KEY_MANAGER.address);

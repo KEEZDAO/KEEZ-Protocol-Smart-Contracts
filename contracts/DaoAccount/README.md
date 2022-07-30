@@ -1,11 +1,11 @@
 ## Methods
 
 ### ``` function togglePermissions(address _to, bytes32[] memory _permissions) ```
-|   Method properties  |                            Explanation                            |
-|        :---:         |                               :---:                               |
-| Method description   | Toggle permissions of an address.                                 |
-| Param: `_to`         | The Universal's Profile address whose permission will be toggled. |
-| Param: `_permission` | The permission that will be toggled.                              |
+|   Method properties   |                            Explanation                            |
+|        :---:          |                               :---:                               |
+| Method description    | Toggle permissions of an address.                                 |
+| Param: `_to`          | The Universal's Profile address whose permission will be toggled. |
+| Param: `_permissions` | The array of permissions that will be toggled.                    |
 
 #### Possible permissions
 

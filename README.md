@@ -17,3 +17,4 @@ On the development network `truffle develop` and then `truffle deploy --network 
 | `0x0007`     | There are no methods to execute.                                                 |
 | `0x0008`     | User has already voted.                                                          |
 | `0x0009`     | User has more choices than allowed.                                              |
+| `0x0010`     | `_signatures.length` must be equal to `_signers.length`                          |
