@@ -18,6 +18,10 @@ import {
 
   _PERMISSION_VOTE,
   _PERMISSION_PROPOSE,
+  _PERMISSION_ADD_MEMBERS,
+  _PERMISSION_REMOVE_MEMBERS,
+
+  _MULTISIG_QUORUM,
 
   _MULTISIG_PARTICIPANTS_KEY,
   _MULTISIG_PARTICIPANTS_KEY_PREFIX,
@@ -58,14 +62,39 @@ contract MultisigKeyManager {
 
   constructor(
     address payable _UNIVERSAL_PROFILE,
-    address _KEY_MANAGER
+    address _KEY_MANAGER,
+    uint8 quorum
   ) {
     UNIVERSAL_PROFILE = _UNIVERSAL_PROFILE;
     KEY_MANAGER = _KEY_MANAGER;
+
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataSingleSelector,
+        _MULTISIG_QUORUM,
+        bytes.concat(bytes1(quorum))
+      )
+    );
   }
 
   // ToDo Move this to the interface of this contract.
   event ProposalCreated(bytes32 proposalSignature);
+
+  /**
+   * @notice Add members to the multisig.
+   */
+  function addMembers(address[] memory newMembers) external {
+    _verifyPermission(msg.sender, _PERMISSION_ADD_MEMBERS, "ADD_MEMBERS");
+
+  }
+
+  /**
+   * @notice Remove members from the multisig.
+   */
+  function addMembers(address[] memory removedMembers) external {
+    _verifyPermission(msg.sender, _PERMISSION_REMOVE_MEMBERS, "REMOVE_MEMBERS");
+
+  }
 
   /**
    * @notice Propose to execute methods on behalf of the multisig.
@@ -153,8 +182,11 @@ contract MultisigKeyManager {
     }
 
     // ToDo compaer the positiveNumbers to the quorum needed for execution.
-    if(positiveResponses > 5) {
+    uint8 quorum = IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_QUORUM);
+    uint256 members;
+    if(positiveResponses/members > quorum/members) {
       // ToDo fix this to execute the datas of the proposals at targets.
+      // ToDo remove the targets and datas from the universal profile data
       ILSP6KeyManager(KEY_MANAGER).execute(
         abi.encodeWithSignature(
           "execute(uint256,address,uint256,bytes)",

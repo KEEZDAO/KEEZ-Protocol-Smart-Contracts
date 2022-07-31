@@ -58,6 +58,18 @@ import {ErrorWithNumber} from "../Errors.sol";
  */
 contract DaoKeyManager is IDaoKeyManager {
 
+
+
+
+  /**
+   * TODO Change the contract to use signatures instead of interacting with the
+   * vote() method to instead sign a message with the vote and then pass the signatures to the
+   * executeProposal() method and check the delegates, choices there from each signature.
+   */
+
+
+
+
   /**
    * @notice Address of the DAO_ACCOUNT.
    */

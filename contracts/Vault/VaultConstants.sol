@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 
-// --- PERMISSIONS KEYS
+// --- LSP6KeyManager KEYS
 
 
 // keccak256("AddressPermissions[]")
@@ -13,6 +13,10 @@ bytes16 constant _LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX = 0xdf30dba06db6a30e65
 
 // AddressPermissions:...
 bytes6 constant _LSP6KEY_ADDRESSPERMISSIONS_PREFIX = 0x4b80742de2bf;
+
+
+// --- VAULT PERMISSIONS KEYS
+
 
 // bytes6(keccak256("AddressPermissions")) + bytes4(keccak256("VaultPermissions")) + bytes2(0)
 // AddressPermissions:VaultPermissions:<address> --> bytes32
