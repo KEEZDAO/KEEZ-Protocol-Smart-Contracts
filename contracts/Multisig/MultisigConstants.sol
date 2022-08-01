@@ -22,10 +22,10 @@ bytes6 constant _LSP6KEY_ADDRESSPERMISSIONS_PREFIX = 0x4b80742de2bf;
 bytes12 constant _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX = 0x4164647265734d756c740000;
 
 // DEFAULT PERMISSIONS VALUES
-bytes32 constant _PERMISSION_VOTE           = 0x0000000000000000000000000000000000000000000000000000000000000001;
-bytes32 constant _PERMISSION_PROPOSE        = 0x0000000000000000000000000000000000000000000000000000000000000002;
-bytes32 constant _PERMISSION_ADD_MEMBERS    = 0x0000000000000000000000000000000000000000000000000000000000000004;
-bytes32 constant _PERMISSION_REMOVE_MEMBERS = 0x0000000000000000000000000000000000000000000000000000000000000008;
+bytes32 constant _PERMISSION_VOTE              = 0x0000000000000000000000000000000000000000000000000000000000000001;
+bytes32 constant _PERMISSION_PROPOSE           = 0x0000000000000000000000000000000000000000000000000000000000000002;
+bytes32 constant _PERMISSION_ADD_PERMISSION    = 0x0000000000000000000000000000000000000000000000000000000000000004;
+bytes32 constant _PERMISSION_REMOVE_PERMISSION = 0x0000000000000000000000000000000000000000000000000000000000000008;
 
 // --- MULTISIG SETTINGS
 
@@ -50,34 +50,31 @@ bytes16 constant _MULTISIG_PARTICIPANTS_KEY_PREFIX = 0x54aef89da199194b126d28036
 // keccak("MultisigProposal")
 bytes4 constant _MULTISIG_PROPOSAL_KEY_BYTES4_PREFIX = 0x4d756c74;
 
-// Proposal signature := _MULTISIG_PROPOSAL_KEY_PREFIX + bytes6(<Creation Timestamp>) + bytes20("<Title>")
-function _MULTISIG_PROPOSAL_SIGNATURE(string memory _title, uint48 _timestamp) pure returns(bytes32 KEY) {
-  KEY = bytes32(bytes.concat(_MULTISIG_PROPOSAL_KEY_BYTES4_PREFIX, bytes6(_timestamp), bytes20(bytes(_title))));
+// Proposal signature := _MULTISIG_PROPOSAL_KEY_PREFIX + bytes6(abi.encode(<Creation Timestamp>))
+function _MULTISIG_PROPOSAL_SIGNATURE(uint48 _timestamp) pure returns(bytes10 KEY) {
+  KEY = bytes10(bytes.concat(_MULTISIG_PROPOSAL_KEY_BYTES4_PREFIX, bytes6(keccak256(abi.encode(_timestamp)))));
 }
 
-// Get proposal signature prefix.
-function _MULTISIG_PROPOSAL_SIGNATURE_PREFIX(string memory _title, uint48 _timestamp) pure returns(bytes16 KEY_PREFIX) {
-  KEY_PREFIX = bytes16(_MULTISIG_PROPOSAL_SIGNATURE(_title, _timestamp));
-}
-
-// keccak256("MultisigProposalTargets")
-bytes16 constant _MULTISIG_TARGETS_SUFFIX = 0x81e946b6d7a7e0baca88491a44167a59;
+// keccak256("MultisigProposalTargets[]")
+bytes20 constant _MULTISIG_TARGETS_SUFFIX = bytes20(keccak256("MultisigProposalTargets[]"));
+//bytes20 constant _MULTISIG_TARGETS_SUFFIX = 0xc6c66d5a29ded4b70a2bc4d1637290a99598996b;
 
 // Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE_PREFIX + bytes16(keccak256("MultisigProposalTargets"))
-function _MULTISIG_PROPOSAL_TARGETS_KEY(string memory _title, uint48 _timestamp) pure returns(bytes32 KEY) {
+function _MULTISIG_PROPOSAL_TARGETS_KEY(bytes10 _proposalSignature) pure returns(bytes32 KEY) {
   KEY = bytes32(bytes.concat(
-    _MULTISIG_PROPOSAL_SIGNATURE_PREFIX(_title, _timestamp),
+    _proposalSignature,
     _MULTISIG_TARGETS_SUFFIX
   ));
 }
 
-// keccak256("MultisigProposalDatas")
-bytes16 constant _MULTISIG_DATAS_SUFFIX = 0x6b3ef8384bb94a894d92588af704ec30;
+// keccak256("MultisigProposalDatas[]")
+bytes20 constant _MULTISIG_DATAS_SUFFIX = bytes20(keccak256("MultisigProposalDatas[]"));
+//bytes20 constant _MULTISIG_DATAS_SUFFIX = 0xa127ec6f6a314082d85a8df20cec2eb66abc0e15;
 
 // Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE_PREFIX + bytes16(keccak256("MultisigProposalDatas"))
-function _MULTISIG_PROPOSAL_DATAS_KEY(string memory _title, uint48 _timestamp) pure returns(bytes32 KEY) {
+function _MULTISIG_PROPOSAL_DATAS_KEY(bytes10 _proposalSignature) pure returns(bytes32 KEY) {
   KEY = bytes32(bytes.concat(
-    _MULTISIG_PROPOSAL_SIGNATURE_PREFIX(_title, _timestamp),
+    _proposalSignature,
     _MULTISIG_DATAS_SUFFIX
   ));
 }

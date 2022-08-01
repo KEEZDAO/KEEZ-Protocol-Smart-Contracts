@@ -2,20 +2,40 @@
 
 pragma solidity ^0.8.0;
 
+// Interfaces for interacting with a Universal Profile.
+
+// getData(...)
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
+// setData(...)
 import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/ILSP6KeyManager.sol";
+
+// Utils for managing arrays using setData(...)
+import {ERC725ArrayUtilsLibrary} from "../ERC725ArrayUtilsLibrary.sol";
+
+// authorizeOperator(...), transfer(...), transferBatch(...)
 import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/ILSP7DigitalAsset.sol";
 import {ILSP8IdentifiableDigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/ILSP8IdentifiableDigitalAsset.sol";
+
+// LSP6 Constants
 import {
   NoPermissionsSet,
   NotAuthorised
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Errors.sol";
 import {
+  setDataSingleSelector,
+  setDataMultipleSelector
+} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
+
+// Vault Constants
+import {
   _LSP6KEY_ADDRESSPERMISSIONS_VAULTPERMISSIONS_PREFIX,
   
   _PERMISSION_INCREASE_TOKEN_ALLOWANCE,
   _PERMISSION_ALLOWED_TOKENS_CONTROLLER,
-  _PERMISSION_TOKENS_TRANSFER
+  _PERMISSION_TOKENS_TRANSFER,
+
+  _VAULT_ALLOWED_TOKEN_ADDRESSES,
+  _VAULT_ALLOWED_TOKEN_ADDRESSES_PREFIX
 } from "./VaultConstants.sol";
 
 /**
@@ -24,9 +44,11 @@ import {
  *
  * @author B00ste
  * @title VaultKeyManager
- * @custom:version 1
+ * @custom:version 1.1
  */
 contract VaultKeyManager {
+  using  ERC725ArrayUtilsLibrary for  ERC725ArrayUtilsLibrary.Targets;
+  ERC725ArrayUtilsLibrary.Targets private account;
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -38,17 +60,13 @@ contract VaultKeyManager {
    */
   address private KEY_MANAGER;
 
-  /**
-   * @notice Address of the creator.
-   */
-  address private CREATOR;
-
   constructor(
     address payable _UNIVERSAL_PROFILE,
     address _KEY_MANAGER
   ) {
     UNIVERSAL_PROFILE = _UNIVERSAL_PROFILE;
     KEY_MANAGER = _KEY_MANAGER;
+    account.ADD_TARGETS(_UNIVERSAL_PROFILE, _KEY_MANAGER);
   }
 
   /**
@@ -58,7 +76,17 @@ contract VaultKeyManager {
     address _tokenAddress
   ) external {
     _verifyPermission(msg.sender, _PERMISSION_ALLOWED_TOKENS_CONTROLLER, "ALLOWED_TOKENS_CONTROLLER");
+    account.ARRAY_ADD(_VAULT_ALLOWED_TOKEN_ADDRESSES, bytes.concat(bytes20(_tokenAddress)));
+  }
 
+  /**
+   * @notice Remove a LSP7/LSP8 from the allowed tokens to be received.
+   */
+  function removeTokenAddressFromTheAllowedArray(
+    address _tokenAddress
+  ) external {
+    _verifyPermission(msg.sender, _PERMISSION_ALLOWED_TOKENS_CONTROLLER, "ALLOWED_TOKENS_CONTROLLER");
+    account.ARRAY_REMOVE(_VAULT_ALLOWED_TOKEN_ADDRESSES, bytes.concat(bytes20(_tokenAddress)));
   }
 
   /**
@@ -192,7 +220,7 @@ contract VaultKeyManager {
         _tokenAddress,
         0,
         abi.encodeWithSignature(
-          "transfer(address[],address[],uint256[],bool,bytes[])",
+          "transferBatch(address[],address[],uint256[],bool,bytes[])",
           _from,
           _to,
           _amount,
@@ -224,7 +252,7 @@ contract VaultKeyManager {
         _tokenAddress,
         0,
         abi.encodeWithSignature(
-          "transfer(address[],address[],bytes32[],bool,bytes[])",
+          "transferBatch(address[],address[],bytes32[],bool,bytes[])",
           _from,
           _to,
           _tokenId,
