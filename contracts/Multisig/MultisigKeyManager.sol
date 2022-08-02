@@ -11,7 +11,6 @@ import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManag
 
 // Openzeppelin Utils.
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 // LSP6 Constants
 import {
@@ -34,6 +33,8 @@ import {
 
   _MULTISIG_QUORUM,
 
+  _MULTISIG_PARTICIPANTS_KEY,
+
   _MULTISIG_PROPOSAL_SIGNATURE,
   _MULTISIG_PROPOSAL_TARGETS_KEY,
   _MULTISIG_PROPOSAL_DATAS_KEY
@@ -48,16 +49,10 @@ import {ErrorWithNumber} from "../Errors.sol";
  *
  * @author B00ste
  * @title MultisigKeyManager
- * @custom:version 1.1
+ * @custom:version 1.2
  */
 contract MultisigKeyManager {
   using ECDSA for bytes32;
-  using EnumerableSet for EnumerableSet.AddressSet;
-
-  /**
-   * @notice Members of the Multisig.
-   */
-  EnumerableSet.AddressSet private multisigMembers;
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -80,8 +75,7 @@ contract MultisigKeyManager {
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
         setDataSingleSelector,
-        _MULTISIG_QUORUM,
-        bytes.concat(bytes1(quorum))
+        _MULTISIG_QUORUM, bytes.concat(bytes1(quorum))
       )
     );
   }
@@ -90,42 +84,93 @@ contract MultisigKeyManager {
   event ProposalCreated(bytes10 proposalSignature);
 
   /**
-   * @notice Add/Remove members permissions.
+   * @notice Create a `_hash` for signing and that signature can be used
+   * by the user `_to` to redeem the permissions.
    */
-  function togglePermissions(address _to, bytes32 _permissions) external {
+  function newPermissionMessage(
+    address _to,
+    bytes32 _permissions
+  ) public pure returns(bytes32 _hash) {
+    _hash = keccak256(abi.encode(
+      _to, _permissions
+    ));
+  }
 
-    // TODO verify each permission from `_permissions` in order to remove it individually or add it individually.
-    bytes32 permissions = _getPermissions(_to);
-    if (permissions & _permissions != 0) {
-      _verifyPermission(msg.sender, _PERMISSION_REMOVE_PERMISSION, "REMOVE_PERMISSION");
-      permissions = bytes32(uint256(permissions) - uint256(_permissions));
-    }
-    else {
-      _verifyPermission(msg.sender, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
-      permissions = bytes32(uint256(permissions) + uint256(_permissions));
-    }
+  /**
+   * @notice User can claim a `_permission` if he recieved the `_signature`
+   * from someone with the ADD_PERMISSION permission, otherwise it will revert.
+   */
+  function claimPermission(bytes32 _permissions, bytes memory _signature) external {
+    bytes32 _hash = newPermissionMessage(msg.sender, _permissions);
+    address recoveredAddress = _hash.recover(_signature);
+    _verifyPermission(recoveredAddress, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
+    _addPermissions(msg.sender, _permissions);
+  }
 
-    bytes32[] memory keys;
-    bytes[] memory values;
-    uint256 setDataArraysLength;
+  /**
+   * @notice 
+   */
+  function addPermissions(address _to, bytes32 _permissions) external {
+    _verifyPermission(msg.sender, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
+    _addPermissions(_to, _permissions);
+  }
 
-    // If the user has no perimissions left we remove him from the `multisigMembers`
-    if(permissions == bytes32(0)) {
-      multisigMembers.add(_to);
-    }
-    // If user's new permissions are equal to the total permissions then it's a new user and we have to add him to `multisigMembers`
-    else if(permissions == _permissions) {
-      multisigMembers.remove(_to);
-    }
+  /**
+   * @notice 
+   */
+  function removePermissions(address _to, bytes32 _permissions) external {
+    _verifyPermission(msg.sender, _PERMISSION_REMOVE_PERMISSION, "REMOVE_PERMISSION");
+    _removePermissions(_to, _permissions);
+  }
 
-    // Save user's permissions.
-    keys[setDataArraysLength - 1] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX, bytes20(_to)));
-    values[setDataArraysLength - 1] = bytes.concat(permissions);
-    
+  /**
+   * @dev Add `_permissions` to an address `_to`.
+   */
+  function _addPermissions(address _to, bytes32 _permissions) internal {
+    // Check if user has any permisssions. If not add him to the list of participants.
+    bytes32 currentPermissions = _getPermissions(_to);
+    if (currentPermissions == bytes32(0))
+    _arrayAdd(_MULTISIG_PARTICIPANTS_KEY, bytes.concat(bytes20(_to)));
+    // Update the permissions in a local variable.
+    for(uint256 i = 0; i < 4; i++) {
+      if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
+      currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
+    }
+    // Set the local permissions to the Universal Profile.
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
+        setDataSingleSelector,
+        bytes32(bytes.concat(
+          _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
+          bytes20(_to)
+        )),
+        bytes.concat(currentPermissions)
+      )
+    );
+  }
+
+  /**
+   * @dev Remove `_permissions` from an address `_to`.
+   */
+  function _removePermissions(address _to, bytes32 _permissions) internal {
+    // Update the permissions in a local variable.
+    bytes32 currentPermissions = _getPermissions(_to);
+    for(uint256 i = 0; i < 4; i++) {
+      if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
+      currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
+    }
+    // Check if user has any permissions left. If not, remove him from the list of participants.
+    if (currentPermissions == bytes32(0))
+    _arrayRemove(_MULTISIG_PARTICIPANTS_KEY, bytes.concat(bytes20(_to)));
+    // Set the local permissions to the Universal Profile.
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataSingleSelector,
+        bytes32(bytes.concat(
+          _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
+          bytes20(_to)
+        )),
+        bytes.concat(currentPermissions)
       )
     );
   }
@@ -202,17 +247,13 @@ contract MultisigKeyManager {
     external
   {
 
-    uint256 votingMembers;
-    for (uint256 i = 0; i < multisigMembers.length(); i++) {
-      if (_getPermissions(multisigMembers.at(i)) & _PERMISSION_VOTE != 0) votingMembers++;
-    }
-
+    uint256 votingMembers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PARTICIPANTS_KEY)));
     uint256 positiveResponses;
     for(uint256 i = 0; i < _signatures.length; i++) {
       bytes32 _hash = getProposalHash(_signers[i], _proposalSignature, true);
       address recoveredAddress = _hash.recover(_signatures[i]);
 
-      if(multisigMembers.contains(recoveredAddress)) {
+      if(_getPermissions(recoveredAddress) & _PERMISSION_VOTE != 0) {
         positiveResponses++;
       }
     }
@@ -262,7 +303,9 @@ contract MultisigKeyManager {
 
   // --- Internal Methods.
 
-
+  /**
+   * @dev Get the permissions of an address.
+   */
   function _getPermissions(
     address _from
   )
@@ -276,6 +319,9 @@ contract MultisigKeyManager {
     ))));
   }
 
+  /**
+   * @dev Verify if an address has a permission.
+   */
   function _verifyPermission(
     address _from,
     bytes32 _permission,
@@ -286,6 +332,98 @@ contract MultisigKeyManager {
   {
     bytes32 permissions = _getPermissions(_from);
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
+  }
+
+  /**
+   * @dev Returns `arrayLenth` + 1 if the array at `_key` doesn't contain `_value`
+   * and the index of the `_value` inside the array at `_key` if it contains `_value`.
+   */
+  function _arrayContains(
+    bytes32 _key,
+    bytes memory _value
+  ) internal view returns(uint256 index) {
+    uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_key)));
+    index = arrayLength + 1;
+    for (uint128 i = 0; i < arrayLength; i++) {
+      bytes memory value = IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
+        bytes16(_key),
+        bytes16(i)
+      )));
+
+      if (_value.length == value.length) {
+        for (uint128 j = 0; value[j] == _value[j]; i++) {
+          if (j == _value.length - 1) index = uint256(i);
+        }
+      }
+    }
+  }
+
+  /**
+   * @dev Add an element to the array at `_key` if it is non-existent yet.
+   */
+  function _arrayAdd(
+    bytes32 _key,
+    bytes memory _value
+  ) internal returns(bool) {
+    uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_key)));
+    if (_arrayContains(_key,_value) != arrayLength + 1) return false;
+
+    bytes32[] memory keys = new bytes32[](2);
+    bytes[] memory values = new bytes[](2);
+
+    keys[0] = _key;
+    values[0] = bytes.concat(bytes32(arrayLength + 1));
+
+    keys[1] = bytes32(bytes.concat(
+      bytes16(_key),
+      bytes16(uint128(arrayLength))
+    ));
+    values[1] = _value;
+
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        keys, values
+      )
+    );
+    return true;
+  }
+
+  /**
+   * @dev Remove an array element if it exists in the array at `_key`.
+   */
+  function _arrayRemove(
+    bytes32 _key,
+    bytes memory _value
+  ) internal returns(bool) {
+    uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_key)));
+    uint256 valueIndex = _arrayContains(_key,_value);
+    if (valueIndex == arrayLength + 1) return false;
+
+    bytes32[] memory keys = new bytes32[](arrayLength - valueIndex + 1);
+    bytes[] memory values = new bytes[](arrayLength - valueIndex + 1);
+
+    for (uint256 i = valueIndex; i < arrayLength; i++) {
+      keys[i] = bytes32(bytes.concat(
+        bytes16(_key),
+        bytes16(uint128(i))
+      ));
+      values[i] = bytes.concat(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
+        bytes16(_key),
+        bytes16(uint128(i + 1))
+      ))));
+    }
+
+    keys[arrayLength - valueIndex] = _key;
+    values[arrayLength - valueIndex] = bytes.concat(bytes32(arrayLength - 1));
+
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        keys, values
+      )
+    );
+    return true;
   }
 
 }

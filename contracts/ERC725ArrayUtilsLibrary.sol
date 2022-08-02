@@ -110,8 +110,8 @@ library ERC725ArrayUtilsLibrary {
     uint256 valueIndex = ARRAY_CONTAINS(targets,_key,_value);
     if (valueIndex == arrayLength + 1) return false;
 
-    bytes32[] memory keys = new bytes32[](arrayLength - valueIndex);
-    bytes[] memory values = new bytes[](arrayLength - valueIndex);
+    bytes32[] memory keys = new bytes32[](arrayLength - valueIndex + 1);
+    bytes[] memory values = new bytes[](arrayLength - valueIndex + 1);
 
     for (uint256 i = valueIndex; i < arrayLength; i++) {
       keys[i] = bytes32(bytes.concat(
@@ -124,10 +124,42 @@ library ERC725ArrayUtilsLibrary {
       ))));
     }
 
+    keys[arrayLength - valueIndex] = _key;
+    values[arrayLength - valueIndex] = bytes.concat(bytes32(arrayLength - 1));
+
     ILSP6KeyManager(targets.KEY_MANAGER).execute(
       abi.encodeWithSelector(
         setDataMultipleSelector,
         keys, values
+      )
+    );
+    return true;
+  }
+
+  function SINGLETON_SET_ONE(
+    Targets storage targets,
+    bytes32 _key,
+    bytes memory _value
+  ) internal returns(bool) {
+    ILSP6KeyManager(targets.KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataSingleSelector,
+        _key, _value
+      )
+    );
+    return true;
+  }
+
+  function SINGLETON_SET_MULTIPLE(
+    Targets storage targets,
+    bytes32[] memory _keys,
+    bytes[] memory _values
+  ) internal returns(bool) {
+    if (_keys.length != _values.length) return false;
+    ILSP6KeyManager(targets.KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        _keys, _values
       )
     );
     return true;

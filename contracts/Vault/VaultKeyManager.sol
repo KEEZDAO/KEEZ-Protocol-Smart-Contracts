@@ -9,9 +9,6 @@ import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.so
 // setData(...)
 import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/ILSP6KeyManager.sol";
 
-// Utils for managing arrays using setData(...)
-import {ERC725ArrayUtilsLibrary} from "../ERC725ArrayUtilsLibrary.sol";
-
 // authorizeOperator(...), transfer(...), transferBatch(...)
 import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/ILSP7DigitalAsset.sol";
 import {ILSP8IdentifiableDigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/ILSP8IdentifiableDigitalAsset.sol";
@@ -47,8 +44,16 @@ import {
  * @custom:version 1.1
  */
 contract VaultKeyManager {
-  using  ERC725ArrayUtilsLibrary for  ERC725ArrayUtilsLibrary.Targets;
-  ERC725ArrayUtilsLibrary.Targets private account;
+
+
+
+  /**
+   * TODO let users claim a permission by recieving a signature.
+   * Check the signers permissions.
+   * check the validity of the signature.
+   */
+
+
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -66,27 +71,6 @@ contract VaultKeyManager {
   ) {
     UNIVERSAL_PROFILE = _UNIVERSAL_PROFILE;
     KEY_MANAGER = _KEY_MANAGER;
-    account.ADD_TARGETS(_UNIVERSAL_PROFILE, _KEY_MANAGER);
-  }
-
-  /**
-   * @notice Add a LSP7/LSP8 to the allowed tokens to be received.
-   */
-  function addTokenAddressToTheAllowedArray(
-    address _tokenAddress
-  ) external {
-    _verifyPermission(msg.sender, _PERMISSION_ALLOWED_TOKENS_CONTROLLER, "ALLOWED_TOKENS_CONTROLLER");
-    account.ARRAY_ADD(_VAULT_ALLOWED_TOKEN_ADDRESSES, bytes.concat(bytes20(_tokenAddress)));
-  }
-
-  /**
-   * @notice Remove a LSP7/LSP8 from the allowed tokens to be received.
-   */
-  function removeTokenAddressFromTheAllowedArray(
-    address _tokenAddress
-  ) external {
-    _verifyPermission(msg.sender, _PERMISSION_ALLOWED_TOKENS_CONTROLLER, "ALLOWED_TOKENS_CONTROLLER");
-    account.ARRAY_REMOVE(_VAULT_ALLOWED_TOKEN_ADDRESSES, bytes.concat(bytes20(_tokenAddress)));
   }
 
   /**
