@@ -49,10 +49,20 @@ import {ErrorWithNumber} from "../Errors.sol";
  *
  * @author B00ste
  * @title MultisigKeyManager
- * @custom:version 1.2
+ * @custom:version 1.3
  */
 contract MultisigKeyManager {
   using ECDSA for bytes32;
+
+  /**
+   * @notice Nonce for claiming permissions.
+   */
+  mapping(address => uint256) claimPermissionNonce;
+
+  /**
+   * @notice Nonce for voting.
+   */
+  mapping(address => uint256) votingNonce;
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -66,18 +76,10 @@ contract MultisigKeyManager {
 
   constructor(
     address payable _UNIVERSAL_PROFILE,
-    address _KEY_MANAGER,
-    uint8 quorum
+    address _KEY_MANAGER
   ) {
     UNIVERSAL_PROFILE = _UNIVERSAL_PROFILE;
     KEY_MANAGER = _KEY_MANAGER;
-
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataSingleSelector,
-        _MULTISIG_QUORUM, bytes.concat(bytes1(quorum))
-      )
-    );
   }
 
   // ToDo Move this to the interface of this contract.
@@ -90,9 +92,9 @@ contract MultisigKeyManager {
   function newPermissionMessage(
     address _to,
     bytes32 _permissions
-  ) public pure returns(bytes32 _hash) {
+  ) public view returns(bytes32 _hash) {
     _hash = keccak256(abi.encode(
-      _to, _permissions
+      _to, _permissions, claimPermissionNonce[_to]
     ));
   }
 
@@ -105,6 +107,7 @@ contract MultisigKeyManager {
     address recoveredAddress = _hash.recover(_signature);
     _verifyPermission(recoveredAddress, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
     _addPermissions(msg.sender, _permissions);
+    claimPermissionNonce[msg.sender]++;
   }
 
   /**
@@ -189,27 +192,14 @@ contract MultisigKeyManager {
 
     bytes10 proposalSignature = _MULTISIG_PROPOSAL_SIGNATURE(uint48(block.timestamp));
 
-    uint128 totalLength = uint128(_targets.length * 2);
-    bytes32[] memory keys = new bytes32[](totalLength + 2);
-    bytes[] memory values = new bytes[](totalLength + 2);
+    bytes32[] memory keys = new bytes32[](2);
+    bytes[] memory values = new bytes[](2);
 
-    for (uint128 i = 0; i < _targets.length ; i++) {
-      keys[i] = bytes32(bytes.concat(
-        bytes16(_MULTISIG_PROPOSAL_TARGETS_KEY(proposalSignature)),
-        bytes16(i)
-      ));
-      values[i] = bytes.concat(bytes20(_targets[i]));
+    keys[0] = _MULTISIG_PROPOSAL_TARGETS_KEY(proposalSignature);
+    values[0] = abi.encode(_targets);
 
-      keys[i + _targets.length] = bytes32(bytes.concat(
-        bytes16(_MULTISIG_PROPOSAL_DATAS_KEY(proposalSignature)),
-        bytes16(i)
-      ));
-      values[i + _targets.length] = _datas[i];
-    }
-    keys[_targets.length * 2 + 0] = _MULTISIG_PROPOSAL_TARGETS_KEY(proposalSignature);
-    values[_targets.length * 2 + 0] = bytes.concat(bytes32(_targets.length));
-    keys[_targets.length * 2 + 1] = _MULTISIG_PROPOSAL_DATAS_KEY(proposalSignature);
-    values[_targets.length * 2 + 1] = bytes.concat(bytes32(_datas.length));
+    keys[1] = _MULTISIG_PROPOSAL_DATAS_KEY(proposalSignature);
+    values[1] = abi.encode(_datas);
 
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
@@ -228,11 +218,12 @@ contract MultisigKeyManager {
     address _signer,
     bytes10 _proposalSignature,
     bool _response
-  ) public pure returns(bytes32 _hash) {
+  ) public view returns(bytes32 _hash) {
     _hash = keccak256(abi.encodePacked(
       _signer,
       _proposalSignature,
-      _response
+      _response,
+      votingNonce[_signer]
     ));
   }
 
@@ -255,47 +246,35 @@ contract MultisigKeyManager {
 
       if(_getPermissions(recoveredAddress) & _PERMISSION_VOTE != 0) {
         positiveResponses++;
+
+        votingNonce[recoveredAddress]++;
       }
     }
 
     uint8 quorum = uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_QUORUM)));
-    uint256 executables = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PROPOSAL_TARGETS_KEY(_proposalSignature))));
 
     if(positiveResponses/votingMembers > quorum/votingMembers) {
-
-      bytes32[] memory keys = new bytes32[](executables * 2);
-      bytes[] memory values = new bytes[](executables * 2);
       
-      for(uint256 i = 0; i < executables; i++) {
-        keys[i] = bytes32(bytes.concat(
-          bytes16(_MULTISIG_PROPOSAL_TARGETS_KEY(_proposalSignature)),
-          bytes16(uint128(i))
-        ));
-        values[i] = bytes.concat(bytes32(0));
+      address[] memory _targets = abi.decode(
+        IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PROPOSAL_TARGETS_KEY(_proposalSignature)),
+        (address[])
+      );
+      bytes[] memory _datas = abi.decode(
+        IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PROPOSAL_DATAS_KEY(_proposalSignature)),
+        (bytes[])
+      );
 
-        keys[executables + i] = bytes32(bytes.concat(
-          bytes16(_MULTISIG_PROPOSAL_DATAS_KEY(_proposalSignature)),
-          bytes16(uint128(i))
-        ));
-        values[executables + i] = bytes.concat(bytes32(0));
-
+      for(uint256 i = 0; i < _targets.length; i++) {
         ILSP6KeyManager(KEY_MANAGER).execute(
           abi.encodeWithSignature(
             "execute(uint256,address,uint256,bytes)",
             1,
-            IERC725Y(UNIVERSAL_PROFILE).getData(keys[i]),
+            _targets[i],
             0,
-            IERC725Y(UNIVERSAL_PROFILE).getData(keys[executables + i])
+            _datas[i]
           )
         );
       }
-
-      ILSP6KeyManager(KEY_MANAGER).execute(
-        abi.encodeWithSelector(
-          setDataMultipleSelector,
-          keys, values  
-        )
-      );
     }
 
   }

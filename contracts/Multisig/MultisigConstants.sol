@@ -59,10 +59,12 @@ function _MULTISIG_PROPOSAL_SIGNATURE(uint48 _timestamp) pure returns(bytes10 KE
 bytes20 constant _MULTISIG_TARGETS_SUFFIX = bytes20(keccak256("MultisigProposalTargets[]"));
 //bytes20 constant _MULTISIG_TARGETS_SUFFIX = 0xc6c66d5a29ded4b70a2bc4d1637290a99598996b;
 
-// Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE_PREFIX + bytes16(keccak256("MultisigProposalTargets"))
+// Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE + bytes2(0) + bytes20(keccak256("MultisigProposalTargets"))
+// --> abi.encode(address[])
 function _MULTISIG_PROPOSAL_TARGETS_KEY(bytes10 _proposalSignature) pure returns(bytes32 KEY) {
   KEY = bytes32(bytes.concat(
     _proposalSignature,
+    bytes2(0),
     _MULTISIG_TARGETS_SUFFIX
   ));
 }
@@ -71,10 +73,12 @@ function _MULTISIG_PROPOSAL_TARGETS_KEY(bytes10 _proposalSignature) pure returns
 bytes20 constant _MULTISIG_DATAS_SUFFIX = bytes20(keccak256("MultisigProposalDatas[]"));
 //bytes20 constant _MULTISIG_DATAS_SUFFIX = 0xa127ec6f6a314082d85a8df20cec2eb66abc0e15;
 
-// Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE_PREFIX + bytes16(keccak256("MultisigProposalDatas"))
+// Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE + bytes2(0) + bytes20(keccak256("MultisigProposalDatas"))
+// --> abi.encode(bytes[])
 function _MULTISIG_PROPOSAL_DATAS_KEY(bytes10 _proposalSignature) pure returns(bytes32 KEY) {
   KEY = bytes32(bytes.concat(
     _proposalSignature,
+    bytes2(0),
     _MULTISIG_DATAS_SUFFIX
   ));
 }
