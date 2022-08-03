@@ -24,24 +24,23 @@ import {
   _PERMISSION_RECIEVEDELEGATE,
   _PERMISSION_MASTER,
   
-  _KEY_MAJORITY,
-  _KEY_PARTICIPATIONRATE,
-  _KEY_MINIMUMVOTINGDELAY,
-  _KEY_MINIMUMVOTINGPERIOD,
+  _DAO_MAJORITY_KEY,
+  _DAO_PARTICIPATION_RATE_KEY,
+  _DAO_MINIMUM_VOTING_DELAY_KEY,
+  _DAO_MINIMUM_VOTING_PERIOD_KEY,
 
-  _KEY_DELEGATEVOTE,
-  _KEY_ADDRESSDELEGATES_ARRAY_PREFIX,
-  _KEY_ADDRESSDELEGATES_ARRAY_INDEX_PREFIX,
+  _DAO_DELEGATED_VOTE_PREFIX,
+  _DAO_ADDRESS_DELEGATES_PREFIX,
 
   _KEY_PROPOSAL_PREFIX,
-  _KEY_PROPOSAL_JSON_SUFFIX,
-  _KEY_PROPOSAL_VOTINGDELAY_SUFFIX,
-  _KEY_PROPOSAL_VOTINGPERIOD_SUFFIX,
-  _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX,
-  _KEY_PROPOSAL_TARGETSARRAY_SUFFIX,
-  _KEY_PROPOSAL_DATASARRAY_SUFFIX,
-  _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX,
-  _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX,
+  _DAO_PROPOSAL_JSON_METADATA_SUFFIX,
+  _DAO_PROPOSAL_VOTING_DELAY_SUFFIX,
+  _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX,
+  _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX,
+  _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX,
+  _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX,
+  _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX,
+  _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX,
   _KEY_PARTICIPANT_VOTE,
 
   _SPLIT_BYTES32_IN_TWO_HALFS
@@ -126,13 +125,14 @@ contract DaoKeyManager is IDaoKeyManager {
     _verifyPermission(msg.sender, _PERMISSION_SENDDELEGATE, "SENDDELEGATE");
     _verifyPermission(delegatee, _PERMISSION_RECIEVEDELEGATE, "RECIEVEDELEGATE");
 
-    bytes32 arrayKey = bytes32(bytes.concat(_KEY_ADDRESSDELEGATES_ARRAY_PREFIX, bytes20(delegatee)));
+    bytes32 arrayKey = bytes32(bytes.concat(_DAO_ADDRESS_DELEGATES_PREFIX, bytes20(delegatee)));
     uint128 arrayLength = uint128(bytes16(IERC725Y(UNIVERSAL_PROFILE).getData(arrayKey)));
+
 
     bytes32[] memory keys = new bytes32[](3);
     keys[0] = bytes32(bytes.concat(_SPLIT_BYTES32_IN_TWO_HALFS(arrayKey)[0], bytes16(arrayLength)));
     keys[1] = arrayKey;
-    keys[2] = bytes32(bytes.concat(_KEY_DELEGATEVOTE, bytes20(msg.sender)));
+    keys[2] = bytes32(bytes.concat(_DAO_DELEGATED_VOTE_PREFIX , bytes20(msg.sender)));
     bytes[] memory values = new bytes[](3);
     values[0] = bytes.concat(bytes20(msg.sender));
     values[1] = bytes.concat(bytes16(arrayLength + 1));
@@ -158,8 +158,8 @@ contract DaoKeyManager is IDaoKeyManager {
     if (targets.length != datas.length) revert ErrorWithNumber(0x0001);
     if (choices > 16) revert ErrorWithNumber(0x0002);
     if (choicesPerVote > choices) revert ErrorWithNumber(0x0003);
-    if (votingDelay < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_MINIMUMVOTINGDELAY)))) revert ErrorWithNumber(0x0004);
-    if (votingPeriod < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_MINIMUMVOTINGPERIOD)))) revert ErrorWithNumber(0x0005);
+    if (votingDelay < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_DELAY_KEY)))) revert ErrorWithNumber(0x0004);
+    if (votingPeriod < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_PERIOD_KEY)))) revert ErrorWithNumber(0x0005);
 
     uint256 arraysLength = 2 * targets.length;
     bytes10 KEY_PROPOSAL_PREFIX = _KEY_PROPOSAL_PREFIX(uint48(block.timestamp), title);
@@ -169,11 +169,11 @@ contract DaoKeyManager is IDaoKeyManager {
     if(arraysLength > 0){
       for (uint16 i = 0; i < targets.length; i++) {
         keys[i] = bytes32(bytes.concat(
-          _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX)))[0],
+          _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX)))[0],
           bytes16(uint128(i))
         ));
         keys[i + targets.length] = bytes32(bytes.concat(
-          _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_DATASARRAY_SUFFIX)))[0],
+          _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX)))[0],
           bytes16(uint128(i))
         ));
 
@@ -182,14 +182,14 @@ contract DaoKeyManager is IDaoKeyManager {
       } 
     }
 
-    keys[arraysLength + 0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX));
-    keys[arraysLength + 1] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_DATASARRAY_SUFFIX));
-    keys[arraysLength + 2] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_JSON_SUFFIX));
-    keys[arraysLength + 3] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_VOTINGDELAY_SUFFIX));
-    keys[arraysLength + 4] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_VOTINGPERIOD_SUFFIX));
-    keys[arraysLength + 5] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX));
-    keys[arraysLength + 6] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX));
-    keys[arraysLength + 7] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX));
+    keys[arraysLength + 0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX));
+    keys[arraysLength + 1] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX));
+    keys[arraysLength + 2] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_JSON_METADATA_SUFFIX));
+    keys[arraysLength + 3] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX));
+    keys[arraysLength + 4] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX));
+    keys[arraysLength + 5] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX));
+    keys[arraysLength + 6] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX));
+    keys[arraysLength + 7] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX));
 
     values[arraysLength + 0] = bytes.concat(bytes32(targets.length));
     values[arraysLength + 1] = bytes.concat(bytes32(datas.length));
@@ -214,14 +214,14 @@ contract DaoKeyManager is IDaoKeyManager {
   {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE, "EXECUTE");
     if (
-      uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX))))))
-      + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_VOTINGDELAY_SUFFIX))))))
-      + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_VOTINGPERIOD_SUFFIX))))))
+      uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX))))))
+      + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX))))))
+      + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX))))))
       > block.timestamp
     ) revert ErrorWithNumber(0x0006);
     if (
       uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX))
+        bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX))
       ))) == 0
     ) revert ErrorWithNumber(0x0007);
 
@@ -232,7 +232,7 @@ contract DaoKeyManager is IDaoKeyManager {
      * 2. If `user` has vote permission or send delegate permission
      * we will save his number of votes as 1 and save his choices.
      */  
-    uint8 nrOfChoices =  uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX)))));
+    uint8 nrOfChoices =  uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX)))));
     uint256 totalUsers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY)));
     uint256[] memory votesByChoiceIndex = new uint256[](nrOfChoices);
     for (uint128 i = 0; i < totalUsers; i++) {
@@ -273,9 +273,9 @@ contract DaoKeyManager is IDaoKeyManager {
       }
     }
 
-    uint256 majority = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_KEY_MAJORITY)));
+    uint256 majority = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MAJORITY_KEY)));
     uint256 participationRate = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
-      _KEY_PARTICIPATIONRATE
+      _DAO_PARTICIPATION_RATE_KEY
     )));
 
     /**
@@ -285,8 +285,8 @@ contract DaoKeyManager is IDaoKeyManager {
       totalVotes/totalUsers > participationRate/totalUsers &&
       positiveVotes/totalVotes > majority/totalVotes
     ) {
-      bytes32 targetsKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_TARGETSARRAY_SUFFIX));
-      bytes32 datasKey = bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_DATASARRAY_SUFFIX));
+      bytes32 targetsKey = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX));
+      bytes32 datasKey = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX));
       uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)));
       for (uint256 i = 0; i < arrayLength; i++) {
         (success[i], results[i]) = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)))
@@ -313,7 +313,7 @@ contract DaoKeyManager is IDaoKeyManager {
     ) revert ErrorWithNumber(0x0008);
     if (
       uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(proposalSignature, _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX))
+        bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX))
       ))) < choicesArray.length
     ) revert ErrorWithNumber(0x0009);
 
@@ -333,7 +333,7 @@ contract DaoKeyManager is IDaoKeyManager {
      */
     if (_getPermissions(msg.sender) & _PERMISSION_RECIEVEDELEGATE != 0) {
       uint256 delegates = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
-        _KEY_ADDRESSDELEGATES_ARRAY_PREFIX, bytes20(msg.sender)
+        _DAO_ADDRESS_DELEGATES_PREFIX, bytes20(msg.sender)
       )))));
       
       keys = new bytes32[](delegates + 1);
@@ -347,7 +347,7 @@ contract DaoKeyManager is IDaoKeyManager {
       for (uint128 i = 0; i < delegates; i++){
         address delegator = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(
           bytes32(bytes.concat(
-            _KEY_ADDRESSDELEGATES_ARRAY_INDEX_PREFIX(msg.sender), bytes16(i)
+            bytes16(bytes32(delegates)), bytes16(i)
           ))
         )));
 

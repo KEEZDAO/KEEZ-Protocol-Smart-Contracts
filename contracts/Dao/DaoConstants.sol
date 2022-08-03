@@ -27,51 +27,46 @@ bytes32 constant _PERMISSION_PROPOSE          = 0x000000000000000000000000000000
 bytes32 constant _PERMISSION_EXECUTE          = 0x0000000000000000000000000000000000000000000000000000000000000004;
 bytes32 constant _PERMISSION_SENDDELEGATE     = 0x0000000000000000000000000000000000000000000000000000000000000008;
 bytes32 constant _PERMISSION_RECIEVEDELEGATE  = 0x0000000000000000000000000000000000000000000000000000000000000010;
+bytes32 constant _PERMISSION_MASTER           = 0x0000000000000000000000000000000000000000000000000000000000000020;
 
-// SUPER PERMISSIONS VALUES
-bytes32 constant _PERMISSION_SUPERVOTE        = 0x0000000000000000000000000000000000000000000000000000000000000020;
-bytes32 constant _PERMISSION_SUPERPROPOSE     = 0x0000000000000000000000000000000000000000000000000000000000000040;
-bytes32 constant _PERMISSION_MASTER           = 0x0000000000000000000000000000000000000000000000000000000000000080;
+
+// --- PARTICIPATION KEYS
+
+
+// keccak256("DaoParticipants[]")
+bytes32 constant _DAO_PARTICIPANTS_KEY = 0xf7f9c7410dd493d79ebdaee15bbc77fd163bd488f54107d1be6ed34b1e099004;
+
+// DaoParticipants[index]
+bytes16 constant _DAO_PARTICIPANTS_PREFIX = 0xf7f9c7410dd493d79ebdaee15bbc77fd;
 
 
 // --- DAO ACCOUNT METDATA KEYS
 
 
 // bytes32(keccak256("DaoMetadataJSON")) --> Website
-bytes32 constant _KEY_JSON_DAO = 0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127;
+bytes32 constant _DAO_JSON_METDATA_KEY = 0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127;
 
 // bytes32(keccak256("Majority")) --> uint8
-bytes32 constant _KEY_MAJORITY = 0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127; // --> uint8
+bytes32 constant _DAO_MAJORITY_KEY = 0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127; // --> uint8
 
 // bytes32(keccak256("ParticipationRate")) --> uint8
-bytes32 constant _KEY_PARTICIPATIONRATE = 0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9; // --> uint8
+bytes32 constant _DAO_PARTICIPATION_RATE_KEY = 0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9; // --> uint8
 
-// bytes32(keccak256("VotingDelay")) --> uint256
-bytes32 constant _KEY_MINIMUMVOTINGDELAY = 0x5bd05fa174be6a4aa4a8222f8837a27a381de14e7797cf7945df58b0626e6c3d; // --> uint256
+// bytes32(keccak256("MinimumVotingDelay")) --> uint256
+bytes32 constant _DAO_MINIMUM_VOTING_DELAY_KEY = 0x799787138cc40d7a47af8e69bdea98db14e1ead8227cef96814fa51751e25c76; // --> uint256
 
-// bytes32(keccak256("VotingPeriod")) --> uint256
-bytes32 constant _KEY_MINIMUMVOTINGPERIOD = 0xd08ca3a83d59467dd8ba57e940549874ea8310a1ebfb4396959235b00035d777; // --> uint256
+// bytes32(keccak256("MinimumVotingPeriod")) --> uint256
+bytes32 constant _DAO_MINIMUM_VOTING_PERIOD_KEY = 0xd3cf4cd71858ea36c3f5ce43955db04cbe9e1f42a2c7795c25c1d430c9bb280a; // --> uint256
 
 
 // --- DAO DELEGATING KEYS
 
 
 // bytes10(keccak256("DelegtateTo")) + bytes2(0)
-bytes12 constant _KEY_DELEGATEVOTE = 0x0a30e74a6c7868e400140000; // DelegateTo:<address> --> address
+bytes12 constant _DAO_DELEGATED_VOTE_PREFIX = 0x0a30e74a6c7868e400140000; // DelegateTo:<address> --> address
 
-// bytes10(keccak256("AddressDelegates[]")) + bytes2(0)
-bytes12 constant _KEY_ADDRESSDELEGATES_ARRAY_PREFIX = 0xc3f797d5c8ae536b82a60000; // AddressDelegates[]:<address> --> uint128 (ArrayLength)
-
-// AddressDelegates[index]
-// _SPLIT_BYTES32_IN_TWO_HALFS(AddressDelegates[]:<address>) + bytes16(index) --> address
-function _KEY_ADDRESSDELEGATES_ARRAY_INDEX_PREFIX(address delegateeAddress) pure returns(bytes16 KEY_PREFIX) {
-  KEY_PREFIX = _SPLIT_BYTES32_IN_TWO_HALFS(
-    bytes32(bytes.concat(
-      _KEY_ADDRESSDELEGATES_ARRAY_PREFIX,
-      bytes20(delegateeAddress)
-    ))
-  )[0];
-}
+// bytes10(keccak256("AddressDelegates")) + bytes2(0)
+bytes12 constant _DAO_ADDRESS_DELEGATES_PREFIX = 0x92a4ebfa1896d9ad8b430000; // AddressDelegates[]:<address> --> abi.encode(address[])
 
 
 // --- DAO PROPOSAL KEYS
@@ -85,28 +80,28 @@ function _KEY_PROPOSAL_PREFIX(uint48 creationTimestamp, string memory title) pur
 }
 
 // bytes2(0) + bytes20(keccak256("ProposalMetadataJSON")) --> Website
-bytes22 constant _KEY_PROPOSAL_JSON_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+bytes22 constant _DAO_PROPOSAL_JSON_METADATA_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
 
 // bytes2(0) + bytes20(keccak256("ProposalDelay")) --> uint256
-bytes22 constant _KEY_PROPOSAL_VOTINGDELAY_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+bytes22 constant _DAO_PROPOSAL_VOTING_DELAY_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
 
 // bytes2(0) + bytes20(keccak256("ProposalPeriod")) --> uint256
-bytes22 constant _KEY_PROPOSAL_VOTINGPERIOD_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+bytes22 constant _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
 
 // bytes2(0) + bytes20(keccak256("CreationTimestamp")) --> uint256
-bytes22 constant _KEY_PROPOSAL_CREATIONTIMESTAMP_SUFFIX = 0x0000bd3132afbfa232f7d171a873f7e52e32c666b06d;
+bytes22 constant _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX = 0x0000bd3132afbfa232f7d171a873f7e52e32c666b06d;
 
-// bytes2(0) + bytes20(keccak256("TargetsArray[]")) --> address[]
-bytes22 constant _KEY_PROPOSAL_TARGETSARRAY_SUFFIX = 0x0000ba6d4933d1a0fbfd29728a3ed8d0a7aca50635b5; 
+// bytes2(0) + bytes20(keccak256("TargetsArray")) --> abi.encode(address[])
+bytes22 constant _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX = 0x00003b69353f229b36a0d6f2d478514b056ffa323442; 
 
-// bytes2(0) + bytes20(keccak256("DatasArray[]")) --> bytes[]
-bytes22 constant _KEY_PROPOSAL_DATASARRAY_SUFFIX = 0x0000478499bb6846f8a28632137c772be842c41b3105;
+// bytes2(0) + bytes20(keccak256("DatasArray")) --> abi.encode(bytes[])
+bytes22 constant _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX = 0x0000ccb04e1d7975be416c1df8eb0301d37fe3b1c9b6;
 
 // bytes2(0) + bytes20(keccak256("ProposalChoices")) --> uint8
-bytes22 constant _KEY_PROPOSAL_PROPOSALCHOICES_SUFFIX = 0x0000e5dd8acc7154a678a0a3fa3fe2d65b8700bf702c;
+bytes22 constant _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX = 0x0000e5dd8acc7154a678a0a3fa3fe2d65b8700bf702c;
 
 // bytes2(0) + bytes20(keccak256("MaximumChoicesPerVote")) --> uint8
-bytes22 constant _KEY_PROPOSAL_MAXIMUMCHOICESPERVOTE_SUFFIX = 0x0000ed458cca63dcf8476211a40ad15420dcabc377f0;
+bytes22 constant _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX = 0x0000ed458cca63dcf8476211a40ad15420dcabc377f0;
 
 // ParticipantVoteKey := bytes10(ProposalSignature) + bytes2(0) + bytes20(participantAddress)
 // --> BitArray with the users choices.

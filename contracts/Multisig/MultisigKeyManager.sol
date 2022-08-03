@@ -31,9 +31,11 @@ import {
   _PERMISSION_ADD_PERMISSION,
   _PERMISSION_REMOVE_PERMISSION,
 
-  _MULTISIG_QUORUM,
+  _MULTISIG_QUORUM_KEY,
 
-  _MULTISIG_PARTICIPANTS_KEY,
+  _MULTISIG_PARTICIPANTS_ARRAY_KEY,
+  _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
+  _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
 
   _MULTISIG_PROPOSAL_SIGNATURE,
   _MULTISIG_PROPOSAL_TARGETS_KEY,
@@ -42,6 +44,9 @@ import {
 
 // Error event
 import {ErrorWithNumber} from "../Errors.sol";
+
+// Library for array interaction
+import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
 
 /**
  *
@@ -133,7 +138,14 @@ contract MultisigKeyManager {
     // Check if user has any permisssions. If not add him to the list of participants.
     bytes32 currentPermissions = _getPermissions(_to);
     if (currentPermissions == bytes32(0))
-    _arrayAdd(_MULTISIG_PARTICIPANTS_KEY, bytes.concat(bytes20(_to)));
+    ArrayWithMappingLibrary._addElement(
+      UNIVERSAL_PROFILE,
+      KEY_MANAGER,
+      _MULTISIG_PARTICIPANTS_ARRAY_KEY,
+      _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
+      _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
+      bytes.concat(bytes20(_to))
+    );
     // Update the permissions in a local variable.
     for(uint256 i = 0; i < 4; i++) {
       if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
@@ -164,7 +176,14 @@ contract MultisigKeyManager {
     }
     // Check if user has any permissions left. If not, remove him from the list of participants.
     if (currentPermissions == bytes32(0))
-    _arrayRemove(_MULTISIG_PARTICIPANTS_KEY, bytes.concat(bytes20(_to)));
+    ArrayWithMappingLibrary._removeElement(
+      UNIVERSAL_PROFILE,
+      KEY_MANAGER,
+      _MULTISIG_PARTICIPANTS_ARRAY_KEY,
+      _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
+      _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
+      bytes.concat(bytes20(_to))
+    );
     // Set the local permissions to the Universal Profile.
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
@@ -238,7 +257,7 @@ contract MultisigKeyManager {
     external
   {
 
-    uint256 votingMembers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PARTICIPANTS_KEY)));
+    uint256 votingMembers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PARTICIPANTS_ARRAY_KEY)));
     uint256 positiveResponses;
     for(uint256 i = 0; i < _signatures.length; i++) {
       bytes32 _hash = getProposalHash(_signers[i], _proposalSignature, true);
@@ -251,7 +270,7 @@ contract MultisigKeyManager {
       }
     }
 
-    uint8 quorum = uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_QUORUM)));
+    uint8 quorum = uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_QUORUM_KEY)));
 
     if(positiveResponses/votingMembers > quorum/votingMembers) {
       
@@ -311,98 +330,6 @@ contract MultisigKeyManager {
   {
     bytes32 permissions = _getPermissions(_from);
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
-  }
-
-  /**
-   * @dev Returns `arrayLenth` + 1 if the array at `_key` doesn't contain `_value`
-   * and the index of the `_value` inside the array at `_key` if it contains `_value`.
-   */
-  function _arrayContains(
-    bytes32 _key,
-    bytes memory _value
-  ) internal view returns(uint256 index) {
-    uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_key)));
-    index = arrayLength + 1;
-    for (uint128 i = 0; i < arrayLength; i++) {
-      bytes memory value = IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
-        bytes16(_key),
-        bytes16(i)
-      )));
-
-      if (_value.length == value.length) {
-        for (uint128 j = 0; value[j] == _value[j]; i++) {
-          if (j == _value.length - 1) index = uint256(i);
-        }
-      }
-    }
-  }
-
-  /**
-   * @dev Add an element to the array at `_key` if it is non-existent yet.
-   */
-  function _arrayAdd(
-    bytes32 _key,
-    bytes memory _value
-  ) internal returns(bool) {
-    uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_key)));
-    if (_arrayContains(_key,_value) != arrayLength + 1) return false;
-
-    bytes32[] memory keys = new bytes32[](2);
-    bytes[] memory values = new bytes[](2);
-
-    keys[0] = _key;
-    values[0] = bytes.concat(bytes32(arrayLength + 1));
-
-    keys[1] = bytes32(bytes.concat(
-      bytes16(_key),
-      bytes16(uint128(arrayLength))
-    ));
-    values[1] = _value;
-
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
-      )
-    );
-    return true;
-  }
-
-  /**
-   * @dev Remove an array element if it exists in the array at `_key`.
-   */
-  function _arrayRemove(
-    bytes32 _key,
-    bytes memory _value
-  ) internal returns(bool) {
-    uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_key)));
-    uint256 valueIndex = _arrayContains(_key,_value);
-    if (valueIndex == arrayLength + 1) return false;
-
-    bytes32[] memory keys = new bytes32[](arrayLength - valueIndex + 1);
-    bytes[] memory values = new bytes[](arrayLength - valueIndex + 1);
-
-    for (uint256 i = valueIndex; i < arrayLength; i++) {
-      keys[i] = bytes32(bytes.concat(
-        bytes16(_key),
-        bytes16(uint128(i))
-      ));
-      values[i] = bytes.concat(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
-        bytes16(_key),
-        bytes16(uint128(i + 1))
-      ))));
-    }
-
-    keys[arrayLength - valueIndex] = _key;
-    values[arrayLength - valueIndex] = bytes.concat(bytes32(arrayLength - 1));
-
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
-      )
-    );
-    return true;
   }
 
 }
