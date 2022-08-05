@@ -30,6 +30,7 @@ import {
   _PERMISSION_PROPOSE,
   _PERMISSION_ADD_PERMISSION,
   _PERMISSION_REMOVE_PERMISSION,
+  _PERMISSION_EXECUTE_PROPOSAL,
 
   _MULTISIG_QUORUM_KEY,
 
@@ -38,12 +39,11 @@ import {
   _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
 
   _MULTISIG_PROPOSAL_SIGNATURE,
-  _MULTISIG_PROPOSAL_TARGETS_KEY,
-  _MULTISIG_PROPOSAL_DATAS_KEY
+  _MULTISIG_PROPOSAL_PAYLOADS_KEY
 } from "./MultisigConstants.sol";
 
-// Error event
-import {ErrorWithNumber} from "../Errors.sol";
+// Custom error.
+import {IndexedError} from "../Errors.sol";
 
 // Library for array interaction
 import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
@@ -94,7 +94,7 @@ contract MultisigKeyManager {
    * @notice Create a `_hash` for signing and that signature can be used
    * by the user `_to` to redeem the permissions.
    */
-  function newPermissionMessage(
+  function getNewPermissionHash(
     address _to,
     bytes32 _permissions
   ) public view returns(bytes32 _hash) {
@@ -108,7 +108,7 @@ contract MultisigKeyManager {
    * from someone with the ADD_PERMISSION permission, otherwise it will revert.
    */
   function claimPermission(bytes32 _permissions, bytes memory _signature) external {
-    bytes32 _hash = newPermissionMessage(msg.sender, _permissions);
+    bytes32 _hash = getNewPermissionHash(msg.sender, _permissions);
     address recoveredAddress = _hash.recover(_signature);
     _verifyPermission(recoveredAddress, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
     _addPermissions(msg.sender, _permissions);
@@ -147,7 +147,7 @@ contract MultisigKeyManager {
       bytes.concat(bytes20(_to))
     );
     // Update the permissions in a local variable.
-    for(uint256 i = 0; i < 4; i++) {
+    for(uint256 i = 0; i < 5; i++) {
       if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
       currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
     }
@@ -170,20 +170,23 @@ contract MultisigKeyManager {
   function _removePermissions(address _to, bytes32 _permissions) internal {
     // Update the permissions in a local variable.
     bytes32 currentPermissions = _getPermissions(_to);
-    for(uint256 i = 0; i < 4; i++) {
+    for(uint256 i = 0; i < 5; i++) {
       if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
       currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
     }
+    bytes memory encodedCurrentPermissions = bytes.concat(currentPermissions);
     // Check if user has any permissions left. If not, remove him from the list of participants.
-    if (currentPermissions == bytes32(0))
-    ArrayWithMappingLibrary._removeElement(
-      UNIVERSAL_PROFILE,
-      KEY_MANAGER,
-      _MULTISIG_PARTICIPANTS_ARRAY_KEY,
-      _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
-      _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
-      bytes.concat(bytes20(_to))
-    );
+    if (currentPermissions == bytes32(0)) {
+      ArrayWithMappingLibrary._removeElement(
+        UNIVERSAL_PROFILE,
+        KEY_MANAGER,
+        _MULTISIG_PARTICIPANTS_ARRAY_KEY,
+        _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
+        _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
+        bytes.concat(bytes20(_to))
+      );
+      encodedCurrentPermissions = "";
+    }
     // Set the local permissions to the Universal Profile.
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
@@ -192,7 +195,7 @@ contract MultisigKeyManager {
           _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
           bytes20(_to)
         )),
-        bytes.concat(currentPermissions)
+        encodedCurrentPermissions
       )
     );
   }
@@ -201,29 +204,22 @@ contract MultisigKeyManager {
    * @notice Propose to execute methods on behalf of the multisig.
    */
   function proposeExecution(
-    address[] memory _targets,
-    bytes[] memory _datas
+    bytes[] calldata _payloads
   )
     external
   {
-    if(_targets.length != _datas.length) revert ErrorWithNumber(0x0001);
+    if(_payloads.length == 0) revert IndexedError("Multisig", 0x01);
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
 
     bytes10 proposalSignature = _MULTISIG_PROPOSAL_SIGNATURE(uint48(block.timestamp));
 
-    bytes32[] memory keys = new bytes32[](2);
-    bytes[] memory values = new bytes[](2);
-
-    keys[0] = _MULTISIG_PROPOSAL_TARGETS_KEY(proposalSignature);
-    values[0] = abi.encode(_targets);
-
-    keys[1] = _MULTISIG_PROPOSAL_DATAS_KEY(proposalSignature);
-    values[1] = abi.encode(_datas);
+    bytes32 key = _MULTISIG_PROPOSAL_PAYLOADS_KEY(proposalSignature);
+    bytes memory value = abi.encode(_payloads);
 
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
+        setDataSingleSelector,
+        key, value
       )
     );
 
@@ -251,13 +247,23 @@ contract MultisigKeyManager {
    */
   function execute(
     bytes10 _proposalSignature,
-    bytes[] memory _signatures,
-    address[] memory _signers
+    bytes[] calldata _signatures,
+    address[] calldata _signers
   )
     external
   {
+    _verifyPermission(msg.sender, _PERMISSION_EXECUTE_PROPOSAL, "EXECUTE_PROPOSAL");
 
-    uint256 votingMembers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PARTICIPANTS_ARRAY_KEY)));
+    bytes32[] memory keys = new bytes32[](2);
+    keys[0] = _MULTISIG_PARTICIPANTS_ARRAY_KEY;
+    keys[1] = _MULTISIG_QUORUM_KEY;
+    bytes[] memory encodedResponses = IERC725Y(UNIVERSAL_PROFILE).getData(keys);
+    uint256 votingMembers = uint256(bytes32(encodedResponses[0]));
+    uint8 quorum = uint8(bytes1(encodedResponses[1]));
+
+    if ((_signatures.length * 100) / votingMembers < quorum) revert IndexedError("Multisig", 0x02);
+
+    // Count the postive responses.
     uint256 positiveResponses;
     for(uint256 i = 0; i < _signatures.length; i++) {
       bytes32 _hash = getProposalHash(_signers[i], _proposalSignature, true);
@@ -270,31 +276,18 @@ contract MultisigKeyManager {
       }
     }
 
-    uint8 quorum = uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_QUORUM_KEY)));
-
-    if(positiveResponses/votingMembers > quorum/votingMembers) {
-      
-      address[] memory _targets = abi.decode(
-        IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PROPOSAL_TARGETS_KEY(_proposalSignature)),
-        (address[])
-      );
-      bytes[] memory _datas = abi.decode(
-        IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PROPOSAL_DATAS_KEY(_proposalSignature)),
+    // Verify if there are enough pro signatures and if yes, execute.
+    if((positiveResponses * 100) / votingMembers < quorum) { 
+      bytes[] memory _payloads = abi.decode(
+        IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PROPOSAL_PAYLOADS_KEY(_proposalSignature)),
         (bytes[])
       );
 
-      for(uint256 i = 0; i < _targets.length; i++) {
-        ILSP6KeyManager(KEY_MANAGER).execute(
-          abi.encodeWithSignature(
-            "execute(uint256,address,uint256,bytes)",
-            1,
-            _targets[i],
-            0,
-            _datas[i]
-          )
-        );
+      for(uint256 i = 0; i < _payloads.length; i++) {
+        ILSP6KeyManager(KEY_MANAGER).execute(_payloads[i]);
       }
     }
+    else revert IndexedError("Multisig", 0x03);
 
   }
 

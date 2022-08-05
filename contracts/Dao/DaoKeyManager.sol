@@ -45,7 +45,9 @@ import {
 
   _SPLIT_BYTES32_IN_TWO_HALFS
 } from "./DaoConstants.sol";
-import {ErrorWithNumber} from "../Errors.sol";
+
+// Custom error
+import {IndexedError} from "../Errors.sol";
 
 /**
  *
@@ -155,11 +157,11 @@ contract DaoKeyManager is IDaoKeyManager {
     uint8 choicesPerVote
   ) external override {
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
-    if (targets.length != datas.length) revert ErrorWithNumber(0x0001);
-    if (choices > 16) revert ErrorWithNumber(0x0002);
-    if (choicesPerVote > choices) revert ErrorWithNumber(0x0003);
-    if (votingDelay < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_DELAY_KEY)))) revert ErrorWithNumber(0x0004);
-    if (votingPeriod < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_PERIOD_KEY)))) revert ErrorWithNumber(0x0005);
+    if (targets.length != datas.length) revert IndexedError("DAO", 0x01);
+    if (choices > 16) revert IndexedError("DAO", 0x02);
+    if (choicesPerVote > choices) revert IndexedError("DAO", 0x03);
+    if (votingDelay < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_DELAY_KEY)))) revert IndexedError("DAO", 0x04);
+    if (votingPeriod < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_PERIOD_KEY)))) revert IndexedError("DAO", 0x05);
 
     uint256 arraysLength = 2 * targets.length;
     bytes10 KEY_PROPOSAL_PREFIX = _KEY_PROPOSAL_PREFIX(uint48(block.timestamp), title);
@@ -218,12 +220,12 @@ contract DaoKeyManager is IDaoKeyManager {
       + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX))))))
       + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX))))))
       > block.timestamp
-    ) revert ErrorWithNumber(0x0006);
+    ) revert IndexedError("DAO", 0x06);
     if (
       uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
         bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX))
       ))) == 0
-    ) revert ErrorWithNumber(0x0007);
+    ) revert IndexedError("DAO", 0x07);
 
     /**
      * @dev Count all the votes by accessing the choices of all of the participants
@@ -310,12 +312,12 @@ contract DaoKeyManager is IDaoKeyManager {
           _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender)
         )
       )) != 0
-    ) revert ErrorWithNumber(0x0008);
+    ) revert IndexedError("DAO", 0x08);
     if (
       uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(
         bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX))
       ))) < choicesArray.length
-    ) revert ErrorWithNumber(0x0009);
+    ) revert IndexedError("DAO", 0x09);
 
     // Create a BitArray of the voters choices.
     uint256 choices = 0;

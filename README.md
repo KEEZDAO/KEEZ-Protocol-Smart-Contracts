@@ -18,14 +18,20 @@ npx hardhat run scripts/deploy.ts
 
 | Error number |                               Error explanation                                  |
 |     :---:    |                                     :---:                                        |
-| `0x0001`     | `targets.length` must be equal to `datas.length`.                                |
-| `0x0002`     | You can have maximum 16 choices.                                                 |
-| `0x0003`     | The number of choices per vote must be smaller than the number of total choices. |
-| `0x0004`     | The voting delay is smaller than the minimum value allowed.                      |
-| `0x0005`     | The voting period is smaller than the minimum value allowed.                     |
-| `0x0006`     | The proposal's time did not expire.                                              |
-| `0x0007`     | There are no methods to execute.                                                 |
-| `0x0008`     | User has already voted.                                                          |
-| `0x0009`     | User has more choices than allowed.                                              |
-| `0x0010`     | `_to_.length` must be equal to `_permissions.length`                             |
-| `0x0011`     | `_signatures.length` must be equal to `_signers.length`                          |
+|    `0x01`    | `targets.length` must be equal to `datas.length`.                                |
+|    `0x02`    | You can have maximum 16 choices.                                                 |
+|    `0x03`    | The number of choices per vote must be smaller than the number of total choices. |
+|    `0x04`    | The voting delay is smaller than the minimum value allowed.                      |
+|    `0x05`    | The voting period is smaller than the minimum value allowed.                     |
+|    `0x06`    | The proposal's time did not expire.                                              |
+|    `0x07`    | There are no methods to execute.                                                 |
+|    `0x08`    | User has already voted.                                                          |
+|    `0x09`    | User has more choices than allowed.                                              |
+
+### This are the errors that you can get while using `MultisigKeyManager.js`
+
+| Error number |                               Error explanation                                  |
+|     :---:    |                                     :---:                                        |
+|    `0x001`   | `_targets.length` must be equal to `_datas.length`.                              |
+|    `0x002`   | Not enough signatures for a successful proposal.                                 |
+|    `0x003`   | Not enough positive votes for a successful proposal.                             |

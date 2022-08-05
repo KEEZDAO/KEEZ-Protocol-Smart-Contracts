@@ -3,10 +3,10 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Lock", function () {
+describe("Deployment testing & Individual contracts method testing", function () {
   async function deployContracts() {
 
-    const [owner, account1, account2] = await ethers.getSigners();
+    const [owner, account1, account2, account3] = await ethers.getSigners();
 
     const UniversalReceiverDelegateUP = await ethers.getContractFactory("UniversalReceiverDelegateUP");
     const universalReceiverDelegateUP = await UniversalReceiverDelegateUP.deploy();
@@ -27,12 +27,58 @@ describe("Lock", function () {
     const multisig = await MultisigKeyManager.deploy(universalProfile.address, keyManager.address);
 
     const DaoKeyManager = await ethers.getContractFactory("DaoKeyManager");
-    const dao = await DaoKeyManager.deploy(universalProfile.address, keyManager.address); 
+    const dao = await DaoKeyManager.deploy(universalProfile.address, keyManager.address);
+      
+    // Initialize the multisig with new members.
+    await universalProfile.connect(owner).setMultisigData(
+      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
+      ethers.utils.hexValue(50),
+      [
+        owner.address,
+        account1.address,
+        account2.address
+      ],
+      [
+        "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "0x000000000000000000000000000000000000000000000000000000000000000f"
+      ]
+    );
+  
+    // Using initializing methods of the universal profile.
+    await universalProfile.giveOwnerPermissionToChangeOwner();
+    await universalProfile.setControllerPermissionsForMultisig(multisig.address);
 
-    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, dao, owner, account1, account2 };
+    // Giving the ownership of the Universal Profile to the Key Manager.
+    await universalProfile.transferOwnership(keyManager.address);
+    let ABI = ["function claimOwnership()"];
+    let iface = new ethers.utils.Interface(ABI);
+    await keyManager.execute(iface.encodeFunctionData("claimOwnership"));
+
+    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, dao, owner, account1, account2, account3 };
+  }
+  async function deployContractsAndProposeExecution() {
+    const { universalProfile, multisig, owner, account1, account2, account3 } = await loadFixture(deployContracts);
+
+    let ABI = ["function setData(bytes32 dataKey, bytes memory dataValue)"];
+    let ERC725Yinterface = new ethers.utils.Interface(ABI);
+    const payloads = [
+      ERC725Yinterface.encodeFunctionData(
+        "setData",
+        [
+          "0x4164647265734d756c740000" + account3.address.substring(2),
+          "0x0000000000000000000000000000000000000000000000000000000000000fff"
+        ]
+      )
+    ];
+
+    const propose = await multisig.connect(owner).proposeExecution(payloads);
+    const proposalSignature = (await propose.wait(1)).logs[2].data.substring(0, 22);
+
+    return { universalProfile, multisig, owner, account1, account2, account3, proposalSignature };
   }
 
-  describe("Deployment", function () {
+  describe("Universal profile deployment", function () {
 
     it("Should set universal profile permissions correctly on deployment", async () => {
       const { universalReceiverDelegateUP, universalProfile } = await loadFixture(deployContracts);
@@ -53,22 +99,6 @@ describe("Lock", function () {
 
     it("Should set multisig permissions correctly", async () => {
       const { universalProfile, owner, account1, account2 } = await loadFixture(deployContracts);
-      
-      
-      const initializeMultisig = await universalProfile.connect(owner).setMultisigdata(
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
-        ethers.utils.hexValue(50),
-        [
-          owner.address,
-          account1.address,
-          account2.address
-        ],
-        [
-          "0x000000000000000000000000000000000000000000000000000000000000000f",
-          "0x0000000000000000000000000000000000000000000000000000000000000001",
-          "0x0000000000000000000000000000000000000000000000000000000000000001"
-        ]
-      );
 
       const keys = [
         // metadata of the multisig
@@ -102,9 +132,9 @@ describe("Lock", function () {
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002",
         // permissions of the addresses
-        "0x000000000000000000000000000000000000000000000000000000000000000f",
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "0x0000000000000000000000000000000000000000000000000000000000000001"
+        "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "0x000000000000000000000000000000000000000000000000000000000000000f"
       ];
 
       const get_data = await universalProfile["getData(bytes32[])"](keys);
@@ -112,80 +142,72 @@ describe("Lock", function () {
       expect(get_data).to.deep.equal(values);
     });
 
-    // TODO set the permissions for the keymanager to the multisig and dao. maybe vault?
-
-    /*it("Should update the members with necessary permissions",async () => {
-      const { universalProfile, multisig, owner, account1, account2 } = await loadFixture(deployRawMultisigKeyManager);
+    it("Should update the owner permissions, owner should have change owner permission.",async () => {
+      const { universalProfile, owner } = await loadFixture(deployContracts);
 
       const keys = [
         "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
         "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000000",
-        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000001",
-        "0x4b80742de2bf82acb3630000" + multisig.address.substring(2),
-        "0x4b80742de2bf82acb3630000" + owner.address.substring(2),
-        "0x47499aa724781173ffff2a8a82c6223b88e1a838d32bb91a9ff9c9c0b8c8759b",
-  
-        "0x54aef89da199194b126d28036f71291726191dbff7160f9d0986952b17eaedb4",
-        "0x54aef89da199194b126d28036f712917" + "00000000000000000000000000000000",
-        "0x54aef89da199194b126d28036f712917" + "00000000000000000000000000000001",
-        "0x54aef89da199194b126d28036f712917" + "00000000000000000000000000000002",
-        "0x4164647265734d756c740000" + owner.address.substring(2),
-        "0x4164647265734d756c740000" + account1.address.substring(2),
-        "0x4164647265734d756c740000" + account2.address.substring(2)
+        "0x4b80742de2bf82acb3630000" + owner.address.substring(2)
       ];
       const values = [
-        "0x0000000000000000000000000000000000000000000000000000000000000004",
-        multisig.address.toLowerCase(),
+        "0x0000000000000000000000000000000000000000000000000000000000000002",
         owner.address.toLowerCase(),
-        "0x0000000000000000000000000000000000000000000000000000000000007fbf",
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
-        ethers.utils.hexValue(50),
-  
-        "0x0000000000000000000000000000000000000000000000000000000000000003",
-        owner.address.toLowerCase(),
-        account1.address.toLowerCase(),
-        account2.address.toLowerCase(),
-        "0x000000000000000000000000000000000000000000000000000000000000000f",
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000001"
       ];
   
-      await universalProfile["setData(bytes32[],bytes[])"](keys, values);
+      const get_data = await universalProfile["getData(bytes32[])"](keys);
+      
+      expect(get_data).to.deep.equal(values);
+    });
+
+    it("Should update the multisig controller permissions",async () => {
+      const { universalProfile, multisig } = await loadFixture(deployContracts);
+
+      const keys = [
+        "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
+        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000001",
+        "0x4b80742de2bf82acb3630000" + multisig.address.substring(2)
+      ];
+      const values = [
+        "0x0000000000000000000000000000000000000000000000000000000000000002",
+        multisig.address.toLowerCase(),
+        "0x0000000000000000000000000000000000000000000000000000000000007fbf"
+      ];
+
       const get_data = await universalProfile["getData(bytes32[])"](keys);
       
       expect(get_data).to.deep.equal(values);
     });
 
     it("Should transfer ownership from EOA to key manager", async () => {
-      const { universalProfile, keyManager } = await loadFixture(deployMultisigKeyManagerWithMultisigPermissionsSet);
-
-      await universalProfile.transferOwnership(keyManager.address);
-
-      let ABI = ["function claimOwnership()"];
-      let iface = new ethers.utils.Interface(ABI);
-      await keyManager.execute(iface.encodeFunctionData("claimOwnership"));
+      const { universalProfile, keyManager } = await loadFixture(deployContracts);
 
       expect(await universalProfile.owner()).to.equal(keyManager.address);
     });
+  });
+
+  describe("Multisig permission methods", function () {
 
     it("Should be able to add permissions", async () => {
-      const { universalProfile, multisig, owner, account1 } = await loadFixture(deployMultisigKeyManagerWithDataSetAndOwnershipTransfered);
+      const { universalProfile, multisig, owner, account3 } = await loadFixture(deployContracts);
 
       await multisig.connect(owner).addPermissions(
-        account1.address, 
+        account3.address, 
         "0x000000000000000000000000000000000000000000000000000000000000000e"
       );
+      const actualData = await universalProfile["getData(bytes32)"]("0x4164647265734d756c740000" + account3.address.substring(2));
+      const expectedData = "0x000000000000000000000000000000000000000000000000000000000000000e";
 
-      expect(await universalProfile["getData(bytes32)"]("0x4164647265734d756c740000" + account1.address.substring(2)))
-      .to.equal("0x000000000000000000000000000000000000000000000000000000000000000f");
+      expect(actualData).to.equal(expectedData);
     });
 
     it("Should not be able to add permissions", async () => {
-      const { multisig, account1, account2 } = await loadFixture(deployMultisigKeyManagerWithDataSetAndOwnershipTransfered);
+      const { multisig, account2, account3 } = await loadFixture(deployContracts);
 
-      const add_permission = multisig.connect(account1).addPermissions(
+      const add_permission = multisig.connect(account3).addPermissions(
         account2.address, 
-        "0x000000000000000000000000000000000000000000000000000000000000000e"
+        "0x0000000000000000000000000000000000000000000000000000000000000010"
       );
 
       let ABI = ["error NotAuthorised(address from, string permission)"];
@@ -195,73 +217,114 @@ describe("Lock", function () {
         errorContract,
         "NotAuthorised"
       );
+    });
+
+    it("Should be able to remove permissions", async () => {
+      const { universalProfile, multisig, owner, account1, account2 } = await loadFixture(deployContracts);
+
+      // remove all permissions
+      await multisig.connect(owner).removePermissions(
+        account1.address, 
+        "0x000000000000000000000000000000000000000000000000000000000000001f" // 0001 1111
+      );
+
+      // remove multiple permissions
+      await multisig.connect(owner).removePermissions(
+        account2.address, 
+        "0x0000000000000000000000000000000000000000000000000000000000000003" // 0000 0011
+      );
+
+      const keys = [
+        // modified users permissions
+        "0x4164647265734d756c740000" + account1.address.substring(2),
+        "0x4164647265734d756c740000" + account2.address.substring(2),
+        // multisig user array length
+        "0x54aef89da199194b126d28036f71291726191dbff7160f9d0986952b17eaedb4",
+        // multisig user indexes
+        "0x54aef89da199194b126d28036f71291700000000000000000000000000000001",
+        "0x54aef89da199194b126d28036f71291700000000000000000000000000000002",
+        // multisig users mappings
+        "0x54aef89da199194b126d0000" + account1.address.substring(2),
+        "0x54aef89da199194b126d0000" + account2.address.substring(2)
+      ];
+      const values = [
+        // modified users permissions
+        "0x",
+        "0x000000000000000000000000000000000000000000000000000000000000000c",
+        // multisig user array length
+        "0x0000000000000000000000000000000000000000000000000000000000000002",
+        // multisig user indexes
+        account2.address.toLowerCase(),
+        "0x",
+        // multisig users mappings
+        "0x",
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
+      ];
+
+      expect(await universalProfile["getData(bytes32[])"](keys))
+      .to.deep.equal(values);
     });
 
     it("Should not be able to remove permissions", async () => {
-      const { multisig, owner, account1 } = await loadFixture(deployMultisigKeyManagerWithDataSetAndOwnershipTransfered);
+      const { multisig, account2, account3 } = await loadFixture(deployContracts);
 
-      const add_permission = multisig.connect(account1).removePermissions(
-        owner.address, 
-        "0x000000000000000000000000000000000000000000000000000000000000000e"
+      const remove_permission = multisig.connect(account3).removePermissions(
+        account2.address, 
+        "0x000000000000000000000000000000000000000000000000000000000000000f"
       );
 
       let ABI = ["error NotAuthorised(address from, string permission)"];
       let errorInterface = new ethers.utils.Interface(ABI);
       const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
-      expect(add_permission).to.revertedWithCustomError(
+      expect(remove_permission).to.revertedWithCustomError(
         errorContract,
         "NotAuthorised"
       );
     });
+  });
+
+  describe("Multisig execute methods", function () {
 
     it("Should be able to propose something for execution", async () => {
-      const { universalProfile, keyManager, multisig, owner, account1, account2 } = await loadFixture(deployMultisigKeyManagerWithDataSetAndOwnershipTransfered);
+      const { universalProfile, multisig, owner, account3 } = await loadFixture(deployContracts);
 
       let ABI = ["function setData(bytes32 dataKey, bytes memory dataValue)"];
       let ERC725Yinterface = new ethers.utils.Interface(ABI);
-      const targets = [universalProfile.address];
-      const datas = [
+      const payloads = [
         ERC725Yinterface.encodeFunctionData(
           "setData",
           [
-            "0x4164647265734d756c740000" + account1.address.substring(2),
-            "0x000000000000000000000000000000000000000000000000000000000000000f"
+            "0x4164647265734d756c740000" + account3.address.substring(2),
+            "0x0000000000000000000000000000000000000000000000000000000000000003"
           ]
         )
       ];
 
-      const propose = await multisig.connect(owner).proposeExecution(targets, datas);
-      const proposeReturnValue = (await propose.wait(1)).logs[3].data.substring(0, 22);
+      const propose = await multisig.connect(owner).proposeExecution(payloads);
+      const proposalSignature = (await propose.wait(1)).logs[2].data.substring(0, 22);
       
-      const keys = [
-        proposeReturnValue + "0000c6c66d5a29ded4b70a2bc4d1637290a99598996b",
-        proposeReturnValue + "0000a127ec6f6a314082d85a8df20cec2eb66abc0e15"
-      ];
-      const values = [
-        ethers.utils.defaultAbiCoder.encode(["address[]"], [targets]),
-        ethers.utils.defaultAbiCoder.encode(["bytes[]"], [datas])
-      ];
+      const key = proposalSignature + "0000870a9bfe5ccee436bab5b4cfd8215400bb038e8e";
+      const value = ethers.utils.defaultAbiCoder.encode(["bytes[]"], [payloads]);
 
-      expect((await universalProfile["getData(bytes32[])"](keys))).to.be.deep.equal(values);
+      expect(await universalProfile["getData(bytes32)"](key)).to.be.equal(value);
     });
 
     it("Should not be able to propose something for execution", async () => {
-      const { universalProfile, keyManager, multisig, owner, account1, account2 } = await loadFixture(deployMultisigKeyManagerWithDataSetAndOwnershipTransfered);
+      const { universalProfile, multisig, account3 } = await loadFixture(deployContracts);
 
       const ABI_SET_DATA = ["function setData(bytes32 dataKey, bytes memory dataValue)"];
       const ERC725Yinterface = new ethers.utils.Interface(ABI_SET_DATA);
-      const targets = [universalProfile.address];
-      const datas = [
+      const payloads = [
         ERC725Yinterface.encodeFunctionData(
           "setData",
           [
-            "0x4164647265734d756c740000" + account1.address.substring(2),
-            "0x000000000000000000000000000000000000000000000000000000000000000f"
+            "0x4164647265734d756c740000" + account3.address.substring(2),
+            "0x0000000000000000000000000000000000000000000000000000000000000003"
           ]
         )
       ];
 
-      const propose = multisig.connect(account1).proposeExecution(targets, datas);
+      const propose = multisig.connect(account3).proposeExecution(payloads);
 
       const ABI_ERROR = ["error NotAuthorised(address from, string permission)"];
       const errorInterface = new ethers.utils.Interface(ABI_ERROR);
@@ -271,9 +334,51 @@ describe("Lock", function () {
         errorContract,
         "NotAuthorised"
       );
-    });*/
+    });
 
-    
+    it("Should be able to execute", async () => {
+      const { universalProfile, multisig, owner, account1, account2, account3, proposalSignature } = await loadFixture(deployContractsAndProposeExecution);
+
+      const hashOwner = await multisig.getProposalHash(owner.address, proposalSignature, true);
+      const hashAcc1  = await multisig.getProposalHash(account1.address, proposalSignature, true);
+      const hashAcc2  = await multisig.getProposalHash(account2.address, proposalSignature, true);
+
+      const signatures = [
+        await owner.signMessage(hashOwner),
+        await owner.signMessage(hashAcc1),
+        await owner.signMessage(hashAcc2)
+      ];
+
+      const execute = await multisig.connect(owner).execute(
+        proposalSignature,
+        signatures,
+        [
+          owner.address,
+          account1.address,
+          account2.address
+        ]
+      );
+
+      const key = "0x4164647265734d756c740000" + account3.address.substring(2);
+      const value = "0x0000000000000000000000000000000000000000000000000000000000000fff"
+
+      expect(await universalProfile["getData(bytes32)"](key)).to.equal(value);
+    });
+
+    it("Should not be able to execute", async () => {
+      const { multisig, account3, proposalSignature } = await loadFixture(deployContractsAndProposeExecution);
+
+      const execute = multisig.connect(account3).execute(proposalSignature, [], []);
+
+      const ABI_ERROR = ["error IndexedError(string contractName, bytes1 errorNumber)"];
+      const errorInterface = new ethers.utils.Interface(ABI_ERROR);
+      const errorContract = new ethers.Contract("Errors", errorInterface, ethers.provider);
+      
+      expect(execute).to.revertedWithCustomError(
+        errorContract,
+        "IndexedError"
+      );
+    });
     
   });
 })

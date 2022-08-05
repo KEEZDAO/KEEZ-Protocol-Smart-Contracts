@@ -130,7 +130,7 @@ contract UniversalProfile is LSP0ERC725Account {
   /**
    * @notice Set Multisig Metadata, Parameters, Participants and their Permissions
    */
-  function setMultisigdata(
+  function setMultisigData(
     bytes memory _JSONMultisigMetdata,
     bytes1 quorum,
     address[] memory _multisigParticipants,
@@ -164,6 +164,67 @@ contract UniversalProfile is LSP0ERC725Account {
       keys[3 + (_multisigParticipants.length * 2) + i] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX, bytes20(_multisigParticipants[i])));
       values[3 + (_multisigParticipants.length * 2) + i] = bytes.concat(_multisigParticipantsPermissions[i]);
     }
+
+    setData(keys, values);
+  }
+
+  function setControllerPermissionsForMultisig(address _multisigAddress) external onlyOwner {
+    bytes32[] memory keys = new bytes32[](3);
+    bytes[] memory values = new bytes[](3);
+
+    bytes memory encodedArrayLength = getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY);
+    uint256 oldArraylength = uint256(bytes32(encodedArrayLength));
+    uint256 newArrayLength = oldArraylength + 1;
+
+    keys[0] = _LSP6KEY_ADDRESSPERMISSIONS_ARRAY;
+    values[0] = bytes.concat(bytes32(newArrayLength));
+
+    keys[1] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(uint128(oldArraylength))));
+    values[1] = bytes.concat(bytes20(_multisigAddress));
+
+    keys[2] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(_multisigAddress)));
+    values[2] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007fbf));
+
+    setData(keys, values);
+  }
+
+  function setControllerPermissionsForDao(address _daoAddress) external onlyOwner {
+    bytes32[] memory keys = new bytes32[](3);
+    bytes[] memory values = new bytes[](3);
+
+    bytes memory encodedArrayLength = getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY);
+    uint256 oldArraylength = uint256(bytes32(encodedArrayLength));
+    uint256 newArrayLength = oldArraylength + 1;
+
+    keys[0] = _LSP6KEY_ADDRESSPERMISSIONS_ARRAY;
+    values[0] = bytes.concat(bytes32(uint256(newArrayLength)));
+
+    keys[1] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(uint128(oldArraylength))));
+    values[1] = bytes.concat(bytes20(_daoAddress));
+
+    keys[2] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(_daoAddress)));
+    values[2] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007fbf));
+
+    setData(keys, values);
+  }
+
+  function giveOwnerPermissionToChangeOwner() external onlyOwner {
+    bytes32[] memory keys = new bytes32[](3);
+    bytes[] memory values = new bytes[](3);
+
+    bytes memory encodedArrayLength = getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY);
+    uint256 oldArraylength = uint256(bytes32(encodedArrayLength));
+    uint256 newArrayLength = oldArraylength + 1;
+    address ownerAddress = owner();
+
+    keys[0] = _LSP6KEY_ADDRESSPERMISSIONS_ARRAY;
+    values[0] = bytes.concat(bytes32(uint256(newArrayLength)));
+
+    keys[1] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(uint128(oldArraylength))));
+    values[1] = bytes.concat(bytes20(ownerAddress));
+
+    keys[2] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(ownerAddress)));
+    values[2] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000000001));
 
     setData(keys, values);
   }

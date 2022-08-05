@@ -26,6 +26,8 @@ bytes32 constant _PERMISSION_VOTE              = 0x00000000000000000000000000000
 bytes32 constant _PERMISSION_PROPOSE           = 0x0000000000000000000000000000000000000000000000000000000000000002;
 bytes32 constant _PERMISSION_ADD_PERMISSION    = 0x0000000000000000000000000000000000000000000000000000000000000004;
 bytes32 constant _PERMISSION_REMOVE_PERMISSION = 0x0000000000000000000000000000000000000000000000000000000000000008;
+bytes32 constant _PERMISSION_EXECUTE_PROPOSAL  = 0x0000000000000000000000000000000000000000000000000000000000000010;
+
 
 // --- MULTISIG SETTINGS
 
@@ -61,30 +63,14 @@ function _MULTISIG_PROPOSAL_SIGNATURE(uint48 _timestamp) pure returns(bytes10 KE
   KEY = bytes10(bytes.concat(_MULTISIG_PROPOSAL_KEY_BYTES4_PREFIX, bytes6(keccak256(abi.encode(_timestamp)))));
 }
 
-// keccak256("MultisigProposalTargets[]")
-bytes20 constant _MULTISIG_TARGETS_SUFFIX = bytes20(keccak256("MultisigProposalTargets[]"));
-//bytes20 constant _MULTISIG_TARGETS_SUFFIX = 0xc6c66d5a29ded4b70a2bc4d1637290a99598996b;
+// bytes2(0) + bytes20(keccak256("MultisigProposalPayloads"))
+bytes22 constant _MULTISIG_PAYLOADS_SUFFIX = 0x0000870a9bfe5ccee436bab5b4cfd8215400bb038e8e;
 
-// Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE + bytes2(0) + bytes20(keccak256("MultisigProposalTargets"))
-// --> abi.encode(address[])
-function _MULTISIG_PROPOSAL_TARGETS_KEY(bytes10 _proposalSignature) pure returns(bytes32 KEY) {
-  KEY = bytes32(bytes.concat(
-    _proposalSignature,
-    bytes2(0),
-    _MULTISIG_TARGETS_SUFFIX
-  ));
-}
-
-// keccak256("MultisigProposalDatas[]")
-bytes20 constant _MULTISIG_DATAS_SUFFIX = bytes20(keccak256("MultisigProposalDatas[]"));
-//bytes20 constant _MULTISIG_DATAS_SUFFIX = 0xa127ec6f6a314082d85a8df20cec2eb66abc0e15;
-
-// Proposal targets := _MULTISIG_PROPOSAL_SIGNATURE + bytes2(0) + bytes20(keccak256("MultisigProposalDatas"))
+// Proposal payloads := _MULTISIG_PROPOSAL_SIGNATURE + bytes2(0) + bytes20(keccak256("MultisigProposalPayloads"))
 // --> abi.encode(bytes[])
-function _MULTISIG_PROPOSAL_DATAS_KEY(bytes10 _proposalSignature) pure returns(bytes32 KEY) {
+function _MULTISIG_PROPOSAL_PAYLOADS_KEY(bytes10 _proposalSignature) pure returns(bytes32 KEY) {
   KEY = bytes32(bytes.concat(
     _proposalSignature,
-    bytes2(0),
-    _MULTISIG_DATAS_SUFFIX
+    _MULTISIG_PAYLOADS_SUFFIX
   ));
 }
