@@ -220,8 +220,6 @@ describe("Deployment testing & Individual contracts method testing", function ()
       ];
 
       const actualData = await universalProfile["getData(bytes32[])"](keys);
-      console.log(values);
-      console.log(actualData);
 
       expect(actualData).to.deep.equal(values);
     });
@@ -302,6 +300,91 @@ describe("Deployment testing & Individual contracts method testing", function ()
       let errorInterface = new ethers.utils.Interface(ABI);
       const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
       expect(remove_permission).to.revertedWithCustomError(
+        errorContract,
+        "NotAuthorised"
+      );
+    });
+  });
+
+  describe("Dao claiming methods", () => {
+    it("Should be able to claim permission from an authorized address", async () => {
+      const { universalProfile, dao, owner, account3 } = await loadFixture(deployContracts);
+
+      const ownerHash = await dao.getNewPermissionHash(
+        owner.address,
+        account3.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
+      );
+
+      const ownerSig = await owner.signMessage(ethers.utils.arrayify(ownerHash));
+
+      await dao.connect(account3).claimPermission(
+        owner.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      const key = "0x4b80742de2bfb3cc0e490000" + account3.address.substring(2);
+      const value = "0x0000000000000000000000000000000000000000000000000000000000000001"
+
+      expect(await universalProfile["getData(bytes32)"](key)).to.equal(value);
+    });
+
+    it("Should not be able to claim twice from an authorized address", async () => {
+      const { dao, owner, account3 } = await loadFixture(deployContracts);
+
+      const ownerHash = await dao.getNewPermissionHash(
+        owner.address,
+        account3.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
+      );
+
+      const ownerSig = await owner.signMessage(ethers.utils.arrayify(ownerHash));
+
+      await dao.connect(account3).claimPermission(
+        owner.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      const secondClaim =  dao.connect(account3).claimPermission(
+        owner.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      let ABI = ["error NotAuthorised(address from, string permission)"];
+      let errorInterface = new ethers.utils.Interface(ABI);
+      const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
+      
+      expect(secondClaim).to.revertedWithCustomError(
+        errorContract,
+        "NotAuthorised"
+      );
+    });
+
+    it("Should not be able to claim from an unauthorized address", async () => {
+      const { dao, account3, account4 } = await loadFixture(deployContracts);
+
+      const acc3Hash = await dao.getNewPermissionHash(
+        account3.address,
+        account4.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
+      );
+
+      const ownerSig = await account3.signMessage(ethers.utils.arrayify(acc3Hash));
+
+      const claimigTrx = dao.connect(account4).claimPermission(
+        account3.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      let ABI = ["error NotAuthorised(address from, string permission)"];
+      let errorInterface = new ethers.utils.Interface(ABI);
+      const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
+      
+      expect(claimigTrx).to.revertedWithCustomError(
         errorContract,
         "NotAuthorised"
       );
