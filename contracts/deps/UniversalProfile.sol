@@ -42,8 +42,9 @@ import {
   _DAO_MINIMUM_VOTING_DELAY_KEY,
   _DAO_MINIMUM_VOTING_PERIOD_KEY,
 
-  _DAO_PARTICIPANTS_KEY,
-  _DAO_PARTICIPANTS_PREFIX,
+  _DAO_PARTICIPANTS_ARRAY_KEY,
+  _DAO_PARTICIPANTS_ARRAY_PREFIX,
+  _DAO_PARTICIPANTS_MAPPING_PREFIX,
   _LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX
 } from "../Dao/DaoConstants.sol";
 
@@ -93,8 +94,8 @@ contract UniversalProfile is LSP0ERC725Account {
       _daoParticipants.length == _daoParticipantsPermissions.length
     );
 
-    bytes32[] memory keys = new bytes32[](6 + (_daoParticipants.length * 2));
-    bytes[] memory values = new bytes[](6 + (_daoParticipants.length * 2));
+    bytes32[] memory keys = new bytes32[](6 + (_daoParticipants.length * 3));
+    bytes[] memory values = new bytes[](6 + (_daoParticipants.length * 3));
 
     // Setting DAO Metadata and Parameters
     keys[0] = _DAO_JSON_METDATA_KEY;
@@ -112,16 +113,19 @@ contract UniversalProfile is LSP0ERC725Account {
     keys[4] = _DAO_MINIMUM_VOTING_PERIOD_KEY;
     values[4] = bytes.concat(_minimumVotingPeriod);
 
-    keys[5] = _DAO_PARTICIPANTS_KEY;
+    keys[5] = _DAO_PARTICIPANTS_ARRAY_KEY;
     values[5] = bytes.concat(bytes32(_daoParticipants.length));
 
     // Setting DAO Participants and their Permissions
     for (uint128 i = 0; i < _daoParticipants.length; i++) {
-      keys[6 + i] = bytes32(bytes.concat(_DAO_PARTICIPANTS_PREFIX, bytes16(i)));
+      keys[6 + i] = bytes32(bytes.concat(_DAO_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
       values[6 + i] = bytes.concat(bytes20(_daoParticipants[i]));
 
-      keys[6 + i + _daoParticipants.length] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_daoParticipants[i])));
-      values[6 + i + _daoParticipants.length] = bytes.concat(_daoParticipantsPermissions[i]);
+      keys[6 + i + _daoParticipants.length] = bytes32(bytes.concat(_DAO_PARTICIPANTS_MAPPING_PREFIX, bytes20(_daoParticipants[i])));
+      values[6 + i + _daoParticipants.length] = bytes.concat(bytes32(uint256(i)));
+
+      keys[6 + i + (_daoParticipants.length * 2)] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_daoParticipants[i])));
+      values[6 + i + (_daoParticipants.length * 2)] = bytes.concat(_daoParticipantsPermissions[i]);
     }
 
     setData(keys, values);
@@ -158,7 +162,7 @@ contract UniversalProfile is LSP0ERC725Account {
       keys[3 + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
       values[3 + i] = bytes.concat(bytes20(_multisigParticipants[i]));
 
-      keys[3 + _multisigParticipants.length + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_MAPPING_PREFIX, bytes2(0), bytes20(_multisigParticipants[i])));
+      keys[3 + _multisigParticipants.length + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_MAPPING_PREFIX, bytes20(_multisigParticipants[i])));
       values[3 + _multisigParticipants.length + i] = bytes.concat(bytes32(uint256(i)));
 
       keys[3 + (_multisigParticipants.length * 2) + i] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX, bytes20(_multisigParticipants[i])));

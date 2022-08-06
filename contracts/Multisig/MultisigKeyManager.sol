@@ -2,11 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-// Interfaces for interacting with a Universal Profile.
-
 // getData(...)
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
-// setData(...)
+// setData(...), execute(...)
 import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/ILSP6KeyManager.sol";
 
 // Openzeppelin Utils.
@@ -42,11 +40,14 @@ import {
   _MULTISIG_PROPOSAL_PAYLOADS_KEY
 } from "./MultisigConstants.sol";
 
+// Library for array interaction
+import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
+
 // Custom error.
 import {IndexedError} from "../Errors.sol";
 
-// Library for array interaction
-import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
+// Contracs's interface
+import {IMultisigKeyManager} from "./IMultisigKeyManager.sol";
 
 /**
  *
@@ -56,26 +57,26 @@ import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
  * @title MultisigKeyManager
  * @custom:version 1.5
  */
-contract MultisigKeyManager {
+contract MultisigKeyManager is IMultisigKeyManager {
   using ECDSA for bytes32;
 
   /**
-   * @notice Nonce for claiming permissions.
+   * @dev Nonce for claiming permissions.
    */
   mapping(address => uint256) private claimPermissionNonce;
 
   /**
-   * @notice Nonce for voting.
+   * @dev Nonce for voting.
    */
   mapping(address => uint256) private votingNonce;
 
   /**
-   * @notice Address of the DAO_ACCOUNT.
+   * @dev Address of the DAO_ACCOUNT.
    */
   address payable private UNIVERSAL_PROFILE;
 
   /**
-   * @notice Address of the KEY_MANAGER.
+   * @dev Address of the KEY_MANAGER.
    */
   address private KEY_MANAGER;
 
@@ -87,28 +88,43 @@ contract MultisigKeyManager {
     KEY_MANAGER = _KEY_MANAGER;
   }
 
-  // ToDo Move this to the interface of this contract.
-  event ProposalCreated(bytes10 proposalSignature);
+
+  // --- General Methods.
+
 
   /**
-   * @notice Create a `_hash` for signing and that signature can be used
-   * by the user `_to` to redeem the permissions.
+   * @inheritdoc IMultisigKeyManager
    */
   function getNewPermissionHash(
     address _from,
     address _to,
     bytes32 _permissions
-  ) public view returns(bytes32 _hash) {
+  )
+    public
+    override
+    view
+    returns(bytes32 _hash)
+  {
     _hash = keccak256(abi.encode(
-      _from, _to, _permissions, claimPermissionNonce[_to]
+      address(this),
+      _from,
+      _to,
+      _permissions,
+      claimPermissionNonce[_to]
     ));
   }
 
   /**
-   * @notice User can claim a `_permission` if he recieved the `_signature`
-   * from someone with the ADD_PERMISSION permission, otherwise it will revert.
+   * @inheritdoc IMultisigKeyManager
    */
-  function claimPermission(address _from, bytes32 _permissions, bytes memory _signature) external {
+  function claimPermission(
+    address _from,
+    bytes32 _permissions,
+    bytes memory _signature
+  )
+    external
+    override
+  {
     _verifyPermission(_from, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
     bytes32 _hash = getNewPermissionHash(_from, msg.sender, _permissions).toEthSignedMessageHash();
     address recoveredAddress = _hash.recover(_signature);
@@ -119,102 +135,49 @@ contract MultisigKeyManager {
   }
 
   /**
-   * @notice 
+   * @inheritdoc IMultisigKeyManager
    */
-  function addPermissions(address _to, bytes32 _permissions) external {
+  function addPermissions(
+    address _to,
+    bytes32 _permissions
+  )
+    external
+    override
+  {
     _verifyPermission(msg.sender, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
     _addPermissions(_to, _permissions);
   }
 
   /**
-   * @notice 
+   * @inheritdoc IMultisigKeyManager
    */
-  function removePermissions(address _to, bytes32 _permissions) external {
+  function removePermissions(
+    address _to,
+    bytes32 _permissions
+  )
+    external
+    override
+  {
     _verifyPermission(msg.sender, _PERMISSION_REMOVE_PERMISSION, "REMOVE_PERMISSION");
     _removePermissions(_to, _permissions);
   }
 
   /**
-   * @dev Add `_permissions` to an address `_to`.
-   */
-  function _addPermissions(address _to, bytes32 _permissions) internal {
-    // Check if user has any permisssions. If not add him to the list of participants.
-    bytes32 currentPermissions = _getPermissions(_to);
-    if (currentPermissions == bytes32(0))
-    ArrayWithMappingLibrary._addElement(
-      UNIVERSAL_PROFILE,
-      KEY_MANAGER,
-      _MULTISIG_PARTICIPANTS_ARRAY_KEY,
-      _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
-      _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
-      bytes.concat(bytes20(_to))
-    );
-    // Update the permissions in a local variable.
-    for(uint256 i = 0; i < 5; i++) {
-      if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
-      currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
-    }
-    // Set the local permissions to the Universal Profile.
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataSingleSelector,
-        bytes32(bytes.concat(
-          _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
-          bytes20(_to)
-        )),
-        bytes.concat(currentPermissions)
-      )
-    );
-  }
-
-  /**
-   * @dev Remove `_permissions` from an address `_to`.
-   */
-  function _removePermissions(address _to, bytes32 _permissions) internal {
-    // Update the permissions in a local variable.
-    bytes32 currentPermissions = _getPermissions(_to);
-    for(uint256 i = 0; i < 5; i++) {
-      if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
-      currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
-    }
-    bytes memory encodedCurrentPermissions = bytes.concat(currentPermissions);
-    // Check if user has any permissions left. If not, remove him from the list of participants.
-    if (currentPermissions == bytes32(0)) {
-      ArrayWithMappingLibrary._removeElement(
-        UNIVERSAL_PROFILE,
-        KEY_MANAGER,
-        _MULTISIG_PARTICIPANTS_ARRAY_KEY,
-        _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
-        _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
-        bytes.concat(bytes20(_to))
-      );
-      encodedCurrentPermissions = "";
-    }
-    // Set the local permissions to the Universal Profile.
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataSingleSelector,
-        bytes32(bytes.concat(
-          _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
-          bytes20(_to)
-        )),
-        encodedCurrentPermissions
-      )
-    );
-  }
-
-  /**
-   * @notice Propose to execute methods on behalf of the multisig.
+   * @inheritdoc IMultisigKeyManager
    */
   function proposeExecution(
+    string calldata _title,
     bytes[] calldata _payloads
   )
     external
+    override
   {
     if(_payloads.length == 0) revert IndexedError("Multisig", 0x02);
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
 
-    bytes10 proposalSignature = _MULTISIG_PROPOSAL_SIGNATURE(uint48(block.timestamp));
+    bytes10 proposalSignature = _MULTISIG_PROPOSAL_SIGNATURE(
+      bytes6(keccak256(abi.encode(_title, block.timestamp)))
+    );
 
     bytes32 key = _MULTISIG_PROPOSAL_PAYLOADS_KEY(proposalSignature);
     bytes memory value = abi.encode(_payloads);
@@ -230,14 +193,20 @@ contract MultisigKeyManager {
   }
 
   /**
-   * @notice Create a unique hash for every proposal which should be hashed. 
+   * @inheritdoc IMultisigKeyManager
    */
   function getProposalHash(
     address _signer,
     bytes10 _proposalSignature,
     bool _response
-  ) public view returns(bytes32 _hash) {
+  )
+    public
+    override
+    view
+    returns(bytes32 _hash)
+  {
     _hash = keccak256(abi.encodePacked(
+      address(this),
       _signer,
       _proposalSignature,
       _response,
@@ -246,7 +215,7 @@ contract MultisigKeyManager {
   }
 
   /**
-   * @notice Execute a proposal if you have all the necessary signatures.
+   * @inheritdoc IMultisigKeyManager
    */
   function execute(
     bytes10 _proposalSignature,
@@ -254,6 +223,7 @@ contract MultisigKeyManager {
     address[] calldata _signers
   )
     external
+    override
   {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE_PROPOSAL, "EXECUTE_PROPOSAL");
     if (_signatures.length != _signers.length) revert IndexedError("Multisig", 0x03);
@@ -330,6 +300,75 @@ contract MultisigKeyManager {
   {
     bytes32 permissions = _getPermissions(_from);
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
+  }
+
+  /**
+   * @dev Add `_permissions` to an address `_to`.
+   */
+  function _addPermissions(address _to, bytes32 _permissions) internal {
+    // Check if user has any permisssions. If not add him to the list of participants.
+    bytes32 currentPermissions = _getPermissions(_to);
+    if (currentPermissions == bytes32(0))
+    ArrayWithMappingLibrary._addElement(
+      UNIVERSAL_PROFILE,
+      KEY_MANAGER,
+      _MULTISIG_PARTICIPANTS_ARRAY_KEY,
+      _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
+      _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
+      bytes.concat(bytes20(_to))
+    );
+    // Update the permissions in a local variable.
+    for(uint256 i = 0; i < 5; i++) {
+      if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
+      currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
+    }
+    // Set the local permissions to the Universal Profile.
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataSingleSelector,
+        bytes32(bytes.concat(
+          _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
+          bytes20(_to)
+        )),
+        bytes.concat(currentPermissions)
+      )
+    );
+  }
+
+  /**
+   * @dev Remove `_permissions` from an address `_to`.
+   */
+  function _removePermissions(address _to, bytes32 _permissions) internal {
+    // Update the permissions in a local variable.
+    bytes32 currentPermissions = _getPermissions(_to);
+    for(uint256 i = 0; i < 5; i++) {
+      if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
+      currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
+    }
+    bytes memory encodedCurrentPermissions = bytes.concat(currentPermissions);
+    // Check if user has any permissions left. If not, remove him from the list of participants.
+    if (currentPermissions == bytes32(0)) {
+      ArrayWithMappingLibrary._removeElement(
+        UNIVERSAL_PROFILE,
+        KEY_MANAGER,
+        _MULTISIG_PARTICIPANTS_ARRAY_KEY,
+        _MULTISIG_PARTICIPANTS_ARRAY_PREFIX,
+        _MULTISIG_PARTICIPANTS_MAPPING_PREFIX,
+        bytes.concat(bytes20(_to))
+      );
+      encodedCurrentPermissions = "";
+    }
+    // Set the local permissions to the Universal Profile.
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataSingleSelector,
+        bytes32(bytes.concat(
+          _LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX,
+          bytes20(_to)
+        )),
+        encodedCurrentPermissions
+      )
+    );
   }
 
 }

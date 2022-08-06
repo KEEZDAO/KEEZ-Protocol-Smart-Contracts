@@ -50,7 +50,7 @@ bytes32 constant _MULTISIG_PARTICIPANTS_ARRAY_KEY = 0x54aef89da199194b126d28036f
 bytes16 constant _MULTISIG_PARTICIPANTS_ARRAY_PREFIX = 0x54aef89da199194b126d28036f712917;
 
 // MultisigParticipants:<address> --> index
-bytes10 constant _MULTISIG_PARTICIPANTS_MAPPING_PREFIX = 0x54aef89da199194b126d;
+bytes12 constant _MULTISIG_PARTICIPANTS_MAPPING_PREFIX = 0x54aef89da199194b126d0000;
 
 
 // --- PROPOSAL KEYS
@@ -59,9 +59,10 @@ bytes10 constant _MULTISIG_PARTICIPANTS_MAPPING_PREFIX = 0x54aef89da199194b126d;
 // keccak("MultisigProposal")
 bytes4 constant _MULTISIG_PROPOSAL_KEY_BYTES4_PREFIX = 0x4d756c74;
 
-// Proposal signature := _MULTISIG_PROPOSAL_KEY_PREFIX + bytes6(abi.encode(<Creation Timestamp>))
-function _MULTISIG_PROPOSAL_SIGNATURE(uint48 _timestamp) pure returns(bytes10 KEY) {
-  KEY = bytes10(bytes.concat(_MULTISIG_PROPOSAL_KEY_BYTES4_PREFIX, bytes6(keccak256(abi.encode(_timestamp)))));
+// Proposal identifier := bytes6(keccak256(abi.encode(<Proposal title>, <Proposal timestamp>)))
+// Proposal signature := _DAO_PROPOSAL_KEY_BYTES4_PREFIX + <Proposal identifier>
+function _MULTISIG_PROPOSAL_SIGNATURE(bytes6 _proposalIdentifier) pure returns(bytes10 KEY) {
+  KEY = bytes10(bytes.concat(_MULTISIG_PROPOSAL_KEY_BYTES4_PREFIX, _proposalIdentifier));
 }
 
 // bytes2(0) + bytes20(keccak256("MultisigProposalPayloads"))

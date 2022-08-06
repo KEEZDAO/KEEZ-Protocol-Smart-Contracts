@@ -32,7 +32,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
     // Initialize the multisig with new members.
     await universalProfile.connect(owner).setMultisigData(
       ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
-      ethers.utils.hexValue(50),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
       [
         owner.address,
         account1.address,
@@ -72,7 +72,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       )
     ];
 
-    const propose = await multisig.connect(owner).proposeExecution(payloads);
+    const propose = await multisig.connect(owner).proposeExecution("Some random title", payloads);
     const proposalSignature = (await propose.wait(1)).logs[2].data.substring(0, 22);
 
     return { universalProfile, multisig, owner, account1, account2, account3, account4, proposalSignature };
@@ -121,7 +121,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       const values = [
         // metadata of the multisig
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
-        ethers.utils.hexValue(50),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
         // array length and array elements
         "0x0000000000000000000000000000000000000000000000000000000000000003",
         owner.address.toLowerCase(),
@@ -386,7 +386,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         )
       ];
 
-      const propose = await multisig.connect(owner).proposeExecution(payloads);
+      const propose = await multisig.connect(owner).proposeExecution("Some random title", payloads);
       const proposalSignature = (await propose.wait(1)).logs[2].data.substring(0, 22);
       
       const key = proposalSignature + "0000870a9bfe5ccee436bab5b4cfd8215400bb038e8e";
@@ -410,7 +410,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         )
       ];
 
-      const propose = multisig.connect(account3).proposeExecution(payloads);
+      const propose = multisig.connect(account3).proposeExecution("Some random title", payloads);
 
       const ABI_ERROR = ["error NotAuthorised(address from, string permission)"];
       const errorInterface = new ethers.utils.Interface(ABI_ERROR);

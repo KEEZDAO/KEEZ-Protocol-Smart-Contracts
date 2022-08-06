@@ -13,12 +13,35 @@ pragma solidity ^0.8.0;
 interface IDaoKeyManager {
 
   /**
-   * @notice Toggle permissions of an address.
+   * @notice This event is emited every time a proposal is created.
    *
-   * @param _to The Universal's Profile address whose permission will be toggled.
-   * @param _permissions The array of permissions that will be toggled.
+   * @param proposalSignature The signature of the proposal that was created.
    */
-  function togglePermissions(address _to, bytes32[] memory _permissions) external;
+  event ProposalCreated(bytes10 proposalSignature);
+
+  /**
+   * @notice Get the message needet to be sign for awarding a set of permissions.
+   */
+  function getNewPermissionHash(
+    address _from,
+    address _to,
+    bytes32 _permissions
+  ) external view returns(bytes32 _hash);
+
+  /**
+   * @notice Claim a permission using a signature
+   */
+  function claimPermission(address _from, bytes32 _permissions, bytes memory _signature) external;
+
+  /**
+   * @notice Add a permission.
+   */
+  function addPermissions(address _to, bytes32 _permissions) external;
+
+  /**
+   * @notice Remove a permission.
+   */
+  function removePermissions(address _to, bytes32 _permissions) external;
 
   /**
    * @notice Delegate your vote.
@@ -26,18 +49,43 @@ interface IDaoKeyManager {
   function delegate(address delegatee) external;
 
   /**
+   *
+   */
+  function undelegate() external;
+
+  /**
    * @notice Create a proposal.
    */
-  function createProposal(string memory title, string memory metadataLink, uint48 votingDelay, uint48 votingPeriod, address[] memory targets, bytes[] memory datas, uint8 choices, uint8 choicesPerVote) external;
+  function createProposal(
+    string calldata _title,
+    string calldata _metadataLink,
+    uint48 _votingDelay,
+    uint48 _votingPeriod,
+    bytes[] calldata _payloads,
+    uint8 _choices,
+    uint8 _choicesPerVote
+  ) external;
 
   /**
-   * @notice Execute the calldata of the Proposal if there is one.
+   *
    */
-  function executeProposal(bytes10 proposalSignature) external returns(bool[] memory success, bytes[] memory results);
+  function getProposalHash(
+    address _signer,
+    bytes10 _proposalSignature,
+    bool _response
+  )
+    external
+    view
+    returns(bytes32 _hash);
 
   /**
-   * @notice Vote on a proposal.
+   * @notice Execute the proposal by signature.
    */
-  function vote(bytes10 proposalSignature, uint256[] memory choicesArray) external;
+  function executeProposal(bytes10 proposalSignature, bytes[] calldata _signatures, address[] calldata _signers) external;
+
+
+
+
+
 
 }

@@ -2,9 +2,15 @@
 
 pragma solidity ^0.8.0;
 
+// getData(...)
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
+// setData(...), execute(...)
 import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/ILSP6KeyManager.sol";
-import {IDaoKeyManager} from "./IDaoKeyManager.sol";
+
+// Openzeppelin Utils.
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+
+// LSP6 Constants
 import {
   NoPermissionsSet,
   NotAuthorised
@@ -13,6 +19,8 @@ import {
   setDataSingleSelector,
   setDataMultipleSelector
 } from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
+
+// Dao Constants
 import {
   _LSP6KEY_ADDRESSPERMISSIONS_ARRAY,
   _LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX,
@@ -22,32 +30,40 @@ import {
   _PERMISSION_EXECUTE,
   _PERMISSION_SENDDELEGATE,
   _PERMISSION_RECIEVEDELEGATE,
-  _PERMISSION_MASTER,
+  _PERMISSION_ADD_PERMISSIONS,
+  _PERMISSION_REMOVE_PERMISSIONS,
+
+  _DAO_PARTICIPANTS_ARRAY_KEY,
+  _DAO_PARTICIPANTS_ARRAY_PREFIX,
+  _DAO_PARTICIPANTS_MAPPING_PREFIX,
+
+  _DAO_DELEGATEE_PREFIX,
+  _DAO_DELEGATES_ARRAY_PREFIX,
   
   _DAO_MAJORITY_KEY,
   _DAO_PARTICIPATION_RATE_KEY,
   _DAO_MINIMUM_VOTING_DELAY_KEY,
   _DAO_MINIMUM_VOTING_PERIOD_KEY,
 
-  _DAO_DELEGATED_VOTE_PREFIX,
-  _DAO_ADDRESS_DELEGATES_PREFIX,
-
-  _KEY_PROPOSAL_PREFIX,
+  _DAO_PROPOSAL_SIGNATURE,
   _DAO_PROPOSAL_JSON_METADATA_SUFFIX,
   _DAO_PROPOSAL_VOTING_DELAY_SUFFIX,
   _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX,
   _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX,
-  _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX,
-  _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX,
+  _DAO_PROPOSAL_PAYLOADS_ARRAY_SUFFIX,
   _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX,
   _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX,
-  _KEY_PARTICIPANT_VOTE,
-
-  _SPLIT_BYTES32_IN_TWO_HALFS
+  _KEY_PARTICIPANT_VOTE
 } from "./DaoConstants.sol";
+
+// Library for array interaction
+import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
 
 // Custom error
 import {IndexedError} from "../Errors.sol";
+
+// Contract's interface
+import {IDaoKeyManager} from "./IDaoKeyManager.sol";
 
 /**
  *
@@ -55,21 +71,20 @@ import {IndexedError} from "../Errors.sol";
  *
  * @author B00ste
  * @title DaoKeyManager
- * @custom:version 1.1
+ * @custom:version 1.2
  */
 contract DaoKeyManager is IDaoKeyManager {
-
-
-
+  using ECDSA for bytes32;
 
   /**
-   * TODO Change the contract to use signatures instead of interacting with the
-   * vote() method to instead sign a message with the vote and then pass the signatures to the
-   * executeProposal() method and check the delegates, choices there from each signature.
+   * @dev Nonce for claiming permissions.
    */
+  mapping(address => uint256) private claimPermissionNonce;
 
-
-
+  /**
+   * @dev Nonce for voting.
+   */
+  mapping(address => uint256) private votingNonce;
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -99,120 +114,238 @@ contract DaoKeyManager is IDaoKeyManager {
   /**
    * @inheritdoc IDaoKeyManager
    */
-  function togglePermissions(address _to, bytes32[] memory _permissions) external override {
-    _verifyPermission(msg.sender, _PERMISSION_MASTER, "MASTER");
-
-    bytes32 permissions = _getPermissions(_to);
-    for (uint8 i = 0; i < _permissions.length; i++) {
-      if (permissions & _permissions[i] != 0) {
-        permissions = bytes32(uint256(permissions) - uint256(_permissions[i]));
-      }
-      else {
-        permissions = bytes32(uint256(permissions) + uint256(_permissions[i]));
-      }
-    }
-
-    bytes32[] memory keys = new bytes32[](1);
-    keys[0] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_to)));
-    bytes[] memory values = new bytes[](1);
-    values[0] = bytes.concat(permissions);
-    _setData(keys, values);
+  function getNewPermissionHash(
+    address _from,
+    address _to,
+    bytes32 _permissions
+  )
+    public
+    override
+    view
+    returns(bytes32 _hash)
+  {
+    _hash = keccak256(abi.encode(
+      address(this),
+      _from,
+      _to,
+      _permissions,
+      claimPermissionNonce[_to]
+    ));
   }
 
   /**
    * @inheritdoc IDaoKeyManager
    */
-  // ToDo remove delegate.
-  function delegate(address delegatee) external override {
+  function claimPermission(
+    address _from,
+    bytes32 _permissions,
+    bytes memory _signature
+  )
+    external
+    override
+  {
+    _verifyPermission(_from, _PERMISSION_ADD_PERMISSIONS, "ADD_PERMISSION");
+    bytes32 _hash = getNewPermissionHash(_from, msg.sender, _permissions).toEthSignedMessageHash();
+    address recoveredAddress = _hash.recover(_signature);
+    if (_from != recoveredAddress) revert IndexedError("DAO", 0x01);
+    _addPermissions(msg.sender, _permissions);
+    // Changing the nonce.
+    claimPermissionNonce[msg.sender] += block.timestamp / 113;
+  }
+
+  /**
+   * @inheritdoc IDaoKeyManager
+   */
+  function addPermissions(
+    address _to,
+    bytes32 _permissions
+  )
+    external
+    override
+  {
+    _verifyPermission(msg.sender, _PERMISSION_ADD_PERMISSIONS, "ADD_PERMISSION");
+    _addPermissions(_to, _permissions);
+  }
+
+  /**
+   * @inheritdoc IDaoKeyManager
+   */
+  function removePermissions(
+    address _to,
+    bytes32 _permissions
+  )
+    external
+    override
+  {
+    _verifyPermission(msg.sender, _PERMISSION_REMOVE_PERMISSIONS, "REMOVE_PERMISSION");
+    _removePermissions(_to, _permissions);
+  }
+
+  /**
+   * @inheritdoc IDaoKeyManager
+   */
+  function delegate(
+    address delegatee
+  )
+    external
+    override
+  {
     _verifyPermission(msg.sender, _PERMISSION_SENDDELEGATE, "SENDDELEGATE");
     _verifyPermission(delegatee, _PERMISSION_RECIEVEDELEGATE, "RECIEVEDELEGATE");
 
-    bytes32 arrayKey = bytes32(bytes.concat(_DAO_ADDRESS_DELEGATES_PREFIX, bytes20(delegatee)));
-    uint128 arrayLength = uint128(bytes16(IERC725Y(UNIVERSAL_PROFILE).getData(arrayKey)));
+    bytes32 delegateeKey = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
+    bytes memory encodedDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(delegateeKey);
 
+    if (delegatee == address(bytes20(encodedDelegatee))) revert IndexedError("DAO", 0x02);
+
+    bytes32 delegatesArrayKey = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, bytes20(delegatee)));
+    bytes memory encodedDelegatesArray = IERC725Y(UNIVERSAL_PROFILE).getData(delegatesArrayKey);
+    address[] memory delegatesArray = abi.decode(encodedDelegatesArray, (address[]));
+    delegatesArray[delegatesArray.length] = msg.sender;
 
     bytes32[] memory keys = new bytes32[](3);
-    keys[0] = bytes32(bytes.concat(_SPLIT_BYTES32_IN_TWO_HALFS(arrayKey)[0], bytes16(arrayLength)));
-    keys[1] = arrayKey;
-    keys[2] = bytes32(bytes.concat(_DAO_DELEGATED_VOTE_PREFIX , bytes20(msg.sender)));
     bytes[] memory values = new bytes[](3);
-    values[0] = bytes.concat(bytes20(msg.sender));
-    values[1] = bytes.concat(bytes16(arrayLength + 1));
-    values[2] = bytes.concat(bytes20(delegatee));
+
+    keys[0] = delegateeKey;
+    values[0] = bytes.concat(bytes20(delegatee));
+
+    keys[1] = delegatesArrayKey;
+    values[1] = abi.encode(delegatesArray);
   
-    _setData(keys, values);
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        keys, values
+      )
+    );
+  }
+
+  /**
+   * TODO
+   * @inheritdoc IDaoKeyManager
+   */
+  function undelegate(
+
+  )
+    external
+    override
+  {
+
   }
 
   /**
    * @inheritdoc IDaoKeyManager
    */
   function createProposal(
-    string memory title,
-    string memory metadataLink,
-    uint48 votingDelay,
-    uint48 votingPeriod,
-    address[] memory targets,
-    bytes[] memory datas,
-    uint8 choices,
-    uint8 choicesPerVote
-  ) external override {
+    string calldata _title,
+    string calldata _metadataLink,
+    uint48 _votingDelay,
+    uint48 _votingPeriod,
+    bytes[] calldata _payloads,
+    uint8 _choices,
+    uint8 _choicesPerVote
+  )
+    external
+    override
+  {
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
-    if (targets.length != datas.length) revert IndexedError("DAO", 0x01);
-    if (choices > 16) revert IndexedError("DAO", 0x02);
-    if (choicesPerVote > choices) revert IndexedError("DAO", 0x03);
-    if (votingDelay < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_DELAY_KEY)))) revert IndexedError("DAO", 0x04);
-    if (votingPeriod < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_PERIOD_KEY)))) revert IndexedError("DAO", 0x05);
+    if (_choices > 16) revert IndexedError("DAO", 0x03);
+    if (_choicesPerVote > _choices) revert IndexedError("DAO", 0x04);
+    if (_votingDelay < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_DELAY_KEY)))) revert IndexedError("DAO", 0x05);
+    if (_votingPeriod < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_PERIOD_KEY)))) revert IndexedError("DAO", 0x06);
 
-    uint256 arraysLength = 2 * targets.length;
-    bytes10 KEY_PROPOSAL_PREFIX = _KEY_PROPOSAL_PREFIX(uint48(block.timestamp), title);
-    bytes32[] memory keys = new bytes32[](arraysLength + 8);
-    bytes[] memory values = new bytes[](arraysLength + 8);
+    bytes10 proposalSignature = _DAO_PROPOSAL_SIGNATURE(
+      bytes6(keccak256(abi.encode(_title, block.timestamp)))
+    );
+    bytes32[] memory keys = new bytes32[](7);
+    bytes[] memory values = new bytes[](7);
 
-    if(arraysLength > 0){
-      for (uint16 i = 0; i < targets.length; i++) {
-        keys[i] = bytes32(bytes.concat(
-          _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX)))[0],
-          bytes16(uint128(i))
-        ));
-        keys[i + targets.length] = bytes32(bytes.concat(
-          _SPLIT_BYTES32_IN_TWO_HALFS(bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX)))[0],
-          bytes16(uint128(i))
-        ));
-
-        values[i] = bytes.concat(bytes20(targets[i]));
-        values[i + targets.length] = datas[i];
-      } 
+    if(_payloads.length > 0){
+      keys[0] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PAYLOADS_ARRAY_SUFFIX));
+      values[0] = abi.encode(_payloads);
     }
 
-    keys[arraysLength + 0] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX));
-    keys[arraysLength + 1] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX));
-    keys[arraysLength + 2] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_JSON_METADATA_SUFFIX));
-    keys[arraysLength + 3] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX));
-    keys[arraysLength + 4] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX));
-    keys[arraysLength + 5] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX));
-    keys[arraysLength + 6] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX));
-    keys[arraysLength + 7] = bytes32(bytes.concat(KEY_PROPOSAL_PREFIX, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX));
+    keys[1] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_JSON_METADATA_SUFFIX));
+    values[1] = bytes(_metadataLink);
 
-    values[arraysLength + 0] = bytes.concat(bytes32(targets.length));
-    values[arraysLength + 1] = bytes.concat(bytes32(datas.length));
-    values[arraysLength + 2] = bytes(metadataLink);
-    values[arraysLength + 3] = bytes.concat(bytes6(uint48(votingDelay)));
-    values[arraysLength + 4] = bytes.concat(bytes6(uint48(votingPeriod)));
-    values[arraysLength + 5] = bytes.concat(bytes6(uint48(block.timestamp)));
-    values[arraysLength + 6] = bytes.concat(bytes1(choices));
-    values[arraysLength + 7] = bytes.concat(bytes1(choicesPerVote));
+    keys[2] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX));
+    values[2] = bytes.concat(bytes6(uint48(_votingDelay)));
 
-    _setData(keys, values);
+    keys[3] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX));
+    values[3] = bytes.concat(bytes6(uint48(_votingPeriod)));
+
+    keys[4] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX));
+    values[4] = bytes.concat(bytes6(uint48(block.timestamp)));
+
+    keys[5] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX));
+    values[5] = bytes.concat(bytes1(_choices));
+
+    keys[6] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX));
+    values[6] = bytes.concat(bytes1(_choicesPerVote));
+
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        keys, values
+      )
+    );
+
+    emit ProposalCreated(proposalSignature);
   }
 
   /**
    * @inheritdoc IDaoKeyManager
    */
-  function executeProposal(
-    bytes10 proposalSignature
+  function getProposalHash(
+    address _signer,
+    bytes10 _proposalSignature,
+    bool _response
   )
-    external override
-    returns(bool[] memory success, bytes[] memory results)
+    public
+    override
+    view
+    returns(bytes32 _hash)
+  {
+    _hash = keccak256(abi.encodePacked(
+      address(this),
+      _signer,
+      _proposalSignature,
+      _response,
+      votingNonce[_signer]
+    ));
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // TODO Fix the execute proposal method according to multisg
+  // Keep in mind signatures and the deleagted votes
+  // As well as the choices of each voter.
+
+
+  /**
+   * @inheritdoc IDaoKeyManager
+   */
+  function executeProposal(
+    bytes10 proposalSignature,
+    bytes[] calldata _signatures,
+    address[] calldata _signers
+  )
+    external
+    override
   {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE, "EXECUTE");
     if (
@@ -287,96 +420,15 @@ contract DaoKeyManager is IDaoKeyManager {
       totalVotes/totalUsers > participationRate/totalUsers &&
       positiveVotes/totalVotes > majority/totalVotes
     ) {
-      bytes32 targetsKey = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_TARGETS_ARRAY_SUFFIX));
-      bytes32 datasKey = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_DATAS_ARRAY_SUFFIX));
-      uint256 arrayLength = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)));
-      for (uint256 i = 0; i < arrayLength; i++) {
-        (success[i], results[i]) = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(targetsKey)))
-        .call(IERC725Y(UNIVERSAL_PROFILE).getData(datasKey));
+      bytes memory encodedPayloadArray = IERC725Y(UNIVERSAL_PROFILE).getData(
+        bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PAYLOADS_ARRAY_SUFFIX))
+      );
+      bytes[] memory payloads = abi.decode(encodedPayloadArray, (bytes[]));
+      for (uint256 i = 0; i < payloads.length; i++) {
+        ILSP6KeyManager(KEY_MANAGER).execute(payloads[i]);
       }
     }
 
-  }
-
-  /**
-   * @inheritdoc IDaoKeyManager
-   */
-  function vote(
-    bytes10 proposalSignature,
-    uint256[] memory choicesArray
-  ) external override {
-    _verifyPermission(msg.sender, _PERMISSION_VOTE, "VOTE");
-    if (
-      uint256(bytes32(
-        IERC725Y(UNIVERSAL_PROFILE).getData(
-          _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender)
-        )
-      )) != 0
-    ) revert IndexedError("DAO", 0x08);
-    if (
-      uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX))
-      ))) < choicesArray.length
-    ) revert IndexedError("DAO", 0x09);
-
-    // Create a BitArray of the voters choices.
-    uint256 choices = 0;
-    for(uint128 i = 0; i < choicesArray.length; i++) {
-      choices = choices + (1 << i);
-    }
-
-    // Initialize the keys and values array.
-    bytes32[] memory keys;
-    bytes[] memory values;
-
-    /**
-     * @dev Set the `_KEY_PARTICIPANT_VOTE` for the voter and his delegators if the voter has
-     * `_PERMISSION_RECIEVEDELEGATE` with the choices BitArray of the voter.
-     */
-    if (_getPermissions(msg.sender) & _PERMISSION_RECIEVEDELEGATE != 0) {
-      uint256 delegates = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(
-        _DAO_ADDRESS_DELEGATES_PREFIX, bytes20(msg.sender)
-      )))));
-      
-      keys = new bytes32[](delegates + 1);
-      values = new bytes[](delegates + 1);
-      uint256 arrayLength = 0;
-
-      /**
-       * @dev Get each delegator address and save the choices to that address
-       * only if it doesn't have other choices already saved.
-       */
-      for (uint128 i = 0; i < delegates; i++){
-        address delegator = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(
-          bytes32(bytes.concat(
-            bytes16(bytes32(delegates)), bytes16(i)
-          ))
-        )));
-
-        if (
-          uint256(bytes32(
-            IERC725Y(UNIVERSAL_PROFILE).getData(
-              _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender)
-            )
-          )) == 0
-        ) {
-          keys[arrayLength++] = _KEY_PARTICIPANT_VOTE(proposalSignature, delegator);
-          values[arrayLength++] = bytes.concat(bytes32(choices));
-        }
-
-
-      }
-
-      keys[arrayLength] = _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender);
-      values[arrayLength] = bytes.concat(bytes32(choices));
-    }
-    else {
-      keys = new bytes32[](1);
-      values = new bytes[](1);
-      keys[0] = _KEY_PARTICIPANT_VOTE(proposalSignature, msg.sender);
-      values[0] = bytes.concat(bytes32(choices));
-    }
-    _setData(keys, values);
   }
 
 
@@ -415,29 +467,72 @@ contract DaoKeyManager is IDaoKeyManager {
   }
 
   /**
-   * @dev Set the data to the Universal Profile.
+   * @dev Add `_permissions` to an address `_to`.
    */
-  function _setData(
-    bytes32[] memory _keys,
-    bytes[] memory _values
-  ) internal returns(bytes memory result) {
-    require(_keys.length == _values.length);
-    require(_keys.length > 0);
-    
-    if(_keys.length == 1) {
-      result = ILSP6KeyManager(KEY_MANAGER).execute(
-        abi.encodeWithSelector(
-          setDataSingleSelector, _keys[0], _values[0]
-        )
-      );
+  function _addPermissions(address _to, bytes32 _permissions) internal {
+    // Check if user has any permisssions. If not add him to the list of participants.
+    bytes32 currentPermissions = _getPermissions(_to);
+    if (currentPermissions == bytes32(0))
+    ArrayWithMappingLibrary._addElement(
+      UNIVERSAL_PROFILE,
+      KEY_MANAGER,
+      _DAO_PARTICIPANTS_ARRAY_KEY,
+      _DAO_PARTICIPANTS_ARRAY_PREFIX,
+      _DAO_PARTICIPANTS_MAPPING_PREFIX,
+      bytes.concat(bytes20(_to))
+    );
+    // Update the permissions in a local variable.
+    for(uint256 i = 0; i < 7; i++) {
+      if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
+      currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
     }
-    else {
-      result = ILSP6KeyManager(KEY_MANAGER).execute(
-        abi.encodeWithSelector(
-          setDataMultipleSelector, _keys, _values
-        )
-      );
+    // Set the local permissions to the Universal Profile.
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataSingleSelector,
+        bytes32(bytes.concat(
+          _LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX,
+          bytes20(_to)
+        )),
+        bytes.concat(currentPermissions)
+      )
+    );
+  }
+
+  /**
+   * @dev Remove `_permissions` from an address `_to`.
+   */
+  function _removePermissions(address _to, bytes32 _permissions) internal {
+    // Update the permissions in a local variable.
+    bytes32 currentPermissions = _getPermissions(_to);
+    for(uint256 i = 0; i < 7; i++) {
+      if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
+      currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
     }
+    bytes memory encodedCurrentPermissions = bytes.concat(currentPermissions);
+    // Check if user has any permissions left. If not, remove him from the list of participants.
+    if (currentPermissions == bytes32(0)) {
+      ArrayWithMappingLibrary._removeElement(
+        UNIVERSAL_PROFILE,
+        KEY_MANAGER,
+        _DAO_PARTICIPANTS_ARRAY_KEY,
+        _DAO_PARTICIPANTS_ARRAY_PREFIX,
+        _DAO_PARTICIPANTS_MAPPING_PREFIX,
+        bytes.concat(bytes20(_to))
+      );
+      encodedCurrentPermissions = "";
+    }
+    // Set the local permissions to the Universal Profile.
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataSingleSelector,
+        bytes32(bytes.concat(
+          _LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX,
+          bytes20(_to)
+        )),
+        encodedCurrentPermissions
+      )
+    );
   }
 
 }

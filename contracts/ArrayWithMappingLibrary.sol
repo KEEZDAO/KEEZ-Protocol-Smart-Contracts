@@ -27,12 +27,12 @@ library ArrayWithMappingLibrary {
    */
   function _arrayContains(
     address payable _UNIVERSAL_PROFILE,
-    bytes10 arrayElementMapPrefix,
+    bytes12 arrayElementMapPrefix,
     bytes memory arrayElement
   ) internal view returns(bool, uint256) {
     bytes memory encodedElementIndex = IERC725Y(_UNIVERSAL_PROFILE).getData(
       bytes32(bytes.concat(
-        arrayElementMapPrefix, bytes2(0), bytes20(arrayElement)
+        arrayElementMapPrefix, bytes20(arrayElement)
       ))
     );    
 
@@ -52,7 +52,7 @@ library ArrayWithMappingLibrary {
     address _KEY_MANAGER,
     bytes32 arrayLengthKey,
     bytes16 arrayIndexPerfix,
-    bytes10 arrayElementMapPrefix,
+    bytes12 arrayElementMapPrefix,
     bytes memory arrayElement
   ) internal returns(bool) {
     uint256 oldArrayLength = uint256(bytes32(IERC725Y(_UNIVERSAL_PROFILE).getData(arrayLengthKey)));
@@ -70,7 +70,7 @@ library ArrayWithMappingLibrary {
     keys[1] = bytes32(bytes.concat(arrayIndexPerfix, bytes16(uint128(oldArrayLength))));
     values[1] = arrayElement;
 
-    keys[2] = bytes32(bytes.concat(arrayElementMapPrefix, bytes2(0), bytes20(arrayElement))); 
+    keys[2] = bytes32(bytes.concat(arrayElementMapPrefix, bytes20(arrayElement))); 
     values[2] = bytes.concat(bytes32(oldArrayLength));
 
     ILSP6KeyManager(_KEY_MANAGER).execute(
@@ -91,7 +91,7 @@ library ArrayWithMappingLibrary {
     address _KEY_MANAGER,
     bytes32 arrayLengthKey,
     bytes16 arrayIndexPerfix,
-    bytes10 arrayElementMapPrefix,
+    bytes12 arrayElementMapPrefix,
     bytes memory arrayElement
   ) internal returns(bool) {
     uint256 oldArrayLength = uint256(bytes32(IERC725Y(_UNIVERSAL_PROFILE).getData(arrayLengthKey)));
@@ -113,10 +113,10 @@ library ArrayWithMappingLibrary {
     keys[2] = bytes32(bytes.concat(arrayIndexPerfix, bytes16(uint128(newArrayLength))));
     values[2] = "";
 
-    keys[3] = bytes32(bytes.concat(arrayElementMapPrefix, bytes2(0), bytes20(encodedArrayLastElement)));
+    keys[3] = bytes32(bytes.concat(arrayElementMapPrefix, bytes20(encodedArrayLastElement)));
     values[3] = bytes.concat(bytes32(elementIndex));
 
-    keys[4] = bytes32(bytes.concat(arrayElementMapPrefix, bytes2(0), bytes20(arrayElement)));
+    keys[4] = bytes32(bytes.concat(arrayElementMapPrefix, bytes20(arrayElement)));
     values[4] = "";
 
     ILSP6KeyManager(_KEY_MANAGER).execute(

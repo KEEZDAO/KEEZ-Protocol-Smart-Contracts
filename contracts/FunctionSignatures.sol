@@ -8,6 +8,9 @@ bytes4 constant setDataSingleSelector = bytes4(keccak256("setData(bytes32,bytes)
 // setData(bytes32[],bytes[])
 bytes4 constant setDataMultipleSelector = bytes4(keccak256("setData(bytes32[],bytes[])"));
 
+// execute(uint256,address,uint256,bytes)
+bytes4 constant executeERC725X = bytes4(keccak256("execute(uint256,address,uint256,bytes)"));
+
 // LSP7: authorizeOperator()
 bytes4 constant authotizeOperatorLSP7 = bytes4(keccak256("authorizeOperator(address,uint256)"));
 
