@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 describe("Deployment testing & Individual contracts method testing", function () {
   async function deployContracts() {
 
-    const [owner, account1, account2, account3] = await ethers.getSigners();
+    const [owner, account1, account2, account3, account4] = await ethers.getSigners();
 
     const UniversalReceiverDelegateUP = await ethers.getContractFactory("UniversalReceiverDelegateUP");
     const universalReceiverDelegateUP = await UniversalReceiverDelegateUP.deploy();
@@ -55,10 +55,10 @@ describe("Deployment testing & Individual contracts method testing", function ()
     let iface = new ethers.utils.Interface(ABI);
     await keyManager.execute(iface.encodeFunctionData("claimOwnership"));
 
-    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, dao, owner, account1, account2, account3 };
+    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, dao, owner, account1, account2, account3, account4 };
   }
   async function deployContractsAndProposeExecution() {
-    const { universalProfile, multisig, owner, account1, account2, account3 } = await loadFixture(deployContracts);
+    const { universalProfile, multisig, owner, account1, account2, account3, account4 } = await loadFixture(deployContracts);
 
     let ABI = ["function setData(bytes32 dataKey, bytes memory dataValue)"];
     let ERC725Yinterface = new ethers.utils.Interface(ABI);
@@ -75,10 +75,10 @@ describe("Deployment testing & Individual contracts method testing", function ()
     const propose = await multisig.connect(owner).proposeExecution(payloads);
     const proposalSignature = (await propose.wait(1)).logs[2].data.substring(0, 22);
 
-    return { universalProfile, multisig, owner, account1, account2, account3, proposalSignature };
+    return { universalProfile, multisig, owner, account1, account2, account3, account4, proposalSignature };
   }
 
-  describe("Universal profile deployment", function () {
+  describe("Universal profile deployment", () => {
 
     it("Should set universal profile permissions correctly on deployment", async () => {
       const { universalReceiverDelegateUP, universalProfile } = await loadFixture(deployContracts);
@@ -187,7 +187,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
   });
 
-  describe("Multisig permission methods", function () {
+  describe("Multisig permission methods", () => {
 
     it("Should be able to add permissions", async () => {
       const { universalProfile, multisig, owner, account3 } = await loadFixture(deployContracts);
@@ -213,6 +213,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       let ABI = ["error NotAuthorised(address from, string permission)"];
       let errorInterface = new ethers.utils.Interface(ABI);
       const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
+
       expect(add_permission).to.revertedWithCustomError(
         errorContract,
         "NotAuthorised"
@@ -283,7 +284,92 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
   });
 
-  describe("Multisig execute methods", function () {
+  describe("Multisg claiming methods", () => {
+    it("Should be able to claim permission from an authorized address", async () => {
+      const { universalProfile, multisig, owner, account3 } = await loadFixture(deployContracts);
+
+      const ownerHash = await multisig.getNewPermissionHash(
+        owner.address,
+        account3.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
+      );
+
+      const ownerSig = await owner.signMessage(ethers.utils.arrayify(ownerHash));
+
+      await multisig.connect(account3).claimPermission(
+        owner.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      const key = "0x4164647265734d756c740000" + account3.address.substring(2);
+      const value = "0x0000000000000000000000000000000000000000000000000000000000000001"
+
+      expect(await universalProfile["getData(bytes32)"](key)).to.equal(value);
+    });
+
+    it("Should not be able to claim twice from an authorized address", async () => {
+      const { multisig, owner, account3 } = await loadFixture(deployContracts);
+
+      const ownerHash = await multisig.getNewPermissionHash(
+        owner.address,
+        account3.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
+      );
+
+      const ownerSig = await owner.signMessage(ethers.utils.arrayify(ownerHash));
+
+      await multisig.connect(account3).claimPermission(
+        owner.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      const secondClaim =  multisig.connect(account3).claimPermission(
+        owner.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      let ABI = ["error NotAuthorised(address from, string permission)"];
+      let errorInterface = new ethers.utils.Interface(ABI);
+      const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
+      
+      expect(secondClaim).to.revertedWithCustomError(
+        errorContract,
+        "NotAuthorised"
+      );
+    });
+
+    it("Should not be able to claim from an unauthorized address", async () => {
+      const { multisig, account3, account4 } = await loadFixture(deployContracts);
+
+      const acc3Hash = await multisig.getNewPermissionHash(
+        account3.address,
+        account4.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001"
+      );
+
+      const ownerSig = await account3.signMessage(ethers.utils.arrayify(acc3Hash));
+
+      const claimigTrx = multisig.connect(account4).claimPermission(
+        account3.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ownerSig
+      );
+
+      let ABI = ["error NotAuthorised(address from, string permission)"];
+      let errorInterface = new ethers.utils.Interface(ABI);
+      const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
+      
+      expect(claimigTrx).to.revertedWithCustomError(
+        errorContract,
+        "NotAuthorised"
+      );
+    });
+  });
+
+  describe("Multisig execute methods", () => {
 
     it("Should be able to propose something for execution", async () => {
       const { universalProfile, multisig, owner, account3 } = await loadFixture(deployContracts);
@@ -336,17 +422,83 @@ describe("Deployment testing & Individual contracts method testing", function ()
       );
     });
 
-    it("Should be able to execute", async () => {
+    it("Should not be able to execute 0%", async () => {
+      const { multisig, owner, account1, account2, proposalSignature } = await loadFixture(deployContractsAndProposeExecution);
+
+      const hashOwner = await multisig.getProposalHash(owner.address, proposalSignature, false);
+      const hashAcc1  = await multisig.getProposalHash(account1.address, proposalSignature, false);
+      const hashAcc2  = await multisig.getProposalHash(account2.address, proposalSignature, false);
+
+      const signatures = [
+        await owner.signMessage(ethers.utils.arrayify(hashOwner)),
+        await account1.signMessage(ethers.utils.arrayify(hashAcc1)),
+        await account2.signMessage(ethers.utils.arrayify(hashAcc2))
+      ];
+
+      const execute = multisig.connect(owner).execute(
+        proposalSignature,
+        signatures,
+        [
+          owner.address,
+          account1.address,
+          account2.address
+        ]
+      );
+
+      const ABI_ERROR = ["error IndexedError(string contractName, bytes1 errorNumber)"];
+      const errorInterface = new ethers.utils.Interface(ABI_ERROR);
+      const errorContract = new ethers.Contract("Errors", errorInterface, ethers.provider);
+
+      expect(execute).to.revertedWithCustomError(
+        errorContract,
+        "IndexedError"
+      );
+    });
+
+    it("Should not be able to execute 33%", async () => {
+      const { multisig, owner, account1, account2, proposalSignature } = await loadFixture(deployContractsAndProposeExecution);
+
+      const hashOwner = await multisig.getProposalHash(owner.address, proposalSignature, true);
+      const hashAcc1  = await multisig.getProposalHash(account1.address, proposalSignature, false);
+      const hashAcc2  = await multisig.getProposalHash(account2.address, proposalSignature, false);
+
+      const signatures = [
+        await owner.signMessage(ethers.utils.arrayify(hashOwner)),
+        await account1.signMessage(ethers.utils.arrayify(hashAcc1)),
+        await account2.signMessage(ethers.utils.arrayify(hashAcc2))
+      ];
+
+      const execute = multisig.connect(owner).execute(
+        proposalSignature,
+        signatures,
+        [
+          owner.address,
+          account1.address,
+          account2.address
+        ]
+      );
+
+      const ABI_ERROR = ["error IndexedError(string contractName, bytes1 errorNumber)"];
+      const errorInterface = new ethers.utils.Interface(ABI_ERROR);
+      const errorContract = new ethers.Contract("Errors", errorInterface, ethers.provider);
+
+      expect(execute).to.revertedWithCustomError(
+        errorContract,
+        "IndexedError"
+      );
+    });
+
+    it("Should be able to execute 66%", async () => {
       const { universalProfile, multisig, owner, account1, account2, account3, proposalSignature } = await loadFixture(deployContractsAndProposeExecution);
 
       const hashOwner = await multisig.getProposalHash(owner.address, proposalSignature, true);
       const hashAcc1  = await multisig.getProposalHash(account1.address, proposalSignature, true);
-      const hashAcc2  = await multisig.getProposalHash(account2.address, proposalSignature, true);
+      const hashAcc2  = await multisig.getProposalHash(account2.address, proposalSignature, false);
 
       const signatures = [
-        await owner.signMessage(hashOwner),
-        await owner.signMessage(hashAcc1),
-        await owner.signMessage(hashAcc2)
+        await owner.signMessage(ethers.utils.arrayify(hashOwner)),
+        await account1.signMessage(ethers.utils.arrayify(hashAcc1)),
+        await account2.signMessage(ethers.utils.arrayify(hashAcc2))
       ];
 
       const execute = await multisig.connect(owner).execute(
@@ -363,6 +515,78 @@ describe("Deployment testing & Individual contracts method testing", function ()
       const value = "0x0000000000000000000000000000000000000000000000000000000000000fff"
 
       expect(await universalProfile["getData(bytes32)"](key)).to.equal(value);
+    });
+
+    it("Should be able to execute 100%", async () => {
+      const { universalProfile, multisig, owner, account1, account2, account3, proposalSignature } = await loadFixture(deployContractsAndProposeExecution);
+
+      const hashOwner = await multisig.getProposalHash(owner.address, proposalSignature, true);
+      const hashAcc1  = await multisig.getProposalHash(account1.address, proposalSignature, true);
+      const hashAcc2  = await multisig.getProposalHash(account2.address, proposalSignature, true);
+
+      const signatures = [
+        await owner.signMessage(ethers.utils.arrayify(hashOwner)),
+        await account1.signMessage(ethers.utils.arrayify(hashAcc1)),
+        await account2.signMessage(ethers.utils.arrayify(hashAcc2))
+      ];
+
+      const execute = await multisig.connect(owner).execute(
+        proposalSignature,
+        signatures,
+        [
+          owner.address,
+          account1.address,
+          account2.address
+        ]
+      );
+
+      const key = "0x4164647265734d756c740000" + account3.address.substring(2);
+      const value = "0x0000000000000000000000000000000000000000000000000000000000000fff"
+
+      expect(await universalProfile["getData(bytes32)"](key)).to.equal(value);
+    });
+
+    it("Should not be able to execute twice", async () => {
+    const { multisig, owner, account1, account2, proposalSignature } = await loadFixture(deployContractsAndProposeExecution);
+
+      const hashOwner = await multisig.getProposalHash(owner.address, proposalSignature, true);
+      const hashAcc1  = await multisig.getProposalHash(account1.address, proposalSignature, true);
+      const hashAcc2  = await multisig.getProposalHash(account2.address, proposalSignature, true);
+
+      const signatures = [
+        await owner.signMessage(ethers.utils.arrayify(hashOwner)),
+        await account1.signMessage(ethers.utils.arrayify(hashAcc1)),
+        await account2.signMessage(ethers.utils.arrayify(hashAcc2))
+      ];
+
+      await multisig.connect(owner).execute(
+        proposalSignature,
+        signatures,
+        [
+          owner.address,
+          account1.address,
+          account2.address
+        ]
+      );
+
+      const executeSecondTime = multisig.connect(owner).execute(
+        proposalSignature,
+        signatures,
+        [
+          owner.address,
+          account1.address,
+          account2.address
+        ]
+      );
+
+      const ABI_ERROR = ["error IndexedError(string contractName, bytes1 errorNumber)"];
+      const errorInterface = new ethers.utils.Interface(ABI_ERROR);
+      const errorContract = new ethers.Contract("Errors", errorInterface, ethers.provider);
+
+      expect(executeSecondTime).to.revertedWithCustomError(
+        errorContract,
+        "IndexedError"
+      );
     });
 
     it("Should not be able to execute", async () => {

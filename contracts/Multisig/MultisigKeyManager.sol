@@ -54,7 +54,7 @@ import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
  *
  * @author B00ste
  * @title MultisigKeyManager
- * @custom:version 1.3
+ * @custom:version 1.5
  */
 contract MultisigKeyManager {
   using ECDSA for bytes32;
@@ -62,12 +62,12 @@ contract MultisigKeyManager {
   /**
    * @notice Nonce for claiming permissions.
    */
-  mapping(address => uint256) claimPermissionNonce;
+  mapping(address => uint256) private claimPermissionNonce;
 
   /**
    * @notice Nonce for voting.
    */
-  mapping(address => uint256) votingNonce;
+  mapping(address => uint256) private votingNonce;
 
   /**
    * @notice Address of the DAO_ACCOUNT.
@@ -95,11 +95,12 @@ contract MultisigKeyManager {
    * by the user `_to` to redeem the permissions.
    */
   function getNewPermissionHash(
+    address _from,
     address _to,
     bytes32 _permissions
   ) public view returns(bytes32 _hash) {
     _hash = keccak256(abi.encode(
-      _to, _permissions, claimPermissionNonce[_to]
+      _from, _to, _permissions, claimPermissionNonce[_to]
     ));
   }
 
@@ -107,12 +108,14 @@ contract MultisigKeyManager {
    * @notice User can claim a `_permission` if he recieved the `_signature`
    * from someone with the ADD_PERMISSION permission, otherwise it will revert.
    */
-  function claimPermission(bytes32 _permissions, bytes memory _signature) external {
-    bytes32 _hash = getNewPermissionHash(msg.sender, _permissions);
+  function claimPermission(address _from, bytes32 _permissions, bytes memory _signature) external {
+    _verifyPermission(_from, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
+    bytes32 _hash = getNewPermissionHash(_from, msg.sender, _permissions).toEthSignedMessageHash();
     address recoveredAddress = _hash.recover(_signature);
-    _verifyPermission(recoveredAddress, _PERMISSION_ADD_PERMISSION, "ADD_PERMISSION");
+    if (_from != recoveredAddress) revert IndexedError("Multisig", 0x01);
     _addPermissions(msg.sender, _permissions);
-    claimPermissionNonce[msg.sender]++;
+    // Changing the nonce.
+    claimPermissionNonce[msg.sender] += block.timestamp / 113;
   }
 
   /**
@@ -208,7 +211,7 @@ contract MultisigKeyManager {
   )
     external
   {
-    if(_payloads.length == 0) revert IndexedError("Multisig", 0x01);
+    if(_payloads.length == 0) revert IndexedError("Multisig", 0x02);
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
 
     bytes10 proposalSignature = _MULTISIG_PROPOSAL_SIGNATURE(uint48(block.timestamp));
@@ -253,6 +256,7 @@ contract MultisigKeyManager {
     external
   {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE_PROPOSAL, "EXECUTE_PROPOSAL");
+    if (_signatures.length != _signers.length) revert IndexedError("Multisig", 0x03);
 
     bytes32[] memory keys = new bytes32[](2);
     keys[0] = _MULTISIG_PARTICIPANTS_ARRAY_KEY;
@@ -261,23 +265,26 @@ contract MultisigKeyManager {
     uint256 votingMembers = uint256(bytes32(encodedResponses[0]));
     uint8 quorum = uint8(bytes1(encodedResponses[1]));
 
-    if ((_signatures.length * 100) / votingMembers < quorum) revert IndexedError("Multisig", 0x02);
+    if ((_signatures.length * 100) / votingMembers < quorum) revert IndexedError("Multisig", 0x04);
 
     // Count the postive responses.
     uint256 positiveResponses;
     for(uint256 i = 0; i < _signatures.length; i++) {
-      bytes32 _hash = getProposalHash(_signers[i], _proposalSignature, true);
+      bytes32 _hash = getProposalHash(_signers[i], _proposalSignature, true).toEthSignedMessageHash();
       address recoveredAddress = _hash.recover(_signatures[i]);
 
-      if(_getPermissions(recoveredAddress) & _PERMISSION_VOTE != 0) {
+      if(
+        recoveredAddress == _signers[i] &&
+        _getPermissions(recoveredAddress) & _PERMISSION_VOTE != 0
+      ) {
         positiveResponses++;
-
-        votingNonce[recoveredAddress]++;
+        // Changing the nonce.
+        votingNonce[_signers[i]] += block.timestamp / 113;
       }
     }
 
     // Verify if there are enough pro signatures and if yes, execute.
-    if((positiveResponses * 100) / votingMembers < quorum) { 
+    if((positiveResponses * 100) / votingMembers > quorum) { 
       bytes[] memory _payloads = abi.decode(
         IERC725Y(UNIVERSAL_PROFILE).getData(_MULTISIG_PROPOSAL_PAYLOADS_KEY(_proposalSignature)),
         (bytes[])
@@ -287,7 +294,7 @@ contract MultisigKeyManager {
         ILSP6KeyManager(KEY_MANAGER).execute(_payloads[i]);
       }
     }
-    else revert IndexedError("Multisig", 0x03);
+    else revert IndexedError("Multisig", 0x05);
 
   }
 

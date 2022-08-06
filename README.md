@@ -30,8 +30,10 @@ npx hardhat run scripts/deploy.ts
 
 ### This are the errors that you can get while using `MultisigKeyManager.js`
 
-| Error number |                               Error explanation                                  |
-|     :---:    |                                     :---:                                        |
-|    `0x001`   | `_targets.length` must be equal to `_datas.length`.                              |
-|    `0x002`   | Not enough signatures for a successful proposal.                                 |
-|    `0x003`   | Not enough positive votes for a successful proposal.                             |
+| Error number |                               Error explanation                                     |
+|     :---:    |                                     :---:                                           |
+|    `0x001`   | The recovered address is not the same as the one that allowed claiming permissions. |
+|    `0x002`   | `_targets.length` must be equal to `_datas.length`.                                 |
+|    `0x003`   | `_signatures.length` must be equal to `_signers.length`.                            |
+|    `0x004`   | Not enough signatures for a successful proposal.                                    |
+|    `0x005`   | Not enough positive votes for a successful proposal.                                |
