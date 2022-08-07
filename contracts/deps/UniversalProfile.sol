@@ -192,22 +192,41 @@ contract UniversalProfile is LSP0ERC725Account {
     setData(keys, values);
   }
 
-  function setControllerPermissionsForDao(address _daoAddress) external onlyOwner {
-    bytes32[] memory keys = new bytes32[](3);
-    bytes[] memory values = new bytes[](3);
+  function setControllerPermissionsForDao(
+    address _daoPermissions,
+    address _daoDelegates,
+    address _daoProposals
+  )
+    external
+    onlyOwner
+  {
+    bytes32[] memory keys = new bytes32[](7);
+    bytes[] memory values = new bytes[](7);
 
     bytes memory encodedArrayLength = getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY);
     uint256 oldArraylength = uint256(bytes32(encodedArrayLength));
-    uint256 newArrayLength = oldArraylength + 1;
+    uint256 newArrayLength = oldArraylength + 3;
 
     keys[0] = _LSP6KEY_ADDRESSPERMISSIONS_ARRAY;
     values[0] = bytes.concat(bytes32(uint256(newArrayLength)));
 
     keys[1] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(uint128(oldArraylength))));
-    values[1] = bytes.concat(bytes20(_daoAddress));
+    values[1] = bytes.concat(bytes20(_daoPermissions));
 
-    keys[2] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(_daoAddress)));
-    values[2] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007fbf));
+    keys[2] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(uint128(oldArraylength + 1))));
+    values[2] = bytes.concat(bytes20(_daoDelegates));
+
+    keys[3] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(uint128(oldArraylength + 2))));
+    values[3] = bytes.concat(bytes20(_daoProposals));
+
+    keys[4] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(_daoPermissions)));
+    values[4] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007fbf));
+
+    keys[5] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(_daoDelegates)));
+    values[5] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007fbf));
+
+    keys[6] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(_daoProposals)));
+    values[6] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000007fbf));
 
     setData(keys, values);
   }

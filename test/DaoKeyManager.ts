@@ -23,11 +23,14 @@ describe("Deployment testing & Individual contracts method testing", function ()
     const KeyManager = await ethers.getContractFactory("KeyManager");
     const keyManager = await KeyManager.deploy(universalProfile.address);
 
-    const MultisigKeyManager = await ethers.getContractFactory("MultisigKeyManager");
-    const multisig = await MultisigKeyManager.deploy(universalProfile.address, keyManager.address);
+    const DaoPermissions = await ethers.getContractFactory("DaoPermissions");
+    const daoPermissions = await DaoPermissions.deploy(universalProfile.address, keyManager.address);
 
-    const DaoKeyManager = await ethers.getContractFactory("DaoKeyManager");
-    const dao = await DaoKeyManager.deploy(universalProfile.address, keyManager.address);
+    const DaoDelegates = await ethers.getContractFactory("DaoDelegates");
+    const daoDelegates = await DaoDelegates.deploy(universalProfile.address, keyManager.address);
+
+    const DaoProposals = await ethers.getContractFactory("DaoProposals");
+    const daoProposals = await DaoProposals.deploy(universalProfile.address, keyManager.address);
 
     // Initialize the dao with new members.
     await universalProfile.connect(owner).setDaoData(
@@ -50,7 +53,11 @@ describe("Deployment testing & Individual contracts method testing", function ()
   
     // Using initializing methods of the universal profile.
     await universalProfile.giveOwnerPermissionToChangeOwner();
-    await universalProfile.setControllerPermissionsForDao(dao.address);
+    await universalProfile.setControllerPermissionsForDao(
+      daoPermissions.address,
+      daoDelegates.address,
+      daoProposals.address
+    );
 
     // Giving the ownership of the Universal Profile to the Key Manager.
     await universalProfile.transferOwnership(keyManager.address);
@@ -58,27 +65,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
     let iface = new ethers.utils.Interface(ABI);
     await keyManager.execute(iface.encodeFunctionData("claimOwnership"));
 
-    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, dao, owner, account1, account2, account3, account4 };
-  }
-  async function deployContractsAndProposeExecution() {
-    const { universalProfile, multisig, owner, account1, account2, account3, account4 } = await loadFixture(deployContracts);
-
-    let ABI = ["function setData(bytes32 dataKey, bytes memory dataValue)"];
-    let ERC725Yinterface = new ethers.utils.Interface(ABI);
-    const payloads = [
-      ERC725Yinterface.encodeFunctionData(
-        "setData",
-        [
-          "0x4164647265734d756c740000" + account3.address.substring(2),
-          "0x0000000000000000000000000000000000000000000000000000000000000fff"
-        ]
-      )
-    ];
-
-    const propose = await multisig.connect(owner).proposeExecution("Some random title", payloads);
-    const proposalSignature = (await propose.wait(1)).logs[2].data.substring(0, 22);
-
-    return { universalProfile, multisig, owner, account1, account2, account3, account4, proposalSignature };
+    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, daoPermissions, daoDelegates, daoProposals, owner, account1, account2, account3, account4 };
   }
 
   describe("Universal profile deployment", () => {
@@ -160,7 +147,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         "0x4b80742de2bf82acb3630000" + owner.address.substring(2)
       ];
       const values = [
-        "0x0000000000000000000000000000000000000000000000000000000000000002",
+        "0x0000000000000000000000000000000000000000000000000000000000000004",
         owner.address.toLowerCase(),
         "0x0000000000000000000000000000000000000000000000000000000000000001"
       ];
@@ -171,16 +158,24 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
 
     it("Should update the dao controller permissions",async () => {
-      const { universalProfile, dao } = await loadFixture(deployContracts);
+      const { universalProfile, daoPermissions, daoDelegates, daoProposals } = await loadFixture(deployContracts);
 
       const keys = [
         "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
         "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000001",
-        "0x4b80742de2bf82acb3630000" + dao.address.substring(2)
+        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000002",
+        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000003",
+        "0x4b80742de2bf82acb3630000" + daoPermissions.address.substring(2),
+        "0x4b80742de2bf82acb3630000" + daoDelegates.address.substring(2),
+        "0x4b80742de2bf82acb3630000" + daoProposals.address.substring(2)
       ];
       const values = [
-        "0x0000000000000000000000000000000000000000000000000000000000000002",
-        dao.address.toLowerCase(),
+        "0x0000000000000000000000000000000000000000000000000000000000000004",
+        daoPermissions.address.toLowerCase(),
+        daoDelegates.address.toLowerCase(),
+        daoProposals.address.toLowerCase(),
+        "0x0000000000000000000000000000000000000000000000000000000000007fbf",
+        "0x0000000000000000000000000000000000000000000000000000000000007fbf",
         "0x0000000000000000000000000000000000000000000000000000000000007fbf"
       ];
 
@@ -199,9 +194,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
   describe("Dao permission methods", () => {
 
     it("Should be able to add permissions", async () => {
-      const { universalProfile, dao, owner, account3 } = await loadFixture(deployContracts);
+      const { universalProfile, daoPermissions, owner, account3 } = await loadFixture(deployContracts);
 
-      await dao.connect(owner).addPermissions(
+      await daoPermissions.connect(owner).addPermissions(
         account3.address, 
         "0x000000000000000000000000000000000000000000000000000000000000000e"
       );
@@ -225,9 +220,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
 
     it("Should not be able to add permissions", async () => {
-      const { dao, account2, account3 } = await loadFixture(deployContracts);
+      const { daoPermissions, account2, account3 } = await loadFixture(deployContracts);
 
-      const add_permission = dao.connect(account3).addPermissions(
+      const add_permission = daoPermissions.connect(account3).addPermissions(
         account2.address, 
         "0x0000000000000000000000000000000000000000000000000000000000000010"
       );
@@ -243,16 +238,16 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
 
     it("Should be able to remove permissions", async () => {
-      const { universalProfile, dao, owner, account1, account2 } = await loadFixture(deployContracts);
+      const { universalProfile, daoPermissions, owner, account1, account2 } = await loadFixture(deployContracts);
 
       // remove all permissions
-      await dao.connect(owner).removePermissions(
+      await daoPermissions.connect(owner).removePermissions(
         account1.address, 
         "0x000000000000000000000000000000000000000000000000000000000000007f" // 0111 1111
       );
 
       // remove multiple permissions
-      await dao.connect(owner).removePermissions(
+      await daoPermissions.connect(owner).removePermissions(
         account2.address, 
         "0x0000000000000000000000000000000000000000000000000000000000000003" // 0000 0011
       );
@@ -289,9 +284,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
 
     it("Should not be able to remove permissions", async () => {
-      const { dao, account2, account3 } = await loadFixture(deployContracts);
+      const { daoPermissions, account2, account3 } = await loadFixture(deployContracts);
 
-      const remove_permission = dao.connect(account3).removePermissions(
+      const remove_permission = daoPermissions.connect(account3).removePermissions(
         account2.address, 
         "0x000000000000000000000000000000000000000000000000000000000000000f"
       );
@@ -308,9 +303,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
 
   describe("Dao claiming methods", () => {
     it("Should be able to claim permission from an authorized address", async () => {
-      const { universalProfile, dao, owner, account3 } = await loadFixture(deployContracts);
+      const { universalProfile, daoPermissions, owner, account3 } = await loadFixture(deployContracts);
 
-      const ownerHash = await dao.getNewPermissionHash(
+      const ownerHash = await daoPermissions.getNewPermissionHash(
         owner.address,
         account3.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -318,7 +313,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
 
       const ownerSig = await owner.signMessage(ethers.utils.arrayify(ownerHash));
 
-      await dao.connect(account3).claimPermission(
+      await daoPermissions.connect(account3).claimPermission(
         owner.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         ownerSig
@@ -331,9 +326,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
 
     it("Should not be able to claim twice from an authorized address", async () => {
-      const { dao, owner, account3 } = await loadFixture(deployContracts);
+      const { daoPermissions, owner, account3 } = await loadFixture(deployContracts);
 
-      const ownerHash = await dao.getNewPermissionHash(
+      const ownerHash = await daoPermissions.getNewPermissionHash(
         owner.address,
         account3.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -341,13 +336,13 @@ describe("Deployment testing & Individual contracts method testing", function ()
 
       const ownerSig = await owner.signMessage(ethers.utils.arrayify(ownerHash));
 
-      await dao.connect(account3).claimPermission(
+      await daoPermissions.connect(account3).claimPermission(
         owner.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         ownerSig
       );
 
-      const secondClaim =  dao.connect(account3).claimPermission(
+      const secondClaim =  daoPermissions.connect(account3).claimPermission(
         owner.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         ownerSig
@@ -364,9 +359,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
 
     it("Should not be able to claim from an unauthorized address", async () => {
-      const { dao, account3, account4 } = await loadFixture(deployContracts);
+      const { daoPermissions, account3, account4 } = await loadFixture(deployContracts);
 
-      const acc3Hash = await dao.getNewPermissionHash(
+      const acc3Hash = await daoPermissions.getNewPermissionHash(
         account3.address,
         account4.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -374,7 +369,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
 
       const ownerSig = await account3.signMessage(ethers.utils.arrayify(acc3Hash));
 
-      const claimigTrx = dao.connect(account4).claimPermission(
+      const claimigTrx = daoPermissions.connect(account4).claimPermission(
         account3.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         ownerSig

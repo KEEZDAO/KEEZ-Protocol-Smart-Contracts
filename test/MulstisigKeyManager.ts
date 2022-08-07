@@ -25,9 +25,6 @@ describe("Deployment testing & Individual contracts method testing", function ()
 
     const MultisigKeyManager = await ethers.getContractFactory("MultisigKeyManager");
     const multisig = await MultisigKeyManager.deploy(universalProfile.address, keyManager.address);
-
-    const DaoKeyManager = await ethers.getContractFactory("DaoKeyManager");
-    const dao = await DaoKeyManager.deploy(universalProfile.address, keyManager.address);
       
     // Initialize the multisig with new members.
     await universalProfile.connect(owner).setMultisigData(
@@ -55,7 +52,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
     let iface = new ethers.utils.Interface(ABI);
     await keyManager.execute(iface.encodeFunctionData("claimOwnership"));
 
-    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, dao, owner, account1, account2, account3, account4 };
+    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, owner, account1, account2, account3, account4 };
   }
   async function deployContractsAndProposeExecution() {
     const { universalProfile, multisig, owner, account1, account2, account3, account4 } = await loadFixture(deployContracts);

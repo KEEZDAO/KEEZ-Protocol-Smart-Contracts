@@ -28,8 +28,8 @@ import {
   _PERMISSION_VOTE,
   _PERMISSION_PROPOSE,
   _PERMISSION_EXECUTE,
-  _PERMISSION_SENDDELEGATE,
-  _PERMISSION_RECIEVEDELEGATE,
+  _PERMISSION_SEND_DELEGATE,
+  _PERMISSION_RECIEVE_DELEGATE,
   _PERMISSION_ADD_PERMISSIONS,
   _PERMISSION_REMOVE_PERMISSIONS,
 
@@ -56,30 +56,22 @@ import {
   _KEY_PARTICIPANT_VOTE
 } from "./DaoConstants.sol";
 
-// Library for array interaction
-import {ArrayWithMappingLibrary} from "../ArrayWithMappingLibrary.sol";
-
 // Custom error
 import {IndexedError} from "../Errors.sol";
 
 // Contract's interface
-import {IDaoKeyManager} from "./IDaoKeyManager.sol";
+import {IDaoProposals} from "./IDaoProposals.sol";
 
 /**
  *
-* @notice This smart contract is responsible for managing the DAO Keys.
+* @notice This smart contract is responsible for managing the DAO Proposals Keys.
  *
  * @author B00ste
- * @title DaoKeyManager
+ * @title DaoProposals
  * @custom:version 1.2
  */
-contract DaoKeyManager is IDaoKeyManager {
+contract DaoProposals is IDaoProposals {
   using ECDSA for bytes32;
-
-  /**
-   * @dev Nonce for claiming permissions.
-   */
-  mapping(address => uint256) private claimPermissionNonce;
 
   /**
    * @dev Nonce for voting.
@@ -112,129 +104,7 @@ contract DaoKeyManager is IDaoKeyManager {
 
 
   /**
-   * @inheritdoc IDaoKeyManager
-   */
-  function getNewPermissionHash(
-    address _from,
-    address _to,
-    bytes32 _permissions
-  )
-    public
-    override
-    view
-    returns(bytes32 _hash)
-  {
-    _hash = keccak256(abi.encode(
-      address(this),
-      _from,
-      _to,
-      _permissions,
-      claimPermissionNonce[_to]
-    ));
-  }
-
-  /**
-   * @inheritdoc IDaoKeyManager
-   */
-  function claimPermission(
-    address _from,
-    bytes32 _permissions,
-    bytes memory _signature
-  )
-    external
-    override
-  {
-    _verifyPermission(_from, _PERMISSION_ADD_PERMISSIONS, "ADD_PERMISSION");
-    bytes32 _hash = getNewPermissionHash(_from, msg.sender, _permissions).toEthSignedMessageHash();
-    address recoveredAddress = _hash.recover(_signature);
-    if (_from != recoveredAddress) revert IndexedError("DAO", 0x01);
-    _addPermissions(msg.sender, _permissions);
-    // Changing the nonce.
-    claimPermissionNonce[msg.sender] += block.timestamp / 113;
-  }
-
-  /**
-   * @inheritdoc IDaoKeyManager
-   */
-  function addPermissions(
-    address _to,
-    bytes32 _permissions
-  )
-    external
-    override
-  {
-    _verifyPermission(msg.sender, _PERMISSION_ADD_PERMISSIONS, "ADD_PERMISSION");
-    _addPermissions(_to, _permissions);
-  }
-
-  /**
-   * @inheritdoc IDaoKeyManager
-   */
-  function removePermissions(
-    address _to,
-    bytes32 _permissions
-  )
-    external
-    override
-  {
-    _verifyPermission(msg.sender, _PERMISSION_REMOVE_PERMISSIONS, "REMOVE_PERMISSION");
-    _removePermissions(_to, _permissions);
-  }
-
-  /**
-   * @inheritdoc IDaoKeyManager
-   */
-  function delegate(
-    address delegatee
-  )
-    external
-    override
-  {
-    _verifyPermission(msg.sender, _PERMISSION_SENDDELEGATE, "SENDDELEGATE");
-    _verifyPermission(delegatee, _PERMISSION_RECIEVEDELEGATE, "RECIEVEDELEGATE");
-
-    bytes32 delegateeKey = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
-    bytes memory encodedDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(delegateeKey);
-
-    if (delegatee == address(bytes20(encodedDelegatee))) revert IndexedError("DAO", 0x02);
-
-    bytes32 delegatesArrayKey = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, bytes20(delegatee)));
-    bytes memory encodedDelegatesArray = IERC725Y(UNIVERSAL_PROFILE).getData(delegatesArrayKey);
-    address[] memory delegatesArray = abi.decode(encodedDelegatesArray, (address[]));
-    delegatesArray[delegatesArray.length] = msg.sender;
-
-    bytes32[] memory keys = new bytes32[](3);
-    bytes[] memory values = new bytes[](3);
-
-    keys[0] = delegateeKey;
-    values[0] = bytes.concat(bytes20(delegatee));
-
-    keys[1] = delegatesArrayKey;
-    values[1] = abi.encode(delegatesArray);
-  
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
-      )
-    );
-  }
-
-  /**
-   * TODO
-   * @inheritdoc IDaoKeyManager
-   */
-  function undelegate(
-
-  )
-    external
-    override
-  {
-
-  }
-
-  /**
-   * @inheritdoc IDaoKeyManager
+   * @inheritdoc IDaoProposals
    */
   function createProposal(
     string calldata _title,
@@ -294,7 +164,7 @@ contract DaoKeyManager is IDaoKeyManager {
   }
 
   /**
-   * @inheritdoc IDaoKeyManager
+   * @inheritdoc IDaoProposals
    */
   function getProposalHash(
     address _signer,
@@ -337,7 +207,7 @@ contract DaoKeyManager is IDaoKeyManager {
 
 
   /**
-   * @inheritdoc IDaoKeyManager
+   * @inheritdoc IDaoProposals
    */
   function executeProposal(
     bytes10 proposalSignature,
@@ -375,7 +245,7 @@ contract DaoKeyManager is IDaoKeyManager {
         bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(i)))
       )));
       bytes32 permissions = _getPermissions(user);
-      if (permissions & _PERMISSION_VOTE != 0 || permissions & _PERMISSION_SENDDELEGATE != 0) {
+      if (permissions & _PERMISSION_VOTE != 0 || permissions & _PERMISSION_SEND_DELEGATE != 0) {
         bytes2 choices = bytes2(IERC725Y(UNIVERSAL_PROFILE).getData(
           _KEY_PARTICIPANT_VOTE(proposalSignature, user)
         ));
@@ -464,75 +334,6 @@ contract DaoKeyManager is IDaoKeyManager {
   {
     bytes32 permissions = _getPermissions(_from);
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
-  }
-
-  /**
-   * @dev Add `_permissions` to an address `_to`.
-   */
-  function _addPermissions(address _to, bytes32 _permissions) internal {
-    // Check if user has any permisssions. If not add him to the list of participants.
-    bytes32 currentPermissions = _getPermissions(_to);
-    if (currentPermissions == bytes32(0))
-    ArrayWithMappingLibrary._addElement(
-      UNIVERSAL_PROFILE,
-      KEY_MANAGER,
-      _DAO_PARTICIPANTS_ARRAY_KEY,
-      _DAO_PARTICIPANTS_ARRAY_PREFIX,
-      _DAO_PARTICIPANTS_MAPPING_PREFIX,
-      bytes.concat(bytes20(_to))
-    );
-    // Update the permissions in a local variable.
-    for(uint256 i = 0; i < 7; i++) {
-      if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
-      currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
-    }
-    // Set the local permissions to the Universal Profile.
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataSingleSelector,
-        bytes32(bytes.concat(
-          _LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX,
-          bytes20(_to)
-        )),
-        bytes.concat(currentPermissions)
-      )
-    );
-  }
-
-  /**
-   * @dev Remove `_permissions` from an address `_to`.
-   */
-  function _removePermissions(address _to, bytes32 _permissions) internal {
-    // Update the permissions in a local variable.
-    bytes32 currentPermissions = _getPermissions(_to);
-    for(uint256 i = 0; i < 7; i++) {
-      if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
-      currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
-    }
-    bytes memory encodedCurrentPermissions = bytes.concat(currentPermissions);
-    // Check if user has any permissions left. If not, remove him from the list of participants.
-    if (currentPermissions == bytes32(0)) {
-      ArrayWithMappingLibrary._removeElement(
-        UNIVERSAL_PROFILE,
-        KEY_MANAGER,
-        _DAO_PARTICIPANTS_ARRAY_KEY,
-        _DAO_PARTICIPANTS_ARRAY_PREFIX,
-        _DAO_PARTICIPANTS_MAPPING_PREFIX,
-        bytes.concat(bytes20(_to))
-      );
-      encodedCurrentPermissions = "";
-    }
-    // Set the local permissions to the Universal Profile.
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataSingleSelector,
-        bytes32(bytes.concat(
-          _LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX,
-          bytes20(_to)
-        )),
-        encodedCurrentPermissions
-      )
-    );
   }
 
 }

@@ -3,14 +3,11 @@
 pragma solidity ^0.8.0;
 
 /**
- *
-* @notice This smart contract is responsible for managing the DAO Keys.
- *
  * @author B00ste
- * @title DaoKeyManager
+ * @title IDaoProposals
  * @custom:version 1
  */
-interface IDaoKeyManager {
+interface IDaoProposals {
 
   /**
    * @notice This event is emited every time a proposal is created.
@@ -18,40 +15,6 @@ interface IDaoKeyManager {
    * @param proposalSignature The signature of the proposal that was created.
    */
   event ProposalCreated(bytes10 proposalSignature);
-
-  /**
-   * @notice Get the message needet to be sign for awarding a set of permissions.
-   */
-  function getNewPermissionHash(
-    address _from,
-    address _to,
-    bytes32 _permissions
-  ) external view returns(bytes32 _hash);
-
-  /**
-   * @notice Claim a permission using a signature
-   */
-  function claimPermission(address _from, bytes32 _permissions, bytes memory _signature) external;
-
-  /**
-   * @notice Add a permission.
-   */
-  function addPermissions(address _to, bytes32 _permissions) external;
-
-  /**
-   * @notice Remove a permission.
-   */
-  function removePermissions(address _to, bytes32 _permissions) external;
-
-  /**
-   * @notice Delegate your vote.
-   */
-  function delegate(address delegatee) external;
-
-  /**
-   *
-   */
-  function undelegate() external;
 
   /**
    * @notice Create a proposal.
@@ -82,10 +45,5 @@ interface IDaoKeyManager {
    * @notice Execute the proposal by signature.
    */
   function executeProposal(bytes10 proposalSignature, bytes[] calldata _signatures, address[] calldata _signers) external;
-
-
-
-
-
 
 }
