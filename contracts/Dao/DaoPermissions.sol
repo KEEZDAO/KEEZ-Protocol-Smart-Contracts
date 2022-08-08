@@ -42,7 +42,7 @@ import {IDaoPermissions} from "./IDaoPermissions.sol";
  *
  * @author B00ste
  * @title DaoPermissions
- * @custom:version 1.2
+ * @custom:version 1.3
  */
 contract DaoPermissions is IDaoPermissions {
   using ECDSA for bytes32;

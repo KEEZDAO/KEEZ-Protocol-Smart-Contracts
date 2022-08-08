@@ -33,7 +33,7 @@ import {IDaoDelegates} from "./IDaoDelegates.sol";
  *
  * @author B00ste
  * @title DaoDelegates
- * @custom:version 1.2
+ * @custom:version 1.3
  */
 contract DaoDelegates is IDaoDelegates {
 
@@ -71,32 +71,25 @@ contract DaoDelegates is IDaoDelegates {
     external
     override
   {
-    _verifyPermission(msg.sender, _PERMISSION_SEND_DELEGATE, "SENDDELEGATE");
-    _verifyPermission(delegatee, _PERMISSION_RECIEVE_DELEGATE, "RECIEVEDELEGATE");
-
-    bytes32 delegateeKey = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
-    bytes memory encodedDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(delegateeKey);
-
-    if (bytes20(delegatee) == bytes20(encodedDelegatee)) revert IndexedError("DAO", 0x02);
+    _verifyPermission(msg.sender, _PERMISSION_SEND_DELEGATE, "SEND_DELEGATE");
+    _verifyPermission(delegatee, _PERMISSION_RECIEVE_DELEGATE, "RECIEVE_DELEGATE");
 
     bytes32[] memory keys = new bytes32[](2);
     bytes[] memory values = new bytes[](2);
 
-    keys[0] = delegateeKey;
+    keys[0] = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
     values[0] = bytes.concat(bytes20(delegatee));
+    bytes memory encodedDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]);
 
+    if (encodedDelegatee.length > 0) revert IndexedError("DaoDelegates", 0x01);
+    
     // Set the key of delegates array of the `delegatee`
     keys[1] = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, bytes20(delegatee)));
     // Get and decode delegates array of the `delegatee`
-    address[] memory delegatesArray = abi.decode(
-      IERC725Y(UNIVERSAL_PROFILE).getData(keys[1]),
-      (address[])
-    );
-    // Update the delegates array of the `delegatee` with `msg.sender`
-    delegatesArray[delegatesArray.length] = msg.sender;
-    // Update the value of `keys[1]` with the new encoded array of addresses
-    values[1] = abi.encode(delegatesArray);
-  
+    bytes memory encodedDelegatesArray = IERC725Y(UNIVERSAL_PROFILE).getData(keys[1]);
+    // Set the encoded delegates array updated with `msg.sender`
+    values[1] = _addAddressToArray(msg.sender, encodedDelegatesArray);
+
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
         setDataMultipleSelector,
@@ -114,49 +107,30 @@ contract DaoDelegates is IDaoDelegates {
     external
     override
   {
-    _verifyPermission(msg.sender, _PERMISSION_SEND_DELEGATE, "SENDDELEGATE");
-    _verifyPermission(newDelegatee, _PERMISSION_RECIEVE_DELEGATE, "RECIEVEDELEGATE");
-
-    bytes32 delegateeKey = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
-    bytes20 encodedOldDelegatee = bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(delegateeKey));
-    bytes20 encodedNewDelegatee  = bytes20(newDelegatee);
-
-    if (encodedNewDelegatee == encodedOldDelegatee) revert IndexedError("DAO", 0x02);
+    _verifyPermission(msg.sender, _PERMISSION_SEND_DELEGATE, "SEND_DELEGATE");
+    _verifyPermission(newDelegatee, _PERMISSION_RECIEVE_DELEGATE, "RECIEVE_DELEGATE");
 
     bytes32[] memory keys = new bytes32[](3);
     bytes[] memory values = new bytes[](3);
 
-    keys[0] = delegateeKey;
+    // The key for the `msg.sender` delegatee
+    keys[0] = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
+    bytes20 encodedOldDelegatee = bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]));
+    bytes20 encodedNewDelegatee  = bytes20(newDelegatee);
+    // Revert if the `encodedNewDelegatee` is the same with the `encodedOldDelegatee`
+    if (encodedNewDelegatee == encodedOldDelegatee) revert IndexedError("DAO", 0x02);
+    // Update the delegatee of `msg.sender`
     values[0] = bytes.concat(encodedNewDelegatee);
 
-    // Set the key for the delegates array of the `oldDelegatee`
+    // The key for the old delegatee's array of delegates
     keys[1] = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, encodedOldDelegatee));
-    // Get and decode the delegates array of the `oldDelegatee`
-    address[] memory oldDelegateeDelegatesArray = abi.decode(
-      IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]),
-      (address[])
-    );
-    // Remove `msg.sender` from the array of delegates of the old delegatee
-    for (uint256 i = 0; i < oldDelegateeDelegatesArray.length; i++) {
-      if (oldDelegateeDelegatesArray[i] == msg.sender) {
-        oldDelegateeDelegatesArray[i] = oldDelegateeDelegatesArray[oldDelegateeDelegatesArray.length - 1];
-        oldDelegateeDelegatesArray[oldDelegateeDelegatesArray.length - 1] = address(0);
-      }
-    }
-    // Update the value of `keys[1]` with the new encoded array of addresses
-    values[1] = abi.encode(oldDelegateeDelegatesArray);
-
-    // Set the key for the delegates array of the `newDelegatee`
+    // Set the encoded delegates array of the old delegatee with `msg.sender` removed
+    values[1] = _removeAddressFromArray(msg.sender, IERC725Y(UNIVERSAL_PROFILE).getData(keys[1]));
+    
+    // The key for the new delegatee's array of delegates
     keys[2] = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, encodedNewDelegatee));
-    // Get and decode the delegates array of the `newDelegatee`
-    address[] memory newDelegateeDelegatesArray = abi.decode(
-      IERC725Y(UNIVERSAL_PROFILE).getData(keys[1]),
-      (address[])
-    );
-    // Update the new delegatee's array of delegates with `msg.sender`
-    newDelegateeDelegatesArray[newDelegateeDelegatesArray.length] = msg.sender;
-    // Update the value of `keys[2]` with the new encoded array of addresses
-    values[2] = abi.encode(newDelegateeDelegatesArray);
+    // Set the encoded delegates array of the new delegatee updated with `msg.sender`
+    values[2] = _addAddressToArray(msg.sender, IERC725Y(UNIVERSAL_PROFILE).getData(keys[2]));
   
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
@@ -170,13 +144,33 @@ contract DaoDelegates is IDaoDelegates {
    * TODO
    * @inheritdoc IDaoDelegates
    */
-  function undelegate(
-
-  )
+  function undelegate()
     external
     override
   {
+    _verifyPermission(msg.sender, _PERMISSION_SEND_DELEGATE, "SEND_DELEGATE");
 
+    bytes32[] memory keys = new bytes32[](2);
+    bytes[] memory values = new bytes[](2);
+
+    keys[0] = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
+    bytes memory encodedOldDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]);
+    // Revert if the delegatee is empty
+    if(encodedOldDelegatee.length == 0) revert IndexedError("DaoDelegates", 0x03);
+    // Update the delegatee with zero value
+    values[0] = "";
+
+    // The key for the old delegatee's array of delegates
+    keys[1] = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, encodedOldDelegatee));
+    // Set the encoded delegates array of the old delegatee with `msg.sender` removed
+    values[1] = _removeAddressFromArray(msg.sender, IERC725Y(UNIVERSAL_PROFILE).getData(keys[1]));
+
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        keys, values
+      )
+    );
   }
 
 
@@ -212,6 +206,109 @@ contract DaoDelegates is IDaoDelegates {
   {
     bytes32 permissions = _getPermissions(_from);
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
+  }
+
+  /**
+   * @dev Add address to the encoded with `abi.encode(address[])` array
+   */
+  function _addAddressToArray(
+    address newElement,
+    bytes memory enocdedAddressArray
+  )
+    internal
+    pure
+    returns (bytes memory updatedEncodedAddressArray)
+  {
+    if (enocdedAddressArray.length != 0) {
+      // abi.encode(address[])
+      // Take the length from enocded with `abi.enocde(address[])` address array
+      bytes memory delegatesArrayLength = bytes.concat(bytes32(0));
+      for (uint256 i = 0; i < 32; i++) {
+        delegatesArrayLength[i] = enocdedAddressArray[32 + i];
+      }
+      // Increase the length with 1
+      bytes memory upadtedLength = bytes.concat(bytes32(
+        uint256(bytes32(delegatesArrayLength)) + 1
+      ));
+      // Updated the encoded with `abi.encode(address[])` address array length
+      for(uint256 i = 0; i < 32; i++) {
+        enocdedAddressArray[32 + i] = upadtedLength[i];
+      }
+      // Concateneate the new address to the encoded with `abi.enocde(address[])` address array
+      updatedEncodedAddressArray = bytes.concat(
+        enocdedAddressArray,
+        bytes12(0),
+        bytes20(newElement)
+      );
+    }
+    else {
+      // abi.encode(address[])
+      updatedEncodedAddressArray = bytes.concat(
+        bytes31(0),
+        bytes1(uint8(32)),
+        bytes32(uint256(1)),
+        bytes12(0),
+        bytes20(newElement)
+      );
+    }
+  }
+
+  /**
+   * @dev Remove address from the encoded with `abi.encode(address[])` array
+   */
+  function _removeAddressFromArray(
+    address removedElement,
+    bytes memory enocdedAddressArray
+  )
+    internal
+    pure
+    returns (bytes memory updatedEncodedAddressArray)
+  {
+    /**
+     * Save the number resulted from dividing `enocdedAddressArray.length` by 32
+     * We use this number to split an save `enocdedAddressArray` in parts of `bytes32`
+     */
+    uint256 bytes32ArrayLength = enocdedAddressArray.length/32;
+    // The array of `bytes32` created from `enocdedAddressArray`
+    bytes32[] memory bytes32array = new bytes32[](bytes32ArrayLength);
+    // First element will be the lenght of each element in the `enocdedAddressArray`
+    bytes32array[0] = bytes32(enocdedAddressArray);
+    // Spitting `enocdedAddressArray` in multiple `bytes32` elements
+    for(uint256 i = 2; i <= bytes32ArrayLength; i++) {
+      bytes32 bytes32ArrayElement;
+      bytes32 positionOfBytes32 = bytes32(uint256(bytes32array[0]) * i);
+      assembly {
+        bytes32ArrayElement := mload(add(enocdedAddressArray, positionOfBytes32))
+      }
+      bytes32array[i-1] = bytes32ArrayElement;
+    }
+
+    // Encoding `removedElement` correctly for comparing
+    bytes32 encodedRemovedElement = bytes32(bytes.concat(bytes12(0), bytes20(removedElement)));
+    if (bytes32array.length ==  3) {
+      if (bytes32array[2] == encodedRemovedElement) updatedEncodedAddressArray = "";
+    }
+    else if (bytes32array.length > 3) {
+      // Finding `removedElement` and swapping with the last element of the array
+      for (uint i = 0; i < bytes32array.length - 1; i++) {
+        if(encodedRemovedElement == bytes32array[i]) {
+          updatedEncodedAddressArray = bytes.concat(
+            updatedEncodedAddressArray, bytes32array[bytes32array.length - 1]
+          );
+        }
+        else if(i == 1) {
+          updatedEncodedAddressArray = bytes.concat(
+            updatedEncodedAddressArray, bytes32(uint256(bytes32array[i]) - 1)
+          );
+        }
+        else {
+          updatedEncodedAddressArray = bytes.concat(
+            updatedEncodedAddressArray, bytes32array[i]
+          );
+        }
+      }
+    }
+
   }
 
 }

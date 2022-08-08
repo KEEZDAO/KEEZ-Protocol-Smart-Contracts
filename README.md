@@ -14,12 +14,12 @@ npx hardhat run scripts/deploy.ts
 
 ## Errors
 
-### This are the errors that you can get while using `DaoKeyManager.js`
+### This are the errors that you can get while using `DaoKeyManager.sol`
 
 | Error number |                               Error explanation                                     |
 |     :---:    |                                     :---:                                           |
 |    `0x01`    | The recovered address is not the same as the one that allowed claiming permissions. |
-|    `0x02`    | User already delegated the vote to this delegatee.                                  |
+|    `0x02`    | User already delegated the vote.                                                    |
 |    `0x03`    | You can have maximum 16 choices.                                                    |
 |    `0x04`    | The number of choices per vote must be smaller than the number of total choices.    |
 |    `0x05`    | The voting delay is smaller than the minimum value allowed.                         |
@@ -29,7 +29,15 @@ npx hardhat run scripts/deploy.ts
 |    `0x08`    | User has already voted.                                                             |
 |    `0x09`    | User has more choices than allowed.                                                 |
 
-### This are the errors that you can get while using `MultisigKeyManager.js`
+### This are the errors that you can get while using `DaoDelegates.sol`
+
+| Error number |                               Error explanation                                     |
+|     :---:    |                                     :---:                                           |
+|    `0x01`    | User already delegated the vote.                                                    |
+|    `0x02`    | Current delegatee is the same as the new delegatee.                                 |
+|    `0x03`    | There is no delegatee to be removed.                                                |
+
+### This are the errors that you can get while using `MultisigKeyManager.sol`
 
 | Error number |                               Error explanation                                     |
 |     :---:    |                                     :---:                                           |

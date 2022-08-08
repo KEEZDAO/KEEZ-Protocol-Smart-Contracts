@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 describe("Deployment testing & Individual contracts method testing", function () {
   async function deployContracts() {
 
-    const [owner, account1, account2, account3, account4] = await ethers.getSigners();
+    const [owner, account1, account2, account3, account4, account5, account6] = await ethers.getSigners();
 
     const UniversalReceiverDelegateUP = await ethers.getContractFactory("UniversalReceiverDelegateUP");
     const universalReceiverDelegateUP = await UniversalReceiverDelegateUP.deploy();
@@ -65,7 +65,22 @@ describe("Deployment testing & Individual contracts method testing", function ()
     let iface = new ethers.utils.Interface(ABI);
     await keyManager.execute(iface.encodeFunctionData("claimOwnership"));
 
-    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, daoPermissions, daoDelegates, daoProposals, owner, account1, account2, account3, account4 };
+    return {
+      universalReceiverDelegateUP,
+      universalProfile,
+      vault,
+      keyManager,
+      daoPermissions,
+      daoDelegates,
+      daoProposals,
+      owner,
+      account1,
+      account2,
+      account3,
+      account4,
+      account5,
+      account6
+    };
   }
 
   describe("Universal profile deployment", () => {
@@ -386,4 +401,220 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
   });
 
-})
+  describe("Dao delegate methods", () => {
+
+    it("Should delegate the vote", async () => {
+      const { universalProfile, daoDelegates, owner, account1 } = await loadFixture(deployContracts);
+
+      await daoDelegates.connect(owner).delegate(account1.address);
+
+      const keys = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account1.address.substring(2)
+      ];
+      const values = [
+        account1.address.toLowerCase(),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [owner.address] ])
+      ];
+
+      const get_data = await universalProfile["getData(bytes32[])"](keys);
+
+      expect(get_data).to.deep.equal(values);
+    });
+
+    it("Should delegate 2 votes", async () => {
+      const { universalProfile, daoPermissions, daoDelegates, owner, account1, account2 } = await loadFixture(deployContracts);
+
+      await daoPermissions.connect(owner).addPermissions(
+        account2.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000010"
+      );
+      await daoDelegates.connect(owner).delegate(account2.address);
+      await daoDelegates.connect(account1).delegate(account2.address);
+  
+      const keys = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account1.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account2.address.substring(2)
+      ];
+      const values = [
+        account2.address.toLowerCase(),
+        account2.address.toLowerCase(),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [owner.address, account1.address] ])
+      ];
+
+      const get_data = await universalProfile["getData(bytes32[])"](keys);
+
+      expect(get_data).to.deep.equal(values);
+    });
+
+    it("Should be able to change the delegate (1 delegate in both arrays)", async () => {
+      const { universalProfile, daoPermissions, daoDelegates, owner, account1, account2 } = await loadFixture(deployContracts);
+
+      await daoPermissions.connect(owner).addPermissions(
+        account2.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000010"
+      );
+      await daoDelegates.connect(owner).delegate(account1.address);
+      await daoDelegates.connect(owner).changeDelegate(account2.address);
+
+      const keys = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account2.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account1.address.substring(2)
+      ];
+      const values = [
+        account2.address.toLowerCase(),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [owner.address] ]),
+        "0x"
+      ];
+
+      const get_data = await universalProfile["getData(bytes32[])"](keys);
+
+      expect(get_data).to.deep.equal(values);
+    });
+
+    it("Should be able to change the delegate (2 delegates in first array, 1 delegate in second array)", async () => {
+      const { universalProfile, daoPermissions, daoDelegates, owner, account1, account2, account3 } = await loadFixture(deployContracts);
+
+      await daoPermissions.connect(owner).addPermissions(
+        account2.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000010"
+      );
+      await daoPermissions.connect(owner).addPermissions(
+        account3.address,
+        "0x0000000000000000000000000000000000000000000000000000000000000010"
+      );
+      await daoDelegates.connect(owner).delegate(account2.address);
+      await daoDelegates.connect(account1).delegate(account2.address);
+      await daoDelegates.connect(owner).changeDelegate(account3.address);
+
+      const keys = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account1.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account2.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account3.address.substring(2)
+      ];
+      const values = [
+        account3.address.toLowerCase(),
+        account2.address.toLowerCase(),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [account1.address] ]),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [owner.address] ])
+      ];
+
+      const get_data = await universalProfile["getData(bytes32[])"](keys);
+
+      expect(get_data).to.deep.equal(values);
+    });
+
+    it("Should be able to change the delegate (2 delegates in both arrays)", async () => {
+      const {
+        universalProfile,
+        daoPermissions,
+        daoDelegates,
+        owner,
+        account1,
+        account2,
+        account3,
+        account4,
+        account5
+      } = await loadFixture(deployContracts);
+
+      await daoPermissions.connect(owner).addPermissions(
+        account4.address,
+        "0x000000000000000000000000000000000000000000000000000000000000007f"
+      );
+      await daoDelegates.connect(owner).delegate(account4.address);
+      await daoDelegates.connect(account1).delegate(account4.address);
+
+      await daoPermissions.connect(owner).addPermissions(
+        account5.address,
+        "0x000000000000000000000000000000000000000000000000000000000000007f"
+      );
+      await daoPermissions.connect(owner).addPermissions(
+        account3.address,
+        "0x000000000000000000000000000000000000000000000000000000000000007f"
+      );
+      await daoDelegates.connect(account2).delegate(account5.address);
+      await daoDelegates.connect(account3).delegate(account5.address);
+
+      const keys1 = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account1.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account2.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account3.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account4.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account5.address.substring(2)
+      ];
+      const values1 = [
+        account4.address.toLowerCase(),
+        account4.address.toLowerCase(),
+        account5.address.toLowerCase(),
+        account5.address.toLowerCase(),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [owner.address, account1.address] ]),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [account2.address, account3.address] ])
+      ];
+
+      const get_data1 = await universalProfile["getData(bytes32[])"](keys1);
+
+      expect(get_data1).to.deep.equal(values1);
+
+      await daoDelegates.connect(owner).changeDelegate(account5.address);
+
+      const keys2 = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account1.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account2.address.substring(2),
+        "0x0a30e74a6c7868e400140000" + account3.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account4.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account5.address.substring(2)
+      ];
+      const values2 = [
+        account5.address.toLowerCase(),
+        account4.address.toLowerCase(),
+        account5.address.toLowerCase(),
+        account5.address.toLowerCase(),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [account1.address] ]),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [account2.address, account3.address, owner.address] ])
+      ];
+
+      const get_data2 = await universalProfile["getData(bytes32[])"](keys2);
+
+      expect(get_data2).to.deep.equal(values2);
+    });
+
+    it("Should undelegate the vote", async () => {
+      const { universalProfile, daoDelegates, owner, account1 } = await loadFixture(deployContracts);
+
+      await daoDelegates.connect(owner).delegate(account1.address);
+      const keys1 = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account1.address.substring(2)
+      ];
+      const values1 = [
+        account1.address.toLowerCase(),
+        (new ethers.utils.AbiCoder()).encode([ "address[]" ], [ [owner.address] ])
+      ];
+
+      const get_data1 = await universalProfile["getData(bytes32[])"](keys1);
+
+      expect(get_data1).to.deep.equal(values1);
+
+      await daoDelegates.connect(owner).undelegate();
+      const keys2 = [
+        "0x0a30e74a6c7868e400140000" + owner.address.substring(2),
+        "0x92a4ebfa1896d9ad8b430000" + account1.address.substring(2)
+      ];
+      const values2 = [
+        "0x",
+        "0x"
+      ];
+
+      const get_data2 = await universalProfile["getData(bytes32[])"](keys2);
+
+      expect(get_data2).to.deep.equal(values2);
+    });
+
+  });
+
+});

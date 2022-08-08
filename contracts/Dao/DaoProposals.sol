@@ -68,7 +68,7 @@ import {IDaoProposals} from "./IDaoProposals.sol";
  *
  * @author B00ste
  * @title DaoProposals
- * @custom:version 1.2
+ * @custom:version 1.3
  */
 contract DaoProposals is IDaoProposals {
   using ECDSA for bytes32;
