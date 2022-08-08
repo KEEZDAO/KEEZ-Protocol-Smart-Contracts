@@ -5,7 +5,8 @@ const config: HardhatUserConfig = {
   solidity: "0.8.9",
   networks: {
     hardhat: {
-      allowUnlimitedContractSize: true
+      throwOnTransactionFailures: true,
+      throwOnCallFailures: true
     }
   }
 };

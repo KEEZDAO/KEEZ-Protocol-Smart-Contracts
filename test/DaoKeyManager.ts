@@ -39,6 +39,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
       [
         owner.address,
         account1.address,
@@ -112,6 +113,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         "0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9",
         "0x799787138cc40d7a47af8e69bdea98db14e1ead8227cef96814fa51751e25c76",
         "0xd3cf4cd71858ea36c3f5ce43955db04cbe9e1f42a2c7795c25c1d430c9bb280a",
+        "0xb207580c05383177027a90d6c298046d3d60dfa05a32b0bb48ea9015e11a3424",
         // array length and array elements
         "0xf7f9c7410dd493d79ebdaee15bbc77fd163bd488f54107d1be6ed34b1e099004",
         "0xf7f9c7410dd493d79ebdaee15bbc77fd" + "00000000000000000000000000000000",
@@ -131,6 +133,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
         // array length and array elements

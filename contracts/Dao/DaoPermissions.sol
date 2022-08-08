@@ -42,7 +42,7 @@ import {IDaoPermissions} from "./IDaoPermissions.sol";
  *
  * @author B00ste
  * @title DaoPermissions
- * @custom:version 1.3
+ * @custom:version 1.4
  */
 contract DaoPermissions is IDaoPermissions {
   using ECDSA for bytes32;
@@ -113,7 +113,7 @@ contract DaoPermissions is IDaoPermissions {
     _verifyPermission(_from, _PERMISSION_ADD_PERMISSIONS, "ADD_PERMISSION");
     bytes32 _hash = getNewPermissionHash(_from, msg.sender, _permissions).toEthSignedMessageHash();
     address recoveredAddress = _hash.recover(_signature);
-    if (_from != recoveredAddress) revert IndexedError("DAO", 0x01);
+    if (_from != recoveredAddress) revert IndexedError("DaoPermissions", 0x01);
     _addPermissions(msg.sender, _permissions);
     // Changing the nonce.
     claimPermissionNonce[msg.sender] += block.timestamp / 113;

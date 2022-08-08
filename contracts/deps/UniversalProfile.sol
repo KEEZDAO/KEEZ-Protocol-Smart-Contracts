@@ -41,6 +41,7 @@ import {
   _DAO_PARTICIPATION_RATE_KEY,
   _DAO_MINIMUM_VOTING_DELAY_KEY,
   _DAO_MINIMUM_VOTING_PERIOD_KEY,
+  _DAO_MINIMUM_EXECUTION_DELAY_KEY,
 
   _DAO_PARTICIPANTS_ARRAY_KEY,
   _DAO_PARTICIPANTS_ARRAY_PREFIX,
@@ -87,6 +88,7 @@ contract UniversalProfile is LSP0ERC725Account {
     bytes1 _participationRate,
     bytes32 _minimumVotingDelay,
     bytes32 _minimumVotingPeriod,
+    bytes32 _minimumExecutionDelay,
     address[] memory _daoParticipants,
     bytes32[] memory _daoParticipantsPermissions
   ) external onlyOwner {
@@ -94,8 +96,8 @@ contract UniversalProfile is LSP0ERC725Account {
       _daoParticipants.length == _daoParticipantsPermissions.length
     );
 
-    bytes32[] memory keys = new bytes32[](6 + (_daoParticipants.length * 3));
-    bytes[] memory values = new bytes[](6 + (_daoParticipants.length * 3));
+    bytes32[] memory keys = new bytes32[](7 + (_daoParticipants.length * 3));
+    bytes[] memory values = new bytes[](7 + (_daoParticipants.length * 3));
 
     // Setting DAO Metadata and Parameters
     keys[0] = _DAO_JSON_METDATA_KEY;
@@ -113,19 +115,22 @@ contract UniversalProfile is LSP0ERC725Account {
     keys[4] = _DAO_MINIMUM_VOTING_PERIOD_KEY;
     values[4] = bytes.concat(_minimumVotingPeriod);
 
-    keys[5] = _DAO_PARTICIPANTS_ARRAY_KEY;
-    values[5] = bytes.concat(bytes32(_daoParticipants.length));
+    keys[5] = _DAO_MINIMUM_EXECUTION_DELAY_KEY;
+    values[6] = bytes.concat(_minimumExecutionDelay);
+
+    keys[6] = _DAO_PARTICIPANTS_ARRAY_KEY;
+    values[6] = bytes.concat(bytes32(_daoParticipants.length));
 
     // Setting DAO Participants and their Permissions
     for (uint128 i = 0; i < _daoParticipants.length; i++) {
-      keys[6 + i] = bytes32(bytes.concat(_DAO_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
-      values[6 + i] = bytes.concat(bytes20(_daoParticipants[i]));
+      keys[7 + i] = bytes32(bytes.concat(_DAO_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
+      values[7 + i] = bytes.concat(bytes20(_daoParticipants[i]));
 
-      keys[6 + i + _daoParticipants.length] = bytes32(bytes.concat(_DAO_PARTICIPANTS_MAPPING_PREFIX, bytes20(_daoParticipants[i])));
-      values[6 + i + _daoParticipants.length] = bytes.concat(bytes32(uint256(i)));
+      keys[7 + i + _daoParticipants.length] = bytes32(bytes.concat(_DAO_PARTICIPANTS_MAPPING_PREFIX, bytes20(_daoParticipants[i])));
+      values[7 + i + _daoParticipants.length] = bytes.concat(bytes32(uint256(i)));
 
-      keys[6 + i + (_daoParticipants.length * 2)] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_daoParticipants[i])));
-      values[6 + i + (_daoParticipants.length * 2)] = bytes.concat(_daoParticipantsPermissions[i]);
+      keys[7 + i + (_daoParticipants.length * 2)] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_daoParticipants[i])));
+      values[7 + i + (_daoParticipants.length * 2)] = bytes.concat(_daoParticipantsPermissions[i]);
     }
 
     setData(keys, values);

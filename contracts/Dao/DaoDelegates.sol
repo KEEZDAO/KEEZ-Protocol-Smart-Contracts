@@ -33,7 +33,7 @@ import {IDaoDelegates} from "./IDaoDelegates.sol";
  *
  * @author B00ste
  * @title DaoDelegates
- * @custom:version 1.3
+ * @custom:version 1.4
  */
 contract DaoDelegates is IDaoDelegates {
 
@@ -77,12 +77,14 @@ contract DaoDelegates is IDaoDelegates {
     bytes32[] memory keys = new bytes32[](2);
     bytes[] memory values = new bytes[](2);
 
+    // The key for the curent delegatee of `msg.sender`
     keys[0] = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
-    values[0] = bytes.concat(bytes20(delegatee));
+    // Get the current enoded delgatee of the `msg.sender`
     bytes memory encodedDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]);
-
+    // Revert if `msg.sender` already has a delegatee
     if (encodedDelegatee.length > 0) revert IndexedError("DaoDelegates", 0x01);
-    
+    // Set the `delegatee` for `msg.sender`
+    values[0] = bytes.concat(bytes20(delegatee));
     // Set the key of delegates array of the `delegatee`
     keys[1] = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, bytes20(delegatee)));
     // Get and decode delegates array of the `delegatee`
@@ -90,12 +92,8 @@ contract DaoDelegates is IDaoDelegates {
     // Set the encoded delegates array updated with `msg.sender`
     values[1] = _addAddressToArray(msg.sender, encodedDelegatesArray);
 
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
-      )
-    );
+    // Update the `keys` of Universal Profile with the `values`
+    _setDataMultiple(keys, values);
   }
 
   /**
@@ -131,13 +129,9 @@ contract DaoDelegates is IDaoDelegates {
     keys[2] = bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, encodedNewDelegatee));
     // Set the encoded delegates array of the new delegatee updated with `msg.sender`
     values[2] = _addAddressToArray(msg.sender, IERC725Y(UNIVERSAL_PROFILE).getData(keys[2]));
-  
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
-      )
-    );
+
+    // Update the `keys` of Universal Profile with the `values`
+    _setDataMultiple(keys, values);
   }
 
   /**
@@ -165,12 +159,8 @@ contract DaoDelegates is IDaoDelegates {
     // Set the encoded delegates array of the old delegatee with `msg.sender` removed
     values[1] = _removeAddressFromArray(msg.sender, IERC725Y(UNIVERSAL_PROFILE).getData(keys[1]));
 
-    ILSP6KeyManager(KEY_MANAGER).execute(
-      abi.encodeWithSelector(
-        setDataMultipleSelector,
-        keys, values
-      )
-    );
+    // Update the `keys` of Universal Profile with the `values`
+    _setDataMultiple(keys, values);
   }
 
 
@@ -206,6 +196,23 @@ contract DaoDelegates is IDaoDelegates {
   {
     bytes32 permissions = _getPermissions(_from);
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
+  }
+
+  /**
+   * @dev Set data, multiple keys, of the Universal Profile through Key Manager
+   */
+  function _setDataMultiple(
+    bytes32[] memory _keys,
+    bytes[] memory _values
+  )
+    internal
+  {
+    ILSP6KeyManager(KEY_MANAGER).execute(
+      abi.encodeWithSelector(
+        setDataMultipleSelector,
+        _keys, _values
+      )
+    );
   }
 
   /**

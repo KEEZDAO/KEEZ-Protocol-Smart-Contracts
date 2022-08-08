@@ -44,16 +44,17 @@ import {
   _DAO_PARTICIPATION_RATE_KEY,
   _DAO_MINIMUM_VOTING_DELAY_KEY,
   _DAO_MINIMUM_VOTING_PERIOD_KEY,
+  _DAO_MINIMUM_EXECUTION_DELAY_KEY,
 
   _DAO_PROPOSAL_SIGNATURE,
   _DAO_PROPOSAL_JSON_METADATA_SUFFIX,
   _DAO_PROPOSAL_VOTING_DELAY_SUFFIX,
   _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX,
+  _DAO_PROPOSAL_EXECUTION_DELAY_SUFFIX,
   _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX,
   _DAO_PROPOSAL_PAYLOADS_ARRAY_SUFFIX,
   _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX,
-  _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX,
-  _KEY_PARTICIPANT_VOTE
+  _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX
 } from "./DaoConstants.sol";
 
 // Custom error
@@ -68,7 +69,7 @@ import {IDaoProposals} from "./IDaoProposals.sol";
  *
  * @author B00ste
  * @title DaoProposals
- * @custom:version 1.3
+ * @custom:version 1.4
  */
 contract DaoProposals is IDaoProposals {
   using ECDSA for bytes32;
@@ -109,20 +110,21 @@ contract DaoProposals is IDaoProposals {
   function createProposal(
     string calldata _title,
     string calldata _metadataLink,
-    uint48 _votingDelay,
-    uint48 _votingPeriod,
+    bytes32 _votingDelay,
+    bytes32 _votingPeriod,
+    bytes32 _executionDelay,
     bytes[] calldata _payloads,
-    uint8 _choices,
-    uint8 _choicesPerVote
+    bytes32 _choices,
+    bytes32 _choicesPerVote
   )
     external
     override
   {
     _verifyPermission(msg.sender, _PERMISSION_PROPOSE, "PROPOSE");
-    if (_choices > 16) revert IndexedError("DAO", 0x03);
-    if (_choicesPerVote > _choices) revert IndexedError("DAO", 0x04);
-    if (_votingDelay < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_DELAY_KEY)))) revert IndexedError("DAO", 0x05);
-    if (_votingPeriod < uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_PERIOD_KEY)))) revert IndexedError("DAO", 0x06);
+    if (_choicesPerVote > _choices) revert IndexedError("DaoProposals", 0x01);
+    if (_votingDelay < bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_DELAY_KEY))) revert IndexedError("DaoProposals", 0x02);
+    if (_votingPeriod < bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_VOTING_PERIOD_KEY))) revert IndexedError("DaoProposals", 0x03);
+    if (_executionDelay < bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MINIMUM_EXECUTION_DELAY_KEY))) revert IndexedError("DaoProposals", 0x04);
 
     bytes10 proposalSignature = _DAO_PROPOSAL_SIGNATURE(
       bytes6(keccak256(abi.encode(_title, block.timestamp)))
@@ -134,24 +136,27 @@ contract DaoProposals is IDaoProposals {
       keys[0] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PAYLOADS_ARRAY_SUFFIX));
       values[0] = abi.encode(_payloads);
     }
-
+    // Key and value for the proposal's JSON metadata link
     keys[1] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_JSON_METADATA_SUFFIX));
     values[1] = bytes(_metadataLink);
-
+    // Key and value for the proposal voting delay
     keys[2] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX));
-    values[2] = bytes.concat(bytes6(uint48(_votingDelay)));
-
+    values[2] = bytes.concat(bytes32(_votingDelay));
+    // Key an value for the proposal voting period
     keys[3] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX));
-    values[3] = bytes.concat(bytes6(uint48(_votingPeriod)));
-
+    values[3] = bytes.concat(bytes32(_votingPeriod));
+    // Key an value for the proposal execution delay
+    keys[3] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_EXECUTION_DELAY_SUFFIX));
+    values[3] = bytes.concat(bytes32(_executionDelay));
+    // Key and value for the proposal creation timestamp
     keys[4] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX));
-    values[4] = bytes.concat(bytes6(uint48(block.timestamp)));
-
+    values[4] = bytes.concat(bytes32(block.timestamp));
+    // Key and value for the number of choices
     keys[5] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX));
-    values[5] = bytes.concat(bytes1(_choices));
-
+    values[5] = bytes.concat(bytes32(_choices));
+    // Key and value for the maximum number of choises allowed per vote
     keys[6] = bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX));
-    values[6] = bytes.concat(bytes1(_choicesPerVote));
+    values[6] = bytes.concat(bytes32(_choicesPerVote));
 
     ILSP6KeyManager(KEY_MANAGER).execute(
       abi.encodeWithSelector(
@@ -169,7 +174,7 @@ contract DaoProposals is IDaoProposals {
   function getProposalHash(
     address _signer,
     bytes10 _proposalSignature,
-    bool _response
+    bytes32 _choicesBitArray
   )
     public
     override
@@ -180,124 +185,54 @@ contract DaoProposals is IDaoProposals {
       address(this),
       _signer,
       _proposalSignature,
-      _response,
+      _choicesBitArray,
       votingNonce[_signer]
     ));
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // TODO Fix the execute proposal method according to multisg
-  // Keep in mind signatures and the deleagted votes
-  // As well as the choices of each voter.
-
-
   /**
    * @inheritdoc IDaoProposals
    */
   function executeProposal(
-    bytes10 proposalSignature,
+    bytes10 _proposalSignature,
     bytes[] calldata _signatures,
-    address[] calldata _signers
+    address[] calldata _signers,
+    bytes32[] calldata _choicesBitArray
   )
     external
     override
+    returns(uint256[] memory)
   {
     _verifyPermission(msg.sender, _PERMISSION_EXECUTE, "EXECUTE");
+    _verifyPhasesPassed(_proposalSignature);
+    // Revert if one of the arrays `_signatures`, `_signers` and `_choicesBitArray` are different in length
     if (
-      uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX))))))
-      + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX))))))
-      + uint256(uint48(bytes6(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX))))))
-      > block.timestamp
-    ) revert IndexedError("DAO", 0x06);
-    if (
-      uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX))
-      ))) == 0
-    ) revert IndexedError("DAO", 0x07);
-
-    /**
-     * @dev Count all the votes by accessing the choices of all of the participants
-     * of the DAO.
-     * 1. Get the user address and verify its permissions.
-     * 2. If `user` has vote permission or send delegate permission
-     * we will save his number of votes as 1 and save his choices.
-     */  
-    uint8 nrOfChoices =  uint8(bytes1(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX)))));
-    uint256 totalUsers = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY)));
-    uint256[] memory votesByChoiceIndex = new uint256[](nrOfChoices);
-    for (uint128 i = 0; i < totalUsers; i++) {
-      address user = address(bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(i)))
-      )));
-      bytes32 permissions = _getPermissions(user);
-      if (permissions & _PERMISSION_VOTE != 0 || permissions & _PERMISSION_SEND_DELEGATE != 0) {
-        bytes2 choices = bytes2(IERC725Y(UNIVERSAL_PROFILE).getData(
-          _KEY_PARTICIPANT_VOTE(proposalSignature, user)
-        ));
-        uint256 votes = 1;
-
-        for(uint8 j = 0; j < nrOfChoices; j++) {
-          choices & bytes2(uint16(1 << j)) != 0 ? votesByChoiceIndex[j] += votes : 0;
+      _signatures.length != _signers.length ||
+      _signers.length != _choicesBitArray.length
+    ) revert IndexedError("DaoProposals", 0x06);
+    // Get maximum chices per vote
+    bytes memory maximumChoicesPerVote = IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_proposalSignature, _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX)));
+    // Getting the array of votes per each choice
+    bytes memory nrOfChoices = IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_proposalSignature, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX)));
+    uint256[] memory arrayOfVotesPerChoices = new uint256[](uint256(bytes32(nrOfChoices)));
+    // Verify each signer and add his choises with his delegates to `arrayOfVotesPerChoices`
+    for (uint256 i = 0; i < _signatures.length; i++) {
+      address recoveredAddress = _getSigRecoveredAddress(_proposalSignature, _signatures[i], _signers[i], _choicesBitArray[i]);
+      // Get number of votes a user has
+      uint256 userNumberOfVotes = _getUserNumberOfVotes(_proposalSignature, recoveredAddress, _signers[i]);
+      if (userNumberOfVotes > 0) {
+        // Add users votes to each user choice in the array of choices.
+        for (uint256 j = 0; j < uint256(bytes32(maximumChoicesPerVote)); j++) {
+          if (_choicesBitArray[i] & bytes32(1 << i) != 0) arrayOfVotesPerChoices[i] += userNumberOfVotes;
         }
       }
     }
 
     /**
-     * @dev We split all the choices between `negativeVotes` and `positiveVotes`
-     *  ____________________________________
-     * |  1  |  2  |  3  | 4 | 5  | 6  | 7  |
-     * | -42 | -28 | -14 | 0 | 14 | 28 | 42 |
-     * |_____|_____|_____|___|____|____|____|
-     *
+     * TODO Select the winner choice/choices. execute depending on the winner choice.
      */
-    uint256 totalVotes;
-    uint256 negativeVotes;
-    uint256 positiveVotes;
-    for (uint256 i = 0; i < nrOfChoices; i++) {
-      totalVotes += votesByChoiceIndex[i];
-      if (i < nrOfChoices/2) {
-        negativeVotes += ((nrOfChoices/2 - i) * 100/nrOfChoices) * votesByChoiceIndex[i];
-      }
-      else {
-        positiveVotes += ((i - nrOfChoices/2) * 100/nrOfChoices) * votesByChoiceIndex[i];
-      }
-    }
 
-    uint256 majority = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(_DAO_MAJORITY_KEY)));
-    uint256 participationRate = uint256(bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(
-      _DAO_PARTICIPATION_RATE_KEY
-    )));
-
-    /**
-     * @dev Check if the proposal has passed and execute the saved methods.
-     */
-    if(
-      totalVotes/totalUsers > participationRate/totalUsers &&
-      positiveVotes/totalVotes > majority/totalVotes
-    ) {
-      bytes memory encodedPayloadArray = IERC725Y(UNIVERSAL_PROFILE).getData(
-        bytes32(bytes.concat(proposalSignature, _DAO_PROPOSAL_PAYLOADS_ARRAY_SUFFIX))
-      );
-      bytes[] memory payloads = abi.decode(encodedPayloadArray, (bytes[]));
-      for (uint256 i = 0; i < payloads.length; i++) {
-        ILSP6KeyManager(KEY_MANAGER).execute(payloads[i]);
-      }
-    }
+    // For testing purposes return the array of choices with the number of votes
+    return arrayOfVotesPerChoices;
 
   }
 
@@ -334,6 +269,106 @@ contract DaoProposals is IDaoProposals {
   {
     bytes32 permissions = _getPermissions(_from);
     if(permissions & _permission == 0) revert NotAuthorised(_from, _permissionName);
+  }
+
+  /**
+   * @dev Verify if all proposal phases passed.
+   * Revert if check failed.
+   */
+  function _verifyPhasesPassed(
+    bytes10 _proposalSignature
+  )
+    internal
+    view
+  {
+    bytes32 creationTimestamp = bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_proposalSignature, _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX))));
+    bytes32 votingDelay = bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_proposalSignature, _DAO_PROPOSAL_VOTING_DELAY_SUFFIX))));
+    bytes32 votingPeriod = bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_proposalSignature, _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX))));
+    bytes32 executionDelay = bytes32(IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_proposalSignature, _DAO_PROPOSAL_EXECUTION_DELAY_SUFFIX))));
+    // Revert if the proposal still has some time left for one of its pahses
+    if (
+      uint256(creationTimestamp) +
+      uint256(votingDelay) +
+      uint256(votingPeriod) +
+      uint256(executionDelay) >
+      block.timestamp
+    )  revert IndexedError("DaoProposals", 0x05);
+  }
+
+  /**
+   * @dev Get the address recovered from a signature.
+   *
+   * @return recoveredAddress
+   */
+  function _getSigRecoveredAddress(
+    bytes10 _proposalSignature,
+    bytes memory _signature,
+    address _signer,
+    bytes32 _choicesBitArray
+  )
+    internal
+    view
+    returns (address recoveredAddress)
+  {
+    bytes32 _hash = getProposalHash(_signer, _proposalSignature, _choicesBitArray).toEthSignedMessageHash();
+    recoveredAddress = _hash.recover(_signature);
+  }
+
+  /**
+   * @dev Verify if the users vote is valid
+   *
+   * @return result
+   */
+  function _getUserVoteValidity(
+    bytes10 _proposalSignature,
+    address _recoveredAddressFromSig,
+    address _userAddress
+  )
+    internal
+    view
+    returns(bool result)
+  {
+    result = true;
+    // Revert if `recoveredAddress` is not the same as `_signers[i]` 
+    if (_userAddress == _recoveredAddressFromSig) result = false;
+    // Verify if user delegated his vote
+    bytes memory dalegatedValue = IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(_recoveredAddressFromSig))));
+    if (dalegatedValue.length == 0) result = false;
+    // Verify if the user has already voted
+    bytes32 votingStatusKey = bytes32(bytes.concat(_proposalSignature, bytes20(_recoveredAddressFromSig)));
+    bytes memory votingStatus = IERC725Y(UNIVERSAL_PROFILE).getData(votingStatusKey);
+    if (votingStatus.length == 0) result = false;
+  }
+
+  /**
+   * @dev Get the number of votes a user has. Takes into account the delegates of the user.
+   */
+  function _getUserNumberOfVotes(
+    bytes10 _proposalSignature,
+    address _recoveredAddressFromSig,
+    address _userAddress
+  )
+    internal
+    view
+    returns (uint256 numberOfVotes)
+  {
+    if (!_getUserVoteValidity(_proposalSignature, _recoveredAddressFromSig, _userAddress)) {
+      numberOfVotes = 0;
+    }
+    else {
+      numberOfVotes = 1;
+      // Find if user has delegates and add the number of delegates to `numberOfVotes`
+      if (_getPermissions(_recoveredAddressFromSig) & _PERMISSION_RECIEVE_DELEGATE != 0) {
+        bytes memory encodedDelegatesArray = IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_DAO_DELEGATES_ARRAY_PREFIX, bytes20(_recoveredAddressFromSig))));
+        if(encodedDelegatesArray.length > 64) {
+          bytes32 userNrOfDelegates;
+          assembly {
+            userNrOfDelegates := mload(add(encodedDelegatesArray, 64))
+          }
+          numberOfVotes += uint256(userNrOfDelegates);
+        }
+      }
+    }
   }
 
 }

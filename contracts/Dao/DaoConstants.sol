@@ -72,6 +72,9 @@ bytes32 constant _DAO_MINIMUM_VOTING_DELAY_KEY = 0x799787138cc40d7a47af8e69bdea9
 // bytes32(keccak256("MinimumVotingPeriod")) --> uint256
 bytes32 constant _DAO_MINIMUM_VOTING_PERIOD_KEY = 0xd3cf4cd71858ea36c3f5ce43955db04cbe9e1f42a2c7795c25c1d430c9bb280a; // --> uint256
 
+// bytes32(keccak256("MinimumExecutionDelay)) --> uint256
+bytes32 constant _DAO_MINIMUM_EXECUTION_DELAY_KEY = 0xb207580c05383177027a90d6c298046d3d60dfa05a32b0bb48ea9015e11a3424; // --> uint256
+
 
 // --- DAO PROPOSAL KEYS
 
@@ -86,13 +89,16 @@ function _DAO_PROPOSAL_SIGNATURE(bytes6 _proposalIdentifier) pure returns(bytes1
 }
 
 // bytes2(0) + bytes20(keccak256("ProposalMetadataJSON")) --> Website
-bytes22 constant _DAO_PROPOSAL_JSON_METADATA_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+bytes22 constant _DAO_PROPOSAL_JSON_METADATA_SUFFIX = 0x00004a8279d372333473468a5a28870c140a7941f668;
 
 // bytes2(0) + bytes20(keccak256("ProposalDelay")) --> uint256
-bytes22 constant _DAO_PROPOSAL_VOTING_DELAY_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+bytes22 constant _DAO_PROPOSAL_VOTING_DELAY_SUFFIX = 0x0000cc713dffc839645a02779745d6e8e8cca753795c;
 
-// bytes2(0) + bytes20(keccak256("ProposalPeriod")) --> uint256
-bytes22 constant _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX = 0x00003f82a2b5852cbedcda3d9062384397479ac9a00d;
+// bytes2(0) + bytes20(keccak256("ProposalVotingPeriod")) --> uint256
+bytes22 constant _DAO_PROPOSAL_VOTING_PERIOD_SUFFIX = 0x00006ebe389303905e56ea48aecac1536207791d0e67;
+
+// bytes2(0) + bytes20(keccak256("ProposalExecutionDelay")) --> uint256
+bytes22 constant _DAO_PROPOSAL_EXECUTION_DELAY_SUFFIX = 0x0000164526a330a273b37abc4c89336a3042182a3910;
 
 // bytes2(0) + bytes20(keccak256("CreationTimestamp")) --> uint256
 bytes22 constant _DAO_PROPOSAL_CREATION_TIMESTAMP_SUFFIX = 0x0000bd3132afbfa232f7d171a873f7e52e32c666b06d;
@@ -104,10 +110,10 @@ bytes22 constant _DAO_PROPOSAL_PAYLOADS_ARRAY_SUFFIX = 0x0000922cb700268d68a7160
 bytes22 constant _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX = 0x0000e5dd8acc7154a678a0a3fa3fe2d65b8700bf702c;
 
 // bytes2(0) + bytes20(keccak256("MaximumChoicesPerVote")) --> uint8
-bytes22 constant _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX = 0x0000ed458cca63dcf8476211a40ad15420dcabc377f0;
+bytes22 constant _DAO_PROPOSAL_MAXIMUM_CHOICES_PER_VOTE_SUFFIX = 0x00002d53f22395ee464559c1d5b27661145933a15e8f;
 
-// ParticipantVoteKey := bytes10(ProposalSignature) + bytes2(0) + bytes20(participantAddress)
-// --> BitArray with the users choices.
-function _KEY_PARTICIPANT_VOTE(bytes10 proposalSignature, address participantAddress) pure returns(bytes32 KEY) {
-  KEY = bytes32(bytes.concat(bytes10(proposalSignature), bytes2(0), bytes20(participantAddress)));
-}
+/**
+ * <ProposalSignature>:<VoterAddress>
+ * This mapping would return a bytes1() which must be equal to 0x01 (meaning voted)
+ * or 0x (meaning, didn't vote) 
+ */

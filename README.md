@@ -14,20 +14,11 @@ npx hardhat run scripts/deploy.ts
 
 ## Errors
 
-### This are the errors that you can get while using `DaoKeyManager.sol`
+### This are the errors that you can get while using `DaoPermissions.sol`
 
 | Error number |                               Error explanation                                     |
 |     :---:    |                                     :---:                                           |
-|    `0x01`    | The recovered address is not the same as the one that allowed claiming permissions. |
-|    `0x02`    | User already delegated the vote.                                                    |
-|    `0x03`    | You can have maximum 16 choices.                                                    |
-|    `0x04`    | The number of choices per vote must be smaller than the number of total choices.    |
-|    `0x05`    | The voting delay is smaller than the minimum value allowed.                         |
-|    `0x06`    | The voting period is smaller than the minimum value allowed.                        |
-|    `0x06`    | The proposal's time did not expire.                                                 |
-|    `0x07`    | There are no methods to execute.                                                    |
-|    `0x08`    | User has already voted.                                                             |
-|    `0x09`    | User has more choices than allowed.                                                 |
+|    `0x01`    | Method caller is wrong or the signature is invalid.                                 |
 
 ### This are the errors that you can get while using `DaoDelegates.sol`
 
@@ -36,6 +27,17 @@ npx hardhat run scripts/deploy.ts
 |    `0x01`    | User already delegated the vote.                                                    |
 |    `0x02`    | Current delegatee is the same as the new delegatee.                                 |
 |    `0x03`    | There is no delegatee to be removed.                                                |
+
+### This are the errors that you can get while using `DaoProposals.sol`
+
+| Error number |                               Error explanation                                     |
+|     :---:    |                                     :---:                                           |
+|    `0x01`    | The number of choices per vote must be smaller than the number of total choices.    |
+|    `0x02`    | The voting delay is smaller than the minimum value allowed.                         |
+|    `0x03`    | The voting period is smaller than the minimum value allowed.                        |
+|    `0x04`    | The execution delay is smaller than the minimum value allowed.                      |
+|    `0x05`    | The proposal's cumulative time did not expire.                                      |
+|    `0x06`    | The number of signatures, the number of signers and the number of choises bit arrays are not equal. |
 
 ### This are the errors that you can get while using `MultisigKeyManager.sol`
 
