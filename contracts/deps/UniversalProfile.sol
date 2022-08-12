@@ -84,8 +84,8 @@ contract UniversalProfile is LSP0ERC725Account {
    */
   function setDaoData(
     bytes memory _JSONDaoMetdata,
-    bytes1 _majority,
-    bytes1 _participationRate,
+    bytes32 _majority,
+    bytes32 _participationRate,
     bytes32 _minimumVotingDelay,
     bytes32 _minimumVotingPeriod,
     bytes32 _minimumExecutionDelay,
@@ -116,7 +116,7 @@ contract UniversalProfile is LSP0ERC725Account {
     values[4] = bytes.concat(_minimumVotingPeriod);
 
     keys[5] = _DAO_MINIMUM_EXECUTION_DELAY_KEY;
-    values[6] = bytes.concat(_minimumExecutionDelay);
+    values[5] = bytes.concat(_minimumExecutionDelay);
 
     keys[6] = _DAO_PARTICIPANTS_ARRAY_KEY;
     values[6] = bytes.concat(bytes32(_daoParticipants.length));

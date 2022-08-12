@@ -15,6 +15,8 @@ interface IDaoProposals {
    * @param proposalSignature The signature of the proposal that was created.
    */
   event ProposalCreated(bytes10 proposalSignature);
+  event VotesRegistered();
+  event ProposalExecuted();
 
   /**
    * @notice Create a proposal.
@@ -48,13 +50,20 @@ interface IDaoProposals {
   ) external view returns(bytes32 _hash);
 
   /**
+   * @notice Register the participants with its choices and signed vote
+   */
+  function registerVotes(
+    bytes10 _proposalSignature,
+    bytes[] memory _signatures,
+    address[] memory _signers,
+    bytes32[] memory _choicesBitArray
+  ) external;
+
+  /**
    * @notice Execute the proposal by signature.
    */
   function executeProposal(
-    bytes10 proposalSignature,
-    bytes[] calldata _signatures,
-    address[] calldata _signers,
-    bytes32[] calldata _choicesBitArray
+    bytes10 proposalSignature
   ) external returns(uint256[] memory);
 
 }

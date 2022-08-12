@@ -14,6 +14,8 @@ describe("Deployment testing & Individual contracts method testing", function ()
     const UniversalReceiverDelegateVault = await ethers.getContractFactory("UniversalReceiverDelegateVault");
     const universalReceiverDelegateVault = await UniversalReceiverDelegateVault.deploy();
 
+    // TODO give key manager super set data perission.
+
     const UniversalProfile = await ethers.getContractFactory("UniversalProfile");
     const universalProfile = await UniversalProfile.deploy(owner.address, universalReceiverDelegateUP.address);
 
@@ -35,8 +37,8 @@ describe("Deployment testing & Individual contracts method testing", function ()
     // Initialize the dao with new members.
     await universalProfile.connect(owner).setDaoData(
       ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
-      ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
-      ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
@@ -46,9 +48,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
         account2.address
       ],
       [
-        "0x000000000000000000000000000000000000000000000000000000000000007f",
-        "0x000000000000000000000000000000000000000000000000000000000000007f",
-        "0x000000000000000000000000000000000000000000000000000000000000000f"
+        "0x00000000000000000000000000000000000000000000000000000000000000ff",
+        "0x00000000000000000000000000000000000000000000000000000000000000ff",
+        "0x00000000000000000000000000000000000000000000000000000000000000ff"
       ]
     );
   
@@ -82,6 +84,49 @@ describe("Deployment testing & Individual contracts method testing", function ()
       account5,
       account6
     };
+  }
+
+  async function deployContractsAndPropose() {
+    const { universalProfile, daoProposals, owner, account1, account2, account3, account4, account5, account6 } = await loadFixture(deployContracts);
+
+    const ABI = ["function setData(bytes32 dataKey, bytes memory dataValue)"];
+    const ERC725Yinterface = new ethers.utils.Interface(ABI);
+    const payloads = [
+      ERC725Yinterface.encodeFunctionData(
+        "setData",
+        [
+          "0x4b80742de2bfb3cc0e490000" + account6.address.substring(2),
+          "0x000000000000000000000000000000000000000000000000000000000000ffff"
+        ]
+      )
+    ];
+
+    const create_proposal = await daoProposals.connect(owner).createProposal(
+      "Som random title",
+      "https://somerandomlink.sahs",
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+      payloads,
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(2), 32),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(1), 32)
+    );
+
+    const proposalSignature = (await create_proposal.wait(1)).logs[9].data.substring(0, 22);
+
+    return {
+      universalProfile,
+      daoProposals,
+      proposalSignature,
+      payloads,
+      owner,
+      account1,
+      account2,
+      account3,
+      account4,
+      account5,
+      account6
+    }
   }
 
   describe("Universal profile deployment", () => {
@@ -131,8 +176,8 @@ describe("Deployment testing & Individual contracts method testing", function ()
       const values = [
         // metadata of the dao
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
-        ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
-        ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
@@ -146,9 +191,9 @@ describe("Deployment testing & Individual contracts method testing", function ()
         "0x0000000000000000000000000000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000000000000000000000000002",
         // permissions of the addresses
-        "0x000000000000000000000000000000000000000000000000000000000000007f",
-        "0x000000000000000000000000000000000000000000000000000000000000007f",
-        "0x000000000000000000000000000000000000000000000000000000000000000f"
+        "0x00000000000000000000000000000000000000000000000000000000000000ff",
+        "0x00000000000000000000000000000000000000000000000000000000000000ff",
+        "0x00000000000000000000000000000000000000000000000000000000000000ff"
       ];
 
       const get_data = await universalProfile["getData(bytes32[])"](keys);
@@ -249,10 +294,10 @@ describe("Deployment testing & Individual contracts method testing", function ()
       let errorInterface = new ethers.utils.Interface(ABI);
       const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
 
-      expect(add_permission).to.revertedWithCustomError(
+      await expect(add_permission).to.revertedWithCustomError(
         errorContract,
         "NotAuthorised"
-      );
+      ).withArgs(account3.address, "ADD_PERMISSION");
     });
 
     it("Should be able to remove permissions", async () => {
@@ -261,7 +306,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       // remove all permissions
       await daoPermissions.connect(owner).removePermissions(
         account1.address, 
-        "0x000000000000000000000000000000000000000000000000000000000000007f" // 0111 1111
+        "0x00000000000000000000000000000000000000000000000000000000000000ff" // 1111 1111
       );
 
       // remove multiple permissions
@@ -286,7 +331,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       const values = [
         // modified users permissions
         "0x",
-        "0x000000000000000000000000000000000000000000000000000000000000000c",
+        "0x00000000000000000000000000000000000000000000000000000000000000fc",
         // dao user array length
         "0x0000000000000000000000000000000000000000000000000000000000000002",
         // dao user indexes
@@ -312,14 +357,15 @@ describe("Deployment testing & Individual contracts method testing", function ()
       let ABI = ["error NotAuthorised(address from, string permission)"];
       let errorInterface = new ethers.utils.Interface(ABI);
       const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
-      expect(remove_permission).to.revertedWithCustomError(
+      await expect(remove_permission).to.revertedWithCustomError(
         errorContract,
         "NotAuthorised"
-      );
+      ).withArgs(account3.address, "REMOVE_PERMISSION");
     });
   });
 
   describe("Dao claiming methods", () => {
+
     it("Should be able to claim permission from an authorized address", async () => {
       const { universalProfile, daoPermissions, owner, account3 } = await loadFixture(deployContracts);
 
@@ -400,7 +446,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       expect(claimigTrx).to.revertedWithCustomError(
         errorContract,
         "NotAuthorised"
-      );
+      ).withArgs(account3.address, "ADD_PERMISSIONS");
     });
   });
 
@@ -616,6 +662,151 @@ describe("Deployment testing & Individual contracts method testing", function ()
       const get_data2 = await universalProfile["getData(bytes32[])"](keys2);
 
       expect(get_data2).to.deep.equal(values2);
+    });
+
+  });
+
+  describe("Dao proposals methods", () => {
+
+    it("Should not be able to make a proposal", async () => {
+      const { daoProposals, account6 } = await loadFixture(deployContracts);
+  
+      const create_proposal = daoProposals.connect(account6).createProposal(
+        "Som random title",
+        "https://somerandomlink.sahs",
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+        [],
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(2), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(1), 32)
+      );
+
+      let ABI = ["error NotAuthorised(address from, string permission)"];
+      let errorInterface = new ethers.utils.Interface(ABI);
+      const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
+
+      await expect(create_proposal).to.be.revertedWithCustomError(
+        errorContract,
+        "NotAuthorised"
+      ).withArgs(account6.address, "PROPOSE");
+    });
+
+    it("Should be able to make a proposal", async () => {
+      const { universalProfile, proposalSignature, payloads } = await loadFixture(deployContractsAndPropose);
+
+      const keys = [
+        proposalSignature + "00004a8279d372333473468a5a28870c140a7941f668",
+        proposalSignature + "0000cc713dffc839645a02779745d6e8e8cca753795c",
+        proposalSignature + "00006ebe389303905e56ea48aecac1536207791d0e67",
+        proposalSignature + "0000164526a330a273b37abc4c89336a3042182a3910",
+        proposalSignature + "0000922cb700268d68a7160e60fe26870af11cd98aaa",
+        proposalSignature + "0000e5dd8acc7154a678a0a3fa3fe2d65b8700bf702c",
+        proposalSignature + "00002d53f22395ee464559c1d5b27661145933a15e8f"
+      ];
+      const values = [
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somerandomlink.sahs")),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+        ethers.utils.defaultAbiCoder.encode(["bytes[]"], [payloads]),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(2), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(1), 32)
+      ];
+
+      const get_data = await universalProfile["getData(bytes32[])"](keys);
+
+      expect(get_data).to.deep.equal(values);
+    });
+
+    it("Should not be able to execute without the voting phases passed", async () => {
+      const { daoProposals, proposalSignature, owner } = await loadFixture(deployContractsAndPropose);
+
+      let ABI = ["error IndexedError(string contractName, bytes1 errorNumber)"];
+      let errorInterface = new ethers.utils.Interface(ABI);
+      const errorContract = new ethers.Contract("LSP6Errors", errorInterface, ethers.provider);
+
+      const register_users = daoProposals.connect(owner).registerVotes(
+        proposalSignature,
+        [],
+        [],
+        []
+      );
+
+      await expect(register_users).to.be.revertedWithCustomError(
+        errorContract,
+        "IndexedError"
+      ).withArgs("DaoProposals", "0x06");
+      
+      const execute_proposal = daoProposals.connect(owner).executeProposal(
+        proposalSignature
+      );
+
+      await expect(execute_proposal).to.be.revertedWithCustomError(
+        errorContract,
+        "IndexedError"
+      ).withArgs("DaoProposals", "0x08");
+    });
+
+    it.only("Should be able to execute with 3 votes", async () => {
+      const { universalProfile, daoProposals, proposalSignature, payloads, owner, account1, account2, account6 } = await loadFixture(deployContractsAndPropose);
+
+      const arrayOfChoices = [
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(1), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(1), 32),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(1), 32)
+      ];
+
+      const hashOwner = await daoProposals.getProposalHash(
+        owner.address,
+        proposalSignature,
+        arrayOfChoices[0]
+      );
+      const hashAcc1  = await daoProposals.getProposalHash(
+        account1.address,
+        proposalSignature,
+        arrayOfChoices[1]
+      );
+      const hashAcc2  = await daoProposals.getProposalHash(
+        account2.address,
+        proposalSignature,
+        arrayOfChoices[2]
+      );
+
+      const signatures = [
+        await owner.signMessage(ethers.utils.arrayify(hashOwner)),
+        await account1.signMessage(ethers.utils.arrayify(hashAcc1)),
+        await account2.signMessage(ethers.utils.arrayify(hashAcc2))
+      ];
+
+      await ethers.provider.send('evm_increaseTime', [100]); 
+      await ethers.provider.send('evm_mine', []);
+
+      await daoProposals.connect(owner).registerVotes(
+        proposalSignature,
+        signatures,
+        [
+          owner.address,
+          account1.address,
+          account2.address
+        ],
+        arrayOfChoices
+      );
+
+      await ethers.provider.send('evm_increaseTime', [100]); 
+      await ethers.provider.send('evm_mine', []);
+      
+      await daoProposals.connect(owner).executeProposal(
+        proposalSignature
+      );
+      
+      const getUserUpdatedPermissions = await universalProfile["getData(bytes32)"](
+        "0x4b80742de2bfb3cc0e490000" + account6.address.substring(2)
+      );
+
+      expect(getUserUpdatedPermissions).to.be.equal(
+        "0x000000000000000000000000000000000000000000000000000000000000ffff"
+      );
     });
 
   });

@@ -33,7 +33,7 @@ import {IDaoDelegates} from "./IDaoDelegates.sol";
  *
  * @author B00ste
  * @title DaoDelegates
- * @custom:version 1.4
+ * @custom:version 1.5
  */
 contract DaoDelegates is IDaoDelegates {
 

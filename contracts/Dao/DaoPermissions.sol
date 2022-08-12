@@ -42,7 +42,7 @@ import {IDaoPermissions} from "./IDaoPermissions.sol";
  *
  * @author B00ste
  * @title DaoPermissions
- * @custom:version 1.4
+ * @custom:version 1.5
  */
 contract DaoPermissions is IDaoPermissions {
   using ECDSA for bytes32;
@@ -198,7 +198,7 @@ contract DaoPermissions is IDaoPermissions {
       bytes.concat(bytes20(_to))
     );
     // Update the permissions in a local variable.
-    for(uint256 i = 0; i < 7; i++) {
+    for(uint256 i = 0; i < 8; i++) {
       if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
       currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
     }
@@ -221,7 +221,7 @@ contract DaoPermissions is IDaoPermissions {
   function _removePermissions(address _to, bytes32 _permissions) internal {
     // Update the permissions in a local variable.
     bytes32 currentPermissions = _getPermissions(_to);
-    for(uint256 i = 0; i < 7; i++) {
+    for(uint256 i = 0; i < 8; i++) {
       if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
       currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
     }

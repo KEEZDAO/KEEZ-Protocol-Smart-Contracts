@@ -7,5 +7,10 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "hardhat": "^2.10.1"
+  },
+  "scripts": {
+    "test:parallel": "run-p test:dao test:multisig",
+    "test:dao": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/DaoKeyManager.ts ",
+    "test:multisig": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/MultisigKeyManager.ts"
   }
 }
