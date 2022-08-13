@@ -113,10 +113,12 @@ contract DaoDelegates is IDaoDelegates {
 
     // The key for the `msg.sender` delegatee
     keys[0] = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
-    bytes20 encodedOldDelegatee = bytes20(IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]));
+    bytes memory encodedOldDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]);
     bytes20 encodedNewDelegatee  = bytes20(newDelegatee);
+    // Revert if `msg.sender` doesn't have a delegatee set
+    if (encodedOldDelegatee.length < 20) revert IndexedError("DaoDelegates", 0x02);
     // Revert if the `encodedNewDelegatee` is the same with the `encodedOldDelegatee`
-    if (encodedNewDelegatee == encodedOldDelegatee) revert IndexedError("DAO", 0x02);
+    if (encodedNewDelegatee == bytes20(encodedOldDelegatee)) revert IndexedError("DAO", 0x03);
     // Update the delegatee of `msg.sender`
     values[0] = bytes.concat(encodedNewDelegatee);
 
@@ -150,7 +152,7 @@ contract DaoDelegates is IDaoDelegates {
     keys[0] = bytes32(bytes.concat(_DAO_DELEGATEE_PREFIX, bytes20(msg.sender)));
     bytes memory encodedOldDelegatee = IERC725Y(UNIVERSAL_PROFILE).getData(keys[0]);
     // Revert if the delegatee is empty
-    if(encodedOldDelegatee.length == 0) revert IndexedError("DaoDelegates", 0x03);
+    if(encodedOldDelegatee.length == 0) revert IndexedError("DaoDelegates", 0x04);
     // Update the delegatee with zero value
     values[0] = "";
 

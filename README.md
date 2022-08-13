@@ -1,43 +1,64 @@
-# Sample Hardhat Project
+# Useful commands
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
+## Compile normal:
 
 ```shell
-npx hardhat help
-npx hardhat test
-GAS_REPORT=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
+npm run compile:normal
+```
+
+## Compile force:
+
+```shell
+npm run compile:force
+```
+
+## Test all contracts:
+
+```shell
+npm run test
+```
+
+## Test DAO contracts:
+
+```shell
+npm run test:dao
+```
+
+## Test Multisig Contracts:
+
+```shell
+npm run test:multisig
 ```
 
 ## Errors
 
 ### This are the errors that you can get while using `DaoPermissions.sol`
 
-| Error number |                               Error explanation                                     |
-|     :---:    |                                     :---:                                           |
-|    `0x01`    | Method caller is wrong or the signature is invalid.                                 |
+| Error number | Error explanation                                   |
+| :----------: | :-------------------------------------------------: |
+| `0x01`       | Method caller is wrong or the signature is invalid. |
 
 ### This are the errors that you can get while using `DaoDelegates.sol`
 
-| Error number |                               Error explanation                                     |
-|     :---:    |                                     :---:                                           |
-|    `0x01`    | User already delegated the vote.                                                    |
-|    `0x02`    | Current delegatee is the same as the new delegatee.                                 |
-|    `0x03`    | There is no delegatee to be removed.                                                |
+| Error number | Error explanation                                   |
+| :----------: | :-------------------------------------------------: |
+| `0x01`       | User already delegated the vote.                    |
+| `0x02`       | There is no delegatee to be changed.                |
+| `0x03`       | Current delegatee is the same as the new delegatee. |
+| `0x04`       | There is no delegatee to be removed.                |
 
 ### This are the errors that you can get while using `DaoProposals.sol`
 
-| Error number |                               Error explanation                                     |
-|     :---:    |                                     :---:                                           |
-|    `0x01`    | The number of choices per vote must be smaller than the number of total choices.    |
-|    `0x02`    | The voting delay is smaller than the minimum value allowed.                         |
-|    `0x03`    | The voting period is smaller than the minimum value allowed.                        |
-|    `0x04`    | The execution delay is smaller than the minimum value allowed.                      |
-|    `0x05`    | The proposal's cumulative time did not expire.                                      |
-|    `0x06`    | The number of signatures, the number of signers and the number of choises bit arrays are not equal. |
+| Error number | Error explanation                                     |
+| :----------: | :-------------------------------------------------------------------------------------------------: |
+| `0x01`       | The number of choices per vote must be smaller than the number of total choices.                    |
+| `0x02`       | The voting delay is smaller than the minimum value allowed.                                         |
+| `0x03`       | The voting period is smaller than the minimum value allowed.                                        |
+| `0x04`       | The execution delay is smaller than the minimum value allowed.                                      |
+| `0x05`       | The number of signatures, the number of signers and the number of choises bit arrays are not equal. |
+| `0x06`       | The proposal's voting delay did not expire.                                                         |
+| `0x07`       | The proposal's voting period did expire.                                                            |
+| `0x08`       | The proposal's voting delay, voting period and execution delay did not expire.                      |
 
 ### This are the errors that you can get while using `MultisigKeyManager.sol`
 

@@ -748,7 +748,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       ).withArgs("DaoProposals", "0x08");
     });
 
-    it.only("Should be able to execute with 3 votes", async () => {
+    it("Should be able to execute with 3 votes", async () => {
       const { universalProfile, daoProposals, proposalSignature, payloads, owner, account1, account2, account6 } = await loadFixture(deployContractsAndPropose);
 
       const arrayOfChoices = [

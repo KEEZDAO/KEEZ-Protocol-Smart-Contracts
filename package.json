@@ -9,8 +9,10 @@
     "hardhat": "^2.10.1"
   },
   "scripts": {
-    "test:parallel": "run-p test:dao test:multisig",
-    "test:dao": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/DaoKeyManager.ts ",
+    "compile:normal": "NODE_NO_WARNINGS=1 hardhat compile",
+    "compile:force": "NODE_NO_WARNINGS=1 hardhat compile --force",
+    "test": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/*.ts", 
+    "test:dao": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/DaoKeyManager.ts",
     "test:multisig": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/MultisigKeyManager.ts"
   }
 }
