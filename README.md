@@ -32,13 +32,13 @@ npm run test:multisig
 
 ## Errors
 
-### This are the errors that you can get while using `DaoPermissions.sol`
+### These are the errors that you can get while using `DaoPermissions.sol`
 
 | Error number | Error explanation                                   |
 | :----------: | :-------------------------------------------------: |
 | `0x01`       | Method caller is wrong or the signature is invalid. |
 
-### This are the errors that you can get while using `DaoDelegates.sol`
+### These are the errors that you can get while using `DaoDelegates.sol`
 
 | Error number | Error explanation                                   |
 | :----------: | :-------------------------------------------------: |
@@ -47,7 +47,7 @@ npm run test:multisig
 | `0x03`       | Current delegatee is the same as the new delegatee. |
 | `0x04`       | There is no delegatee to be removed.                |
 
-### This are the errors that you can get while using `DaoProposals.sol`
+### These are the errors that you can get while using `DaoProposals.sol`
 
 | Error number | Error explanation                                     |
 | :----------: | :-------------------------------------------------------------------------------------------------: |
@@ -60,7 +60,7 @@ npm run test:multisig
 | `0x07`       | The proposal's voting period did expire.                                                            |
 | `0x08`       | The proposal's voting delay, voting period and execution delay did not expire.                      |
 
-### This are the errors that you can get while using `MultisigKeyManager.sol`
+### These are the errors that you can get while using `MultisigKeyManager.sol`
 
 | Error number |                               Error explanation                                     |
 |     :---:    |                                     :---:                                           |
