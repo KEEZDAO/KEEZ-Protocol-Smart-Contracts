@@ -222,7 +222,8 @@ contract DaoProposals is IDaoProposals {
     // Revert if the proposal still has some time left for the voting delay.
     if (
       uint256(creationTimestamp) +
-      uint256(votingDelay) >
+      uint256(votingDelay) +
+      uint256(votingPeriod) >
       block.timestamp
     )  revert IndexedError("DaoProposals", 0x06);
 
@@ -230,7 +231,8 @@ contract DaoProposals is IDaoProposals {
     if (
       uint256(creationTimestamp) +
       uint256(votingDelay) +
-      uint256(votingPeriod) <
+      uint256(votingPeriod) +
+      60 * 60 * 24 <
       block.timestamp
     )  revert IndexedError("DaoProposals", 0x07);
 
@@ -357,6 +359,7 @@ contract DaoProposals is IDaoProposals {
       uint256(creationTimestamp) +
       uint256(votingDelay) +
       uint256(votingPeriod) +
+      60 * 60 * 24 +
       uint256(executionDelay) >
       block.timestamp
     )  revert IndexedError("DaoProposals", 0x08);

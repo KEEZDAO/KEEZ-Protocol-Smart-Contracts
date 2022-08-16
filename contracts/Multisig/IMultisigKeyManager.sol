@@ -18,6 +18,7 @@ interface IMultisigKeyManager {
    * @param proposalSignature The signature of the proposal that was created.
    */
   event ProposalCreated(bytes10 proposalSignature);
+  event ProposalExecuted(bytes10 proposalSignature);
 
   /**
    * @notice Create a `_hash` for signing and that signature can be used

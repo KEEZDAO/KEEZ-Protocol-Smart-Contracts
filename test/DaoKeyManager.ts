@@ -779,7 +779,25 @@ describe("Deployment testing & Individual contracts method testing", function ()
         await account2.signMessage(ethers.utils.arrayify(hashAcc2))
       ];
 
-      await ethers.provider.send('evm_increaseTime', [100]); 
+      /*
+      [
+        user1Address,
+        user2Address,
+        ...
+      ]
+      [
+        user1Sig,
+        user2Sig,
+        ...
+      ]
+      [
+        user1Choices,
+        user2Choices,
+        ...
+      ]
+      */
+
+      await ethers.provider.send('evm_increaseTime', [120]); 
       await ethers.provider.send('evm_mine', []);
 
       await daoProposals.connect(owner).registerVotes(
@@ -793,7 +811,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         arrayOfChoices
       );
 
-      await ethers.provider.send('evm_increaseTime', [100]); 
+      await ethers.provider.send('evm_increaseTime', [120 + 60 * 60 * 24]); 
       await ethers.provider.send('evm_mine', []);
       
       await daoProposals.connect(owner).executeProposal(
