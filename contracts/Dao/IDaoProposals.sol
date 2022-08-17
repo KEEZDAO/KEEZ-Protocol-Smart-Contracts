@@ -15,8 +15,27 @@ interface IDaoProposals {
    * @param proposalSignature The signature of the proposal that was created.
    */
   event ProposalCreated(bytes10 proposalSignature);
+
+  /**
+   * @notice This event is emited every time a proposal's votes are registered.
+   *
+   * @param proposalSignature The signature of the proposal that had its voted registered.
+   */
   event VotesRegistered(bytes10 proposalSignature);
+
+  /**
+   * @notice This event is emited every time a proposal is executed.
+   *
+   * @param proposalSignature The signature of the proposal that was executed.
+   */
   event ProposalExecuted(bytes10 proposalSignature);
+
+  /**
+   * @notice This event is emited every time a proposal is tried to be executed.
+   *
+   * @param proposalSignature The signature of the proposal that cannot be executed.
+   */
+  event ProposalCannotBeExecuted(bytes10 proposalSignature);
 
   /**
    * @notice Create a proposal.
@@ -55,7 +74,7 @@ interface IDaoProposals {
    * @param _choicesBitArray The choices of the voter.
    * 
    * Requirements:
-   * - `msg.sender` must have PROPOSE permission.
+   * - `msg.sender` must have VOTE permission.
    * - `_signer` must be the same as the address that will sign the message.
    */
   function getProposalHash(

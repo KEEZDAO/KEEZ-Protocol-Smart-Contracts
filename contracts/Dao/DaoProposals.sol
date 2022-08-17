@@ -239,6 +239,8 @@ contract DaoProposals is IDaoProposals {
     proposalSigVotes[_proposalSignature] = _signatures;
     proposalParticipants[_proposalSignature] = _signers;
     proposalChoicesBitArrays[_proposalSignature] = _choicesBitArray;
+
+    emit VotesRegistered(_proposalSignature);
   } 
 
   /**
@@ -299,6 +301,10 @@ contract DaoProposals is IDaoProposals {
           payloads[i]
         );
       }
+      emit ProposalExecuted(_proposalSignature);
+    }
+    else {
+      emit ProposalCannotBeExecuted(_proposalSignature);
     }
 
     // For testing purposes return the array of choices with the number of votes
