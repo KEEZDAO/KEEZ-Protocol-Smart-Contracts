@@ -1,35 +1,5 @@
 ## Public methods
 
-### ProposalCreated
-
-```solidity
- event ProposalCreated(bytes10 proposalSignature);
- ```
-
- This event is emited every time a proposal is created.
-
- #### Parameters:
-
-| Name           | Type    | Description |
-| :------------- | :------ | :---------- |
-| `proposalSignature` | bytes10 | The signature of the proposal that was created. |
-
-
-### ProposalExecuted
-
-```solidity
- event ProposalCreated(bytes10 proposalSignature);
- ```
-
- This event is emited every time a proposal is executed.
-
- #### Parameters:
-
-| Name           | Type    | Description |
-| :------------- | :------ | :---------- |
-| `proposalSignature` | bytes10 | The signature of the proposal that was executed. |
-
-
 ### getNewPermissionHash
 
 ```solidity
@@ -139,8 +109,6 @@ Remove a permission.
 
 
 
-
-
 ### proposeExecution
 
 ```solidity
@@ -220,3 +188,35 @@ Execute a proposal if you have all the necessary signatures.
 
 
 :::
+
+## Events
+
+
+### ProposalCreated
+
+```solidity
+ event ProposalCreated(bytes10 proposalSignature);
+ ```
+
+ This event is emited every time a proposal is created.
+
+ #### Parameters:
+
+| Name           | Type    | Description |
+| :------------- | :------ | :---------- |
+| `proposalSignature` | bytes10 | The signature of the proposal that was created. |
+
+
+### ProposalExecuted
+
+```solidity
+ event ProposalCreated(bytes10 proposalSignature);
+ ```
+
+ This event is emited every time a proposal is executed.
+
+ #### Parameters:
+
+| Name           | Type    | Description |
+| :------------- | :------ | :---------- |
+| `proposalSignature` | bytes10 | The signature of the proposal that was executed. |
