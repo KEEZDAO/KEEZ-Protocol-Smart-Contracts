@@ -1,23 +1,22 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
+import UniversalProfileJSON from "../artifacts/contracts/deps/UniversalProfile.sol/UniversalProfile.json";
 
-async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+const deployUniversalProfile = async (
+  from: string,
+  newOwner: string,
+  universalReceiverDelegateUP: string
+) => {
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const UniversalProfile = new ethers.ContractFactory(UniversalProfileJSON.abi, UniversalProfileJSON.bytecode);
+  const universalProfile = await UniversalProfile.deploy(
+    newOwner,
+    universalReceiverDelegateUP,
+    {
+      from
+    }
+  );
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  return universalProfile;
+};
 
-  await lock.deployed();
-
-  console.log("Lock with 1 ETH deployed to:", lock.address);
-}
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+export default deployUniversalProfile;
