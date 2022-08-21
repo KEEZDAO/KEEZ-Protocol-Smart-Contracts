@@ -28,13 +28,13 @@ contract Deployer {
    * @dev Initialize dao an multisig addresses
    */
   constructor(
+    address _UNIVERSAL_PROFILE_DEPLOYER,
     address _DAO_DEPLOYER,
-    address _MULTISIG_DEPLOYER,
-    address _UNIVERSAL_PROFILE_DEPLOYER
+    address _MULTISIG_DEPLOYER
   ) {
+    UNIVERSAL_PROFILE_DEPLOYER = _UNIVERSAL_PROFILE_DEPLOYER;
     DAO_DEPLOYER = _DAO_DEPLOYER;
     MULTISIG_DEPLOYER = _MULTISIG_DEPLOYER;
-    UNIVERSAL_PROFILE_DEPLOYER = _UNIVERSAL_PROFILE_DEPLOYER;
   }
 
   /**

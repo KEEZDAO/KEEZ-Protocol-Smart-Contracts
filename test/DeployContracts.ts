@@ -1,13 +1,13 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
-import { Deployer, Deployer__factory, LSP0ERC725Account__factory } from "../typechain-types";
+import { Deployer, Deployer__factory, UniversalReceiverDelegateUP } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { lsp0Erc725Account } from "../typechain-types/@lukso/lsp-smart-contracts/contracts";
 
 export type DeployerContext = {
   accounts: SignerWithAddress[];
-  DeployerContract: Deployer__factory;
-  deployerContract: Deployer;
+  Deployer: Deployer__factory;
+  deployer: Deployer;
+  universalReceiverDelegateUP: UniversalReceiverDelegateUP;
 };
 
 describe("Contracts deployment", async () => {
@@ -15,24 +15,81 @@ describe("Contracts deployment", async () => {
 
   before(async () => {
     const accounts = await ethers.getSigners();
-    const DeployerContract = await ethers.getContractFactory("Deployer");
-    const deployerContract = await DeployerContract.deploy();
+
+    const UniversalReceiverDelegateUP = await ethers.getContractFactory("UniversalReceiverDelegateUP");
+    const universalReceiverDelegateUP = await UniversalReceiverDelegateUP.deploy();
+
+    const DaoPermissionsDeployer = await ethers.getContractFactory("DaoPermissionsDeployer");
+    const daoPermissionsDeployer = await DaoPermissionsDeployer.deploy();
+    const DaoDelegatesDeployer = await ethers.getContractFactory("DaoDelegatesDeployer");
+    const daoDelegatesDeployer = await DaoDelegatesDeployer.deploy();
+    const DaoProposalsDeployer = await ethers.getContractFactory("DaoProposalsDeployer");
+    const daoProposalsDeployer = await DaoProposalsDeployer.deploy();
+
+    const UniversalProfileDeployer = await ethers.getContractFactory("UniversalProfileDeployer");
+    const universalProfileDeployer = await UniversalProfileDeployer.deploy();
+    const DaoDeployer = await ethers.getContractFactory("DaoDeployer");
+    const daoDeployer = await DaoDeployer.deploy(
+      daoPermissionsDeployer.address,
+      daoDelegatesDeployer.address,
+      daoProposalsDeployer.address
+    );
+    const MultisigDeployer = await ethers.getContractFactory("MultisigDeployer");
+    const multisigDeployer = await MultisigDeployer.deploy();
+
+    const Deployer = await ethers.getContractFactory("Deployer");
+    const deployer = await Deployer.deploy(
+      universalProfileDeployer.address,
+      daoDeployer.address,
+      multisigDeployer.address
+    );
     context = {
       accounts,
-      DeployerContract,
-      deployerContract,
+      Deployer,
+      deployer,
+      universalReceiverDelegateUP
     };
   });
 
   it("Should deploy a new Universal Profile", async () => {
-    await context.deployerContract
+    await context.deployer
       .connect(context.accounts[0])
-      .initialize(
-        context.accounts[0].address,
-        "0x00"
+      ["initialize(address,bytes,bytes,bytes32[],address[],bytes32[],bytes,bytes32,address[],bytes32[])"](
+        context.universalReceiverDelegateUP.address,
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
+        [
+          ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
+          ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
+          ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+          ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
+          ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32)
+        ],
+        [
+          context.accounts[0].address,
+          context.accounts[1].address,
+          context.accounts[2].address
+        ],
+        [
+          "0x00000000000000000000000000000000000000000000000000000000000000ff",
+          "0x00000000000000000000000000000000000000000000000000000000000000ff",
+          "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        ],
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
+        ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
+        [
+          context.accounts[0].address,
+          context.accounts[1].address,
+          context.accounts[2].address
+        ],
+        [
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "0x000000000000000000000000000000000000000000000000000000000000000f"
+        ]
       );
       
-    const userAddresses = await context.deployerContract
+    const userAddresses = await context.deployer
       .connect(context.accounts[0])
       .getAddresses();
 

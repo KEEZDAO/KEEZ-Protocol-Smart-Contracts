@@ -82,6 +82,7 @@ contract DaoDeployer is IDaoDeployer {
     external
     returns(address[] memory _DAO_ADDRESSES)
   {
+    _DAO_ADDRESSES = new address[](3);
     _DAO_ADDRESSES[0] = IDaoPermissionsDeployer(DAO_PERMSISSIONS).deployDaoPermissions(_UNIVERSAL_PROFILE, _KEY_MANAGER);
     _DAO_ADDRESSES[1] = IDaoDelegatesDeployer(DAO_DELEGATES).deployDaoDelegates(_UNIVERSAL_PROFILE, _KEY_MANAGER);
     _DAO_ADDRESSES[2] = IDaoProposalsDeployer(DAO_PROPOSALS).deployDaoProposals(_UNIVERSAL_PROFILE, _KEY_MANAGER);
