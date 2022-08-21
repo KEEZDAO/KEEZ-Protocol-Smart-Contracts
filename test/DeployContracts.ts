@@ -54,7 +54,7 @@ describe("Contracts deployment", async () => {
   it("Should deploy a new Universal Profile", async () => {
     await context.deployer
       .connect(context.accounts[0])
-      ["initialize(address,bytes,bytes,bytes32[],address[],bytes32[],bytes,bytes32,address[],bytes32[])"](
+      ["deploy(address,bytes,bytes,bytes32[],address[],bytes32[],bytes,bytes32,address[],bytes32[])"](
         context.universalReceiverDelegateUP.address,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),

@@ -102,7 +102,7 @@ contract Deployer {
   /**
    * @notice Deploys UP, Key Manager and update the necessary data for the dao and multisig.
    */
-  function initialize(
+  function deploy(
     address _unviersalReceiverDelegateUPAddress,
     bytes memory _universalProfileMetadata,
 
@@ -148,7 +148,7 @@ contract Deployer {
   /**
    * @notice Deploys UP, Key Manager and update the necessary data for the dao.
    */
-  function initialize(
+  function deploy(
     address _unviersalReceiverDelegateUPAddress,
     bytes memory _universalProfileMetadata,
 
@@ -183,7 +183,7 @@ contract Deployer {
   /**
    * @notice Deploys UP, Key Manager and update the necessary data for the multisig.
    */
-  function initialize(
+  function deploy(
     address _unviersalReceiverDelegateUPAddress,
     bytes memory _universalProfileMetadata,
 
