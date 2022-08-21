@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 // LSP9Vault
 import {LSP9Vault} from "@lukso/lsp-smart-contracts/contracts/LSP9Vault/LSP9Vault.sol";
@@ -11,13 +11,6 @@ import {
 } from "@lukso/lsp-smart-contracts/contracts/LSP1UniversalReceiver/LSP1Constants.sol";
 
 contract Vault is LSP9Vault {
-
-  /**
-   * @dev Emits an event when receiving native tokens
-   */
-  receive() external payable virtual {
-    if (msg.value > 0) emit ValueReceived(msg.sender, msg.value);
-  }
 
   constructor(
     address newOwner,

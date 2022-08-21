@@ -9,10 +9,11 @@
     "hardhat": "^2.10.1"
   },
   "scripts": {
-    "compile:normal": "NODE_NO_WARNINGS=1 hardhat compile",
-    "compile:force": "NODE_NO_WARNINGS=1 hardhat compile --force",
-    "test": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/*.ts",
-    "test:dao": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/DaoKeyManager.ts",
-    "test:multisig": "NODE_NO_WARNINGS=1 hardhat test --no-compile test/MultisigKeyManager.ts"
+    "compile:normal": "hardhat compile",
+    "compile:force": "hardhat compile --force",
+    "test": "hardhat test --no-compile test/*.ts",
+    "test:dao": "hardhat test --no-compile test/DaoKeyManager.ts",
+    "test:multisig": "hardhat test --no-compile test/MultisigKeyManager.ts",
+    "test:deploy": "hardhat test --no-compile test/DeployContracts.ts"
   }
 }
