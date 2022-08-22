@@ -56,7 +56,7 @@ contract MultisigDeployer is IMultisigDeployer {
         _KEY_MANAGER
       )
     );
-    emit NewMultisigCreated(_MULTISIG);
+    emit MultisigDeployed(_MULTISIG);
     setMultisigPermissions(
       _UNIVERSAL_PROFILE,
       _MULTISIG,

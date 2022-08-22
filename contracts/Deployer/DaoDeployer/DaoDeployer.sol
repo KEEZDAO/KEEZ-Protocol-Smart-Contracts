@@ -86,7 +86,7 @@ contract DaoDeployer is IDaoDeployer {
     _DAO_ADDRESSES[0] = IDaoPermissionsDeployer(DAO_PERMSISSIONS).deployDaoPermissions(_UNIVERSAL_PROFILE, _KEY_MANAGER);
     _DAO_ADDRESSES[1] = IDaoDelegatesDeployer(DAO_DELEGATES).deployDaoDelegates(_UNIVERSAL_PROFILE, _KEY_MANAGER);
     _DAO_ADDRESSES[2] = IDaoProposalsDeployer(DAO_PROPOSALS).deployDaoProposals(_UNIVERSAL_PROFILE, _KEY_MANAGER);
-    emit NewDaoDeployed(
+    emit DaoDeployed(
       _DAO_ADDRESSES[0],
       _DAO_ADDRESSES[1],
       _DAO_ADDRESSES[2]

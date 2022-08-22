@@ -8,7 +8,7 @@ interface IMultisigDeployer {
    * @notice Emit this whenever a new Multisig is created.
    * @param _MULTISIG Address of the Multisg.
    */
-  event NewMultisigCreated(address _MULTISIG);
+  event MultisigDeployed(address _MULTISIG);
 
   /**
    * @notice Deploy a new Multisig.

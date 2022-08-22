@@ -10,7 +10,7 @@ interface IDaoDeployer {
    * @param _DAO_DELEGATES Address of the DAO Delegates contract.
    * @param _DAO_PROPOSALS Address of the DAO Proposals contract.
    */
-  event NewDaoDeployed(address _DAO_PERMISSIONS, address _DAO_DELEGATES, address _DAO_PROPOSALS);
+  event DaoDeployed(address _DAO_PERMISSIONS, address _DAO_DELEGATES, address _DAO_PROPOSALS);
 
   /**
    * @notice Deploy a new Dao.
