@@ -5,10 +5,24 @@ pragma solidity 0.8.10;
 // IERC725Y
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
 
+// ILSP6KeyManager
+import {ILSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/ILSP6KeyManager.sol";
+
 // Deployers
 import {IDaoDeployer} from "./DaoDeployer/IDaoDeployer.sol";
 import {IMultisigDeployer} from "./IMultisigDeployer.sol";
 import {IUniversalProfileDeployer} from "./IUniversalProfileDeployer.sol";
+
+// LSP6Constants
+import {
+  _LSP6KEY_ADDRESSPERMISSIONS_ARRAY,
+  _LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX,
+  _LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX
+} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
+
+interface IClaimOwnership {
+  function transferOwnership(address newOwner) external;
+}
 
 contract Deployer {
   /**
@@ -40,7 +54,7 @@ contract Deployer {
   /**
    * @dev Storing the progress of a caller.
    */
-  struct Accounts {
+  struct Account {
     /**
      * @dev The address of the LSP0.
      */
@@ -70,7 +84,7 @@ contract Deployer {
      */
     bytes1 phase;
   }
-  mapping(address => Accounts) accountOf;
+  mapping(address => Account) accountOf;
 
   /**
    * @dev Check if address is one of the allowed ones
@@ -143,6 +157,7 @@ contract Deployer {
       _multisigParticipants,
       _multisigParticipantsPermissions
     );
+    giveKeyManagerOwnersipOfUP();
   }
 
   /**
@@ -178,6 +193,7 @@ contract Deployer {
       _daoParticipants,
       _daoParticipantsPermissions
     );
+    giveKeyManagerOwnersipOfUP();
   }
 
   /**
@@ -204,6 +220,7 @@ contract Deployer {
       _multisigParticipants,
       _multisigParticipantsPermissions
     );
+    giveKeyManagerOwnersipOfUP();
   }
 
   /**
@@ -282,6 +299,37 @@ contract Deployer {
         _multisigParticipantsPermissions
       );
     accountOf[msg.sender].MULTISIG = _MULTISISG;
+  }
+
+  /**
+   * @dev Transfer the ownership of Universal Profile to the Key Manager
+   */
+  function giveKeyManagerOwnersipOfUP() internal {
+    bytes32[] memory keys = new bytes32[](3);
+    bytes[] memory values = new bytes[](3);
+
+    address UNIVERSAL_PROFILE_ADDRESS = accountOf[msg.sender].UNIVERSAL_PROFILE;
+    IERC725Y UNIVERSAL_PROFILE = IERC725Y(UNIVERSAL_PROFILE_ADDRESS);
+
+    bytes memory encodedArrayLength = UNIVERSAL_PROFILE.getData(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY);
+    uint256 oldArraylength = uint256(bytes32(encodedArrayLength));
+    uint256 newArrayLength = oldArraylength + 1;
+
+    keys[0] = _LSP6KEY_ADDRESSPERMISSIONS_ARRAY;
+    values[0] = bytes.concat(bytes32(uint256(newArrayLength)));
+
+    keys[1] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_ARRAY_PREFIX, bytes16(uint128(oldArraylength))));
+    values[1] = bytes.concat(bytes20(address(this)));
+
+    keys[2] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_PERMISSIONS_PREFIX, bytes20(address(this))));
+    values[2] = bytes.concat(bytes32(0x0000000000000000000000000000000000000000000000000000000000000001));
+
+    UNIVERSAL_PROFILE.setData(keys, values);
+
+    IClaimOwnership(UNIVERSAL_PROFILE_ADDRESS).transferOwnership(accountOf[msg.sender].KEY_MANAGER);
+    ILSP6KeyManager(accountOf[msg.sender].KEY_MANAGER).execute(
+      abi.encodeWithSignature("claimOwnership()")
+    );
   }
 
   /**

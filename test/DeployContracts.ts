@@ -94,8 +94,7 @@ describe("Contracts deployment", async () => {
     const userAddresses = await context.deployer
       .connect(context.accounts[0])
       .getAddresses();
-      console.log(userAddresses);
-  
+
     await expect(deployment)
       .to.emit(context.daoDeployer, "DaoDeployed")
       .withArgs(userAddresses[2], userAddresses[3], userAddresses[4]);
@@ -106,6 +105,9 @@ describe("Contracts deployment", async () => {
       
     const UniversalProfile = await ethers.getContractFactory("LSP0ERC725Account");
     const universalProfile = UniversalProfile.attach(userAddresses[0]);
+
+    console.log(await universalProfile.owner());
+    console.log(userAddresses[1]);
 
     const keys = [
       "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
@@ -216,7 +218,6 @@ describe("Contracts deployment", async () => {
     const userAddresses = await context.deployer
       .connect(context.accounts[0])
       .getAddresses();
-      console.log(userAddresses);
   
     await expect(deployment)
       .to.emit(context.daoDeployer, "DaoDeployed")
@@ -300,7 +301,6 @@ describe("Contracts deployment", async () => {
     const userAddresses = await context.deployer
       .connect(context.accounts[0])
       .getAddresses();
-      console.log(userAddresses);
 
     await expect(deployment)
       .to.emit(context.multisigDeployer, "MultisigDeployed")
