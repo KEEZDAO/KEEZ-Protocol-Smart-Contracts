@@ -22,7 +22,6 @@ interface IDaoDeployer {
     address _KEY_MANAGER,
     address _caller,
 
-    bytes memory _JSONDaoMetdata,
     bytes32 _majority,
     bytes32 _participationRate,
     bytes32 _minimumVotingDelay,

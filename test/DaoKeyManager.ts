@@ -36,7 +36,6 @@ describe("Deployment testing & Individual contracts method testing", function ()
 
     // Initialize the dao with new members.
     await universalProfile.connect(owner).setDaoData(
-      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
@@ -152,8 +151,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       const { universalProfile, owner, account1, account2 } = await loadFixture(deployContracts);
 
       const keys = [
-        // metadata of the dao
-        "0x529fc5ec0943a0370fe51d4dec0787294933572592c61b103d9e170cb15e8e79",
+        // settings of the dao
         "0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127",
         "0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9",
         "0x799787138cc40d7a47af8e69bdea98db14e1ead8227cef96814fa51751e25c76",
@@ -174,8 +172,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         "0x4b80742de2bfb3cc0e490000" + account2.address.substring(2)
       ];
       const values = [
-        // metadata of the dao
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
+        // settings of the dao
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),

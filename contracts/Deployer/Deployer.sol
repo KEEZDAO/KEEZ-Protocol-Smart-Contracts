@@ -120,7 +120,6 @@ contract Deployer {
     address _unviersalReceiverDelegateUPAddress,
     bytes memory _universalProfileMetadata,
 
-    bytes memory _JSONDaoMetdata,
     /*bytes32 _majority,
     bytes32 _participationRate,
     bytes32 _minimumVotingDelay,
@@ -130,7 +129,6 @@ contract Deployer {
     address[] memory _daoParticipants,
     bytes32[] memory _daoParticipantsPermissions,
 
-    bytes memory _JSONMultisigMetdata,
     bytes32 _multisigQuorum,
     address[] memory _multisigParticipants,
     bytes32[] memory _multisigParticipantsPermissions
@@ -142,7 +140,6 @@ contract Deployer {
       _universalProfileMetadata
     );
     deployDao(
-      _JSONDaoMetdata,
       _daoData[0],
       _daoData[1],
       _daoData[2],
@@ -152,7 +149,6 @@ contract Deployer {
       _daoParticipantsPermissions
     );
     deployMultisig(
-      _JSONMultisigMetdata,
       _multisigQuorum,
       _multisigParticipants,
       _multisigParticipantsPermissions
@@ -168,7 +164,6 @@ contract Deployer {
     bytes memory _universalProfileMetadata,
 
     // Dao parameters
-    bytes memory _JSONDaoMetdata,
     bytes32 _majority,
     bytes32 _participationRate,
     bytes32 _minimumVotingDelay,
@@ -184,7 +179,6 @@ contract Deployer {
       _universalProfileMetadata
     );
     deployDao(
-      _JSONDaoMetdata,
       _majority,
       _participationRate,
       _minimumVotingDelay,
@@ -203,7 +197,6 @@ contract Deployer {
     address _unviersalReceiverDelegateUPAddress,
     bytes memory _universalProfileMetadata,
 
-    bytes memory _JSONMultisigMetdata,
     bytes32 _multisigQuorum,
     address[] memory _multisigParticipants,
     bytes32[] memory _multisigParticipantsPermissions
@@ -215,7 +208,6 @@ contract Deployer {
       _universalProfileMetadata
     );
     deployMultisig(
-      _JSONMultisigMetdata,
       _multisigQuorum,
       _multisigParticipants,
       _multisigParticipantsPermissions
@@ -245,7 +237,6 @@ contract Deployer {
    * @dev Deploy Dao contracts and save the addresses.
    */
   function deployDao(
-    bytes memory _JSONDaoMetdata,
     bytes32 _majority,
     bytes32 _participationRate,
     bytes32 _minimumVotingDelay,
@@ -262,7 +253,6 @@ contract Deployer {
         accountOf[msg.sender].KEY_MANAGER,
         msg.sender,
 
-        _JSONDaoMetdata,
         _majority,
         _participationRate,
         _minimumVotingDelay,
@@ -280,7 +270,6 @@ contract Deployer {
    * @dev Deploy the Multisig contract and save the address.
    */
   function deployMultisig(
-    bytes memory _JSONMultisigMetdata,
     bytes32 _multisigQuorum,
     address[] memory _multisigParticipants,
     bytes32[] memory _multisigParticipantsPermissions
@@ -293,7 +282,6 @@ contract Deployer {
         accountOf[msg.sender].KEY_MANAGER,
         msg.sender,
 
-        _JSONMultisigMetdata,
         _multisigQuorum,
         _multisigParticipants,
         _multisigParticipantsPermissions

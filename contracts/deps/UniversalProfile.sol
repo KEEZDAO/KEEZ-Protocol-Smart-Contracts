@@ -25,7 +25,6 @@ import {
 
 // Multisig Constants
 import {
-  _MULTISIG_JSON_METADATA_KEY,
   _MULTISIG_QUORUM_KEY,
 
   _MULTISIG_PARTICIPANTS_ARRAY_KEY,
@@ -36,7 +35,6 @@ import {
 
 // DAO Constants
 import {
-  _DAO_JSON_METDATA_KEY,
   _DAO_MAJORITY_KEY,
   _DAO_PARTICIPATION_RATE_KEY,
   _DAO_MINIMUM_VOTING_DELAY_KEY,
@@ -83,7 +81,6 @@ contract UniversalProfile is LSP0ERC725Account {
    * @notice Set DAO Metadata, Parameters, Participants and their Permissions
    */
   function setDaoData(
-    bytes memory _JSONDaoMetdata,
     bytes32 _majority,
     bytes32 _participationRate,
     bytes32 _minimumVotingDelay,
@@ -96,41 +93,39 @@ contract UniversalProfile is LSP0ERC725Account {
       _daoParticipants.length == _daoParticipantsPermissions.length
     );
 
-    bytes32[] memory keys = new bytes32[](7 + (_daoParticipants.length * 3));
-    bytes[] memory values = new bytes[](7 + (_daoParticipants.length * 3));
+    bytes32[] memory keys = new bytes32[](6 + (_daoParticipants.length * 3));
+    bytes[] memory values = new bytes[](6 + (_daoParticipants.length * 3));
 
-    // Setting DAO Metadata and Parameters
-    keys[0] = _DAO_JSON_METDATA_KEY;
-    values[0] = _JSONDaoMetdata;
+    // Setting DAO Parameters
 
-    keys[1] = _DAO_MAJORITY_KEY;
-    values[1] = bytes.concat(_majority);
+    keys[0] = _DAO_MAJORITY_KEY;
+    values[0] = bytes.concat(_majority);
 
-    keys[2] = _DAO_PARTICIPATION_RATE_KEY;
-    values[2] = bytes.concat(_participationRate);
+    keys[1] = _DAO_PARTICIPATION_RATE_KEY;
+    values[1] = bytes.concat(_participationRate);
 
-    keys[3] = _DAO_MINIMUM_VOTING_DELAY_KEY;
-    values[3] = bytes.concat(_minimumVotingDelay);
+    keys[2] = _DAO_MINIMUM_VOTING_DELAY_KEY;
+    values[2] = bytes.concat(_minimumVotingDelay);
 
-    keys[4] = _DAO_MINIMUM_VOTING_PERIOD_KEY;
-    values[4] = bytes.concat(_minimumVotingPeriod);
+    keys[3] = _DAO_MINIMUM_VOTING_PERIOD_KEY;
+    values[3] = bytes.concat(_minimumVotingPeriod);
 
-    keys[5] = _DAO_MINIMUM_EXECUTION_DELAY_KEY;
-    values[5] = bytes.concat(_minimumExecutionDelay);
+    keys[4] = _DAO_MINIMUM_EXECUTION_DELAY_KEY;
+    values[4] = bytes.concat(_minimumExecutionDelay);
 
-    keys[6] = _DAO_PARTICIPANTS_ARRAY_KEY;
-    values[6] = bytes.concat(bytes32(_daoParticipants.length));
+    keys[5] = _DAO_PARTICIPANTS_ARRAY_KEY;
+    values[5] = bytes.concat(bytes32(_daoParticipants.length));
 
     // Setting DAO Participants and their Permissions
     for (uint128 i = 0; i < _daoParticipants.length; i++) {
-      keys[7 + i] = bytes32(bytes.concat(_DAO_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
-      values[7 + i] = bytes.concat(bytes20(_daoParticipants[i]));
+      keys[6 + i] = bytes32(bytes.concat(_DAO_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
+      values[6 + i] = bytes.concat(bytes20(_daoParticipants[i]));
 
-      keys[7 + i + _daoParticipants.length] = bytes32(bytes.concat(_DAO_PARTICIPANTS_MAPPING_PREFIX, bytes20(_daoParticipants[i])));
-      values[7 + i + _daoParticipants.length] = bytes.concat(bytes32(uint256(i)));
+      keys[6 + i + _daoParticipants.length] = bytes32(bytes.concat(_DAO_PARTICIPANTS_MAPPING_PREFIX, bytes20(_daoParticipants[i])));
+      values[6 + i + _daoParticipants.length] = bytes.concat(bytes32(uint256(i)));
 
-      keys[7 + i + (_daoParticipants.length * 2)] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_daoParticipants[i])));
-      values[7 + i + (_daoParticipants.length * 2)] = bytes.concat(_daoParticipantsPermissions[i]);
+      keys[6 + i + (_daoParticipants.length * 2)] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_daoParticipants[i])));
+      values[6 + i + (_daoParticipants.length * 2)] = bytes.concat(_daoParticipantsPermissions[i]);
     }
 
     setData(keys, values);
@@ -140,7 +135,6 @@ contract UniversalProfile is LSP0ERC725Account {
    * @notice Set Multisig Metadata, Parameters, Participants and their Permissions
    */
   function setMultisigData(
-    bytes memory _JSONMultisigMetdata,
     bytes1 quorum,
     address[] memory _multisigParticipants,
     bytes32[] memory _multisigParticipantsPermissions
@@ -149,29 +143,27 @@ contract UniversalProfile is LSP0ERC725Account {
       _multisigParticipantsPermissions.length == _multisigParticipantsPermissions.length
     );
 
-    bytes32[] memory keys = new bytes32[](3 + (_multisigParticipants.length * 3));
-    bytes[] memory values = new bytes[](3 + (_multisigParticipants.length * 3));
+    bytes32[] memory keys = new bytes32[](2 + (_multisigParticipants.length * 3));
+    bytes[] memory values = new bytes[](2 + (_multisigParticipants.length * 3));
 
-    // Setting Multisig Metadata and Parameters
-    keys[0] = _MULTISIG_JSON_METADATA_KEY;
-    values[0] = _JSONMultisigMetdata;
+    // Setting Multisig Parameters
 
-    keys[1] = _MULTISIG_QUORUM_KEY;
-    values[1] = bytes.concat(quorum);
+    keys[0] = _MULTISIG_QUORUM_KEY;
+    values[0] = bytes.concat(quorum);
 
-    keys[2] = _MULTISIG_PARTICIPANTS_ARRAY_KEY;
-    values[2] = bytes.concat(bytes32(_multisigParticipants.length));
+    keys[1] = _MULTISIG_PARTICIPANTS_ARRAY_KEY;
+    values[1] = bytes.concat(bytes32(_multisigParticipants.length));
 
     // Setting Multisig Participants and their Permissions
     for (uint128 i = 0; i < _multisigParticipants.length; i++) {
-      keys[3 + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
-      values[3 + i] = bytes.concat(bytes20(_multisigParticipants[i]));
+      keys[2 + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
+      values[2 + i] = bytes.concat(bytes20(_multisigParticipants[i]));
 
-      keys[3 + _multisigParticipants.length + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_MAPPING_PREFIX, bytes20(_multisigParticipants[i])));
-      values[3 + _multisigParticipants.length + i] = bytes.concat(bytes32(uint256(i)));
+      keys[2 + _multisigParticipants.length + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_MAPPING_PREFIX, bytes20(_multisigParticipants[i])));
+      values[2 + _multisigParticipants.length + i] = bytes.concat(bytes32(uint256(i)));
 
-      keys[3 + (_multisigParticipants.length * 2) + i] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX, bytes20(_multisigParticipants[i])));
-      values[3 + (_multisigParticipants.length * 2) + i] = bytes.concat(_multisigParticipantsPermissions[i]);
+      keys[2 + (_multisigParticipants.length * 2) + i] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX, bytes20(_multisigParticipants[i])));
+      values[2 + (_multisigParticipants.length * 2) + i] = bytes.concat(_multisigParticipantsPermissions[i]);
     }
 
     setData(keys, values);

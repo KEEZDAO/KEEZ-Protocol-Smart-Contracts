@@ -20,7 +20,6 @@ interface IMultisigDeployer {
     address _KEY_MANAGER,
     address _caller,
 
-    bytes memory _JSONMultisigMetdata,
     bytes32 quorum,
     address[] memory _multisigParticipants,
     bytes32[] memory _multisigParticipantsPermissions

@@ -22,7 +22,6 @@ import {
 
 // DAO Constants
 import {
-  _DAO_JSON_METDATA_KEY,
   _DAO_MAJORITY_KEY,
   _DAO_PARTICIPATION_RATE_KEY,
   _DAO_MINIMUM_VOTING_DELAY_KEY,
@@ -70,7 +69,6 @@ contract DaoDeployer is IDaoDeployer {
     address _KEY_MANAGER,
     address _caller,
 
-    bytes memory _JSONDaoMetdata,
     bytes32 _majority,
     bytes32 _participationRate,
     bytes32 _minimumVotingDelay,
@@ -101,7 +99,6 @@ contract DaoDeployer is IDaoDeployer {
 
     setDaoSettings(
       _caller,
-      _JSONDaoMetdata,
       _majority,
       _participationRate,
       _minimumVotingDelay,
@@ -160,7 +157,6 @@ contract DaoDeployer is IDaoDeployer {
    */
   function setDaoSettings(
     address _caller,
-    bytes memory _JSONDaoMetdata,
     bytes32 _majority,
     bytes32 _participationRate,
     bytes32 _minimumVotingDelay,
@@ -178,9 +174,7 @@ contract DaoDeployer is IDaoDeployer {
     bytes32[] memory keys = new bytes32[](7 + (_daoParticipants.length * 3));
     bytes[] memory values = new bytes[](7 + (_daoParticipants.length * 3));
 
-    // Setting DAO Metadata and Parameters
-    keys[0] = _DAO_JSON_METDATA_KEY;
-    values[0] = _JSONDaoMetdata;
+    // Setting DAO Parameters
 
     keys[1] = _DAO_MAJORITY_KEY;
     values[1] = bytes.concat(_majority);

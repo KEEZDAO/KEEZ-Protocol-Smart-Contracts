@@ -28,7 +28,6 @@ describe("Deployment testing & Individual contracts method testing", function ()
       
     // Initialize the multisig with new members.
     await universalProfile.connect(owner).setMultisigData(
-      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
       [
         owner.address,
@@ -98,8 +97,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
       const { universalProfile, owner, account1, account2 } = await loadFixture(deployContracts);
 
       const keys = [
-        // metadata of the multisig
-        "0xa175306945481d092127a6c47d28cb3185da752d20388c1682ff11fce1017356",
+        // settings of the multisig
         "0x47499aa724781173ffff2a8a82c6223b88e1a838d32bb91a9ff9c9c0b8c8759b",
         // array length and array elements
         "0x54aef89da199194b126d28036f71291726191dbff7160f9d0986952b17eaedb4",
@@ -116,8 +114,7 @@ describe("Deployment testing & Individual contracts method testing", function ()
         "0x4164647265734d756c740000" + account2.address.substring(2)
       ];
       const values = [
-        // metadata of the multisig
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/")),
+        // settings of the multisig
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
         // array length and array elements
         "0x0000000000000000000000000000000000000000000000000000000000000003",

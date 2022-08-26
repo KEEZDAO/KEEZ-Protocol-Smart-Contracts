@@ -56,10 +56,9 @@ describe("Deployment of the universal deployer", async () => {
   it("Should deploy a new Universal Profile, DAO and Multisig", async () => {
     const deployment = await context.deployer
       .connect(context.accounts[0])
-      ["deploy(address,bytes,bytes,bytes32[],address[],bytes32[],bytes,bytes32,address[],bytes32[])"](
+      ["deploy(address,bytes,bytes32[],address[],bytes32[],bytes32,address[],bytes32[])"](
         context.universalReceiverDelegateUP.address,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/universal-profile-metadata")),
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/dao-metadata")),
         [
           ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
           ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
@@ -77,7 +76,6 @@ describe("Deployment of the universal deployer", async () => {
           "0x00000000000000000000000000000000000000000000000000000000000000ff",
           "0x00000000000000000000000000000000000000000000000000000000000000ff"
         ],
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/multisig-metadata")),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
         [
           context.accounts[0].address,
@@ -113,8 +111,7 @@ describe("Deployment of the universal deployer", async () => {
       "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
       "0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38",
       "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
-      // DAO Metadata and settings
-      "0x529fc5ec0943a0370fe51d4dec0787294933572592c61b103d9e170cb15e8e79",
+      // DAO Settings
       "0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127",
       "0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9",
       "0x799787138cc40d7a47af8e69bdea98db14e1ead8227cef96814fa51751e25c76",
@@ -132,8 +129,7 @@ describe("Deployment of the universal deployer", async () => {
       "0x4b80742de2bfb3cc0e490000" + context.accounts[0].address.substring(2),
       "0x4b80742de2bfb3cc0e490000" + context.accounts[1].address.substring(2),
       "0x4b80742de2bfb3cc0e490000" + context.accounts[2].address.substring(2),
-      // Multisig Metadata and Settings
-      "0xa175306945481d092127a6c47d28cb3185da752d20388c1682ff11fce1017356",
+      // Multisig Settings
       "0x47499aa724781173ffff2a8a82c6223b88e1a838d32bb91a9ff9c9c0b8c8759b",
       // Multisig Participants
       "0x54aef89da199194b126d28036f71291726191dbff7160f9d0986952b17eaedb4",
@@ -152,8 +148,7 @@ describe("Deployment of the universal deployer", async () => {
       context.universalReceiverDelegateUP.address,
       "0xabe425d6",
       ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/universal-profile-metadata")),
-      // DAO Metadata and Settings
-      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/dao-metadata")),
+      // DAO Settings
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
@@ -171,8 +166,7 @@ describe("Deployment of the universal deployer", async () => {
       ethers.utils.hexZeroPad(ethers.utils.hexValue(255), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(255), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(255), 32),
-      // Multisig Metadata and Settings
-      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/multisig-metadata")),
+      // Multisig Settings
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       // Multisig Participants
       ethers.utils.hexZeroPad(ethers.utils.hexValue(3), 32),
@@ -194,10 +188,9 @@ describe("Deployment of the universal deployer", async () => {
   it("Should deploy a new Universal Profile and DAO", async () => {
     const deployment = await context.deployer
       .connect(context.accounts[0])
-      ["deploy(address,bytes,bytes,bytes32,bytes32,bytes32,bytes32,bytes32,address[],bytes32[])"](
+      ["deploy(address,bytes,bytes32,bytes32,bytes32,bytes32,bytes32,address[],bytes32[])"](
         context.universalReceiverDelegateUP.address,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/universal-profile-metadata")),
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/dao-metadata")),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
@@ -230,8 +223,7 @@ describe("Deployment of the universal deployer", async () => {
       "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
       "0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38",
       "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
-      // DAO Metadata and settings
-      "0x529fc5ec0943a0370fe51d4dec0787294933572592c61b103d9e170cb15e8e79",
+      // DAO Settings
       "0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127",
       "0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9",
       "0x799787138cc40d7a47af8e69bdea98db14e1ead8227cef96814fa51751e25c76",
@@ -254,8 +246,7 @@ describe("Deployment of the universal deployer", async () => {
       context.universalReceiverDelegateUP.address,
       "0xabe425d6",
       ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/universal-profile-metadata")),
-      // DAO Metadata and Settings
-      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/dao-metadata")),
+      // DAO Settings
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       ethers.utils.hexZeroPad(ethers.utils.hexValue(60), 32),
@@ -281,10 +272,9 @@ describe("Deployment of the universal deployer", async () => {
   it("Should deploy a new Universal Profile, DAO and Multisig", async () => {
     const deployment = await context.deployer
       .connect(context.accounts[0])
-        ["deploy(address,bytes,bytes,bytes32,address[],bytes32[])"](
+        ["deploy(address,bytes,bytes32,address[],bytes32[])"](
         context.universalReceiverDelegateUP.address,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/universal-profile-metadata")),
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/multisig-metadata")),
         ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
         [
           context.accounts[0].address,
@@ -313,8 +303,7 @@ describe("Deployment of the universal deployer", async () => {
       "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
       "0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38",
       "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
-      // Multisig Metadata and Settings
-      "0xa175306945481d092127a6c47d28cb3185da752d20388c1682ff11fce1017356",
+      // Multisig Settings
       "0x47499aa724781173ffff2a8a82c6223b88e1a838d32bb91a9ff9c9c0b8c8759b",
       // Multisig Participants
       "0x54aef89da199194b126d28036f71291726191dbff7160f9d0986952b17eaedb4",
@@ -333,8 +322,7 @@ describe("Deployment of the universal deployer", async () => {
       context.universalReceiverDelegateUP.address,
       "0xabe425d6",
       ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/universal-profile-metadata")),
-      // Multisig Metadata and Settings
-      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/multisig-metadata")),
+      // Multisig Settings
       ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       // Multisig Participants
       ethers.utils.hexZeroPad(ethers.utils.hexValue(3), 32),

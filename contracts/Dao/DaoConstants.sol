@@ -58,9 +58,6 @@ bytes12 constant _DAO_DELEGATES_ARRAY_PREFIX = 0x92a4ebfa1896d9ad8b430000; // Ad
 // --- DAO ACCOUNT METDATA KEYS
 
 
-// bytes32(keccak256("DaoMetadataJSON")) --> Website
-bytes32 constant _DAO_JSON_METDATA_KEY = 0x529fc5ec0943a0370fe51d4dec0787294933572592c61b103d9e170cb15e8e79;
-
 // bytes32(keccak256("Majority")) --> uint256
 bytes32 constant _DAO_MAJORITY_KEY = 0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127; // --> uint8
 
