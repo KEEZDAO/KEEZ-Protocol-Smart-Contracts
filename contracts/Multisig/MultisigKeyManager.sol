@@ -204,7 +204,8 @@ contract MultisigKeyManager is IMultisigKeyManager {
 
         // Count the postive responses.
         uint256 positiveResponses;
-        for (uint256 i = 0; i < _signatures.length; i++) {
+        uint256 signaturesLength = _signatures.length;
+        for (uint256 i = 0; i < signaturesLength;) {
             bytes32 _hash = getProposalHash(
                 _signers[i],
                 _proposalSignature,
@@ -220,6 +221,8 @@ contract MultisigKeyManager is IMultisigKeyManager {
                 // Changing the nonce.
                 votingNonce[_signers[i]] += block.timestamp / 113;
             }
+        
+            unchecked { ++i; }
         }
 
         // Verify if there are enough pro signatures and if yes, execute.
@@ -231,8 +234,11 @@ contract MultisigKeyManager is IMultisigKeyManager {
                 (bytes[])
             );
 
-            for (uint256 i = 0; i < _payloads.length; i++) {
+            uint256 payloadsLength = _payloads.length;
+            for (uint256 i = 0; i < payloadsLength;) {
                 ILSP6KeyManager(KEY_MANAGER).execute(_payloads[i]);
+
+                unchecked { ++i; }
             }
         } else revert IndexedError("Multisig", 0x05);
     }
@@ -276,6 +282,9 @@ contract MultisigKeyManager is IMultisigKeyManager {
      * @dev Add `_permissions` to an address `_to`.
      */
     function _addPermissions(address _to, bytes32 _permissions) internal {
+        // Find the first index from left to right in the `_permissions` BitArray that is 1
+        uint256 firstElementIndex = 0;
+        while (firstElementIndex < 32 && _permissions[firstElementIndex] != bytes1(0)) { unchecked { ++firstElementIndex; } }
         // Check if user has any permisssions. If not add him to the list of participants.
         bytes32 currentPermissions = _getPermissions(_to);
         if (currentPermissions == bytes32(0))
@@ -288,14 +297,17 @@ contract MultisigKeyManager is IMultisigKeyManager {
                 bytes.concat(bytes20(_to))
             );
         // Update the permissions in a local variable.
-        for (uint256 i = 0; i < 5; i++) {
+        for (uint256 i = 0; i < 32 - firstElementIndex;) {
             if (
                 currentPermissions & bytes32(1 << i) == 0 &&
                 _permissions & bytes32(1 << i) != 0
-            )
+            ) {
                 currentPermissions = bytes32(
                     uint256(currentPermissions) + (1 << i)
                 );
+            }
+
+            unchecked { ++i; }
         }
         // Set the local permissions to the Universal Profile.
         ILSP6KeyManager(KEY_MANAGER).execute(
@@ -316,16 +328,22 @@ contract MultisigKeyManager is IMultisigKeyManager {
      * @dev Remove `_permissions` from an address `_to`.
      */
     function _removePermissions(address _to, bytes32 _permissions) internal {
+        // Find the first index from left to right in the `_permissions` BitArray that is 1
+        uint256 firstElementIndex = 0;
+        while (firstElementIndex < 32 && _permissions[firstElementIndex] != bytes1(0)) { unchecked { ++firstElementIndex; } }
         // Update the permissions in a local variable.
         bytes32 currentPermissions = _getPermissions(_to);
-        for (uint256 i = 0; i < 5; i++) {
+        for (uint256 i = 0; i < 32 - firstElementIndex;) {
             if (
                 currentPermissions & bytes32(1 << i) != 0 &&
                 _permissions & bytes32(1 << i) != 0
-            )
+            ) {
                 currentPermissions = bytes32(
                     uint256(currentPermissions) - (1 << i)
                 );
+            }
+
+            unchecked { ++i; }
         }
         bytes memory encodedCurrentPermissions = bytes.concat(
             currentPermissions

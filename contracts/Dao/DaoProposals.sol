@@ -261,7 +261,8 @@ contract DaoProposals is IDaoProposals {
     bytes memory nrOfChoices = IERC725Y(UNIVERSAL_PROFILE).getData(bytes32(bytes.concat(_proposalSignature, _DAO_PROPOSAL_PROPOSAL_CHOICES_SUFFIX)));
     uint256[] memory arrayOfVotesPerChoice = new uint256[](uint256(bytes32(nrOfChoices)));
     // Verify each signer and add his choises with his delegates to `arrayOfVotesPerChoice`
-    for (uint256 i = 0; i < proposalSigVotes[_proposalSignature].length; i++) {
+    uint256 votesLength = proposalSigVotes[_proposalSignature].length;
+    for (uint256 i = 0; i < votesLength;) {
       address recoveredAddress = _getSigRecoveredAddress(
         _proposalSignature,
         proposalSigVotes[_proposalSignature][i],
@@ -289,6 +290,8 @@ contract DaoProposals is IDaoProposals {
           }
         }
       }
+
+      unchecked { ++i; }
     }
 
     bytes[] memory payloads = abi.decode(
@@ -296,10 +299,13 @@ contract DaoProposals is IDaoProposals {
       (bytes[])
     );
     if (_getProposalResult(arrayOfVotesPerChoice)) {
-      for (uint256 i = 0; i < payloads.length; i++) {
+      uint256 payloadsLength = payloads.length;
+      for (uint256 i = 0; i < payloadsLength;) {
         ILSP6KeyManager(KEY_MANAGER).execute(
           payloads[i]
         );
+
+        unchecked { ++i; }
       }
       emit ProposalExecuted(_proposalSignature);
     }
@@ -469,7 +475,7 @@ contract DaoProposals is IDaoProposals {
 
     uint256 positiveVotes;
     uint256 negativeVotes;
-    for (uint256 i = 0; i < arrayLength / 2; i++) {
+    for (uint256 i = 0; i < arrayLength / 2;) {
       positiveVotes += _arrayOfVotesPerChoice[i] * (votePower * (i + 1));
       if (arrayLength % 2 == 1) {
         negativeVotes +=
@@ -481,6 +487,8 @@ contract DaoProposals is IDaoProposals {
           _arrayOfVotesPerChoice[i + arrayLength / 2] *
             (votePower * (arrayLength / 2 - i));
       }
+
+      unchecked { ++i; }
     }
 
     totalVotes += (positiveVotes + negativeVotes);

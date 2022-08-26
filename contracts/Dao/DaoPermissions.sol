@@ -186,6 +186,9 @@ contract DaoPermissions is IDaoPermissions {
    * @dev Add `_permissions` to an address `_to`.
    */
   function _addPermissions(address _to, bytes32 _permissions) internal {
+    // Find the first index from left to right in the `_permissions` BitArray that is 1
+    uint256 firstElementIndex = 0;
+    while (firstElementIndex < 32 && _permissions[firstElementIndex] != bytes1(0)) { unchecked { ++firstElementIndex; } }
     // Check if user has any permisssions. If not add him to the list of participants.
     bytes32 currentPermissions = _getPermissions(_to);
     if (currentPermissions == bytes32(0))
@@ -198,9 +201,11 @@ contract DaoPermissions is IDaoPermissions {
       bytes.concat(bytes20(_to))
     );
     // Update the permissions in a local variable.
-    for(uint256 i = 0; i < 8; i++) {
+    for(uint256 i = 0; i < 32 - firstElementIndex;) {
       if (currentPermissions & bytes32(1 << i) == 0 && _permissions & bytes32(1 << i) != 0)
       currentPermissions = bytes32(uint256(currentPermissions) + (1 << i));
+
+      unchecked { ++i; }
     }
     // Set the local permissions to the Universal Profile.
     ILSP6KeyManager(KEY_MANAGER).execute(
@@ -219,11 +224,16 @@ contract DaoPermissions is IDaoPermissions {
    * @dev Remove `_permissions` from an address `_to`.
    */
   function _removePermissions(address _to, bytes32 _permissions) internal {
+    // Find the first index from left to right in the `_permissions` BitArray that is 1
+    uint256 firstElementIndex = 0;
+    while (firstElementIndex < 32 && _permissions[firstElementIndex] != bytes1(0)) { unchecked { ++firstElementIndex; } }
     // Update the permissions in a local variable.
     bytes32 currentPermissions = _getPermissions(_to);
-    for(uint256 i = 0; i < 8; i++) {
+    for(uint256 i = 0; i < 32 - firstElementIndex;) {
       if (currentPermissions & bytes32(1 << i) != 0 && _permissions & bytes32(1 << i) != 0)
       currentPermissions = bytes32(uint256(currentPermissions) - (1 << i));
+
+      unchecked { ++i; }
     }
     bytes memory encodedCurrentPermissions = bytes.concat(currentPermissions);
     // Check if user has any permissions left. If not, remove him from the list of participants.

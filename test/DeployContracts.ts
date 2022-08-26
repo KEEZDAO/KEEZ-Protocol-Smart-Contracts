@@ -11,7 +11,7 @@ export type DeployerContext = {
   universalReceiverDelegateUP: UniversalReceiverDelegateUP;
 };
 
-describe("Contracts deployment", async () => {
+describe("Deployment of the universal deployer", async () => {
   let context: DeployerContext;
 
   before(async () => {

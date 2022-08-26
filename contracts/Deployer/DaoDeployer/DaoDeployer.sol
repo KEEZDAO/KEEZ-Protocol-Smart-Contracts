@@ -201,7 +201,8 @@ contract DaoDeployer is IDaoDeployer {
     values[6] = bytes.concat(bytes32(_daoParticipants.length));
 
     // Setting DAO Participants and their Permissions
-    for (uint128 i = 0; i < _daoParticipants.length; i++) {
+    uint256 participantsLength = _daoParticipants.length;
+    for (uint128 i = 0; i < participantsLength;) {
       keys[7 + i] = bytes32(bytes.concat(_DAO_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
       values[7 + i] = bytes.concat(bytes20(_daoParticipants[i]));
 
@@ -210,6 +211,8 @@ contract DaoDeployer is IDaoDeployer {
 
       keys[7 + i + (_daoParticipants.length * 2)] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_DAOPERMISSIONS_PREFIX, bytes20(_daoParticipants[i])));
       values[7 + i + (_daoParticipants.length * 2)] = bytes.concat(_daoParticipantsPermissions[i]);
+    
+      unchecked { ++i; }
     }
 
     IDeployer(msg.sender).setData(_caller, keys, values);

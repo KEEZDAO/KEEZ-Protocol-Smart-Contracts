@@ -232,16 +232,20 @@ contract DaoDelegates is IDaoDelegates {
       // abi.encode(address[])
       // Take the length from enocded with `abi.enocde(address[])` address array
       bytes memory delegatesArrayLength = bytes.concat(bytes32(0));
-      for (uint256 i = 0; i < 32; i++) {
+      for (uint256 i = 0; i < 32;) {
         delegatesArrayLength[i] = enocdedAddressArray[32 + i];
+      
+        unchecked { ++i; }
       }
       // Increase the length with 1
       bytes memory upadtedLength = bytes.concat(bytes32(
         uint256(bytes32(delegatesArrayLength)) + 1
       ));
       // Updated the encoded with `abi.encode(address[])` address array length
-      for(uint256 i = 0; i < 32; i++) {
+      for(uint256 i = 0; i < 32;) {
         enocdedAddressArray[32 + i] = upadtedLength[i];
+      
+        unchecked { ++i; }
       }
       // Concateneate the new address to the encoded with `abi.enocde(address[])` address array
       updatedEncodedAddressArray = bytes.concat(
@@ -283,13 +287,15 @@ contract DaoDelegates is IDaoDelegates {
     // First element will be the lenght of each element in the `enocdedAddressArray`
     bytes32array[0] = bytes32(enocdedAddressArray);
     // Spitting `enocdedAddressArray` in multiple `bytes32` elements
-    for(uint256 i = 2; i <= bytes32ArrayLength; i++) {
+    for(uint256 i = 2; i <= bytes32ArrayLength;) {
       bytes32 bytes32ArrayElement;
       bytes32 positionOfBytes32 = bytes32(uint256(bytes32array[0]) * i);
       assembly {
         bytes32ArrayElement := mload(add(enocdedAddressArray, positionOfBytes32))
       }
       bytes32array[i-1] = bytes32ArrayElement;
+
+      unchecked { ++i; }
     }
 
     // Encoding `removedElement` correctly for comparing
@@ -299,7 +305,7 @@ contract DaoDelegates is IDaoDelegates {
     }
     else if (bytes32array.length > 3) {
       // Finding `removedElement` and swapping with the last element of the array
-      for (uint i = 0; i < bytes32array.length - 1; i++) {
+      for (uint i = 0; i < bytes32array.length - 1;) {
         if(encodedRemovedElement == bytes32array[i]) {
           updatedEncodedAddressArray = bytes.concat(
             updatedEncodedAddressArray, bytes32array[bytes32array.length - 1]
@@ -315,6 +321,8 @@ contract DaoDelegates is IDaoDelegates {
             updatedEncodedAddressArray, bytes32array[i]
           );
         }
+
+        unchecked { ++i; }
       }
     }
 

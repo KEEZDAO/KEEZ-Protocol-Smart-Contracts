@@ -130,7 +130,8 @@ contract MultisigDeployer is IMultisigDeployer {
     values[2] = bytes.concat(bytes32(_multisigParticipants.length));
 
     // Setting Multisig Participants and their Permissions
-    for (uint128 i = 0; i < _multisigParticipants.length; i++) {
+    uint256 participantsLength = _multisigParticipants.length;
+    for (uint128 i = 0; i < participantsLength;) {
       keys[3 + i] = bytes32(bytes.concat(_MULTISIG_PARTICIPANTS_ARRAY_PREFIX, bytes16(i)));
       values[3 + i] = bytes.concat(bytes20(_multisigParticipants[i]));
 
@@ -139,6 +140,8 @@ contract MultisigDeployer is IMultisigDeployer {
 
       keys[3 + (_multisigParticipants.length * 2) + i] = bytes32(bytes.concat(_LSP6KEY_ADDRESSPERMISSIONS_MULTISIGPERMISSIONS_PREFIX, bytes20(_multisigParticipants[i])));
       values[3 + (_multisigParticipants.length * 2) + i] = bytes.concat(_multisigParticipantsPermissions[i]);
+    
+      unchecked { ++i; }
     }
 
     IDeployer(msg.sender).setData(_caller, keys, values);
