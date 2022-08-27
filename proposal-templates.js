@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 
 const updateUserPermission = (address, permissions) => {
   const setDataABI = ["function setData(bytes32 dataKey, bytes memory dataValue)"];
@@ -23,7 +23,6 @@ console.log(
 );
 
 
-const _DAO_JSON_METDATA_KEY = "0x529fc5ec0943a0370fe51d4dec0787294933572592c61b103d9e170cb15e8e79";
 const _DAO_MAJORITY_KEY = "0xbc776f168e7b9c60bb2a7180950facd372cd90c841732d963c31a93ff9f8c127"; // --> uint8
 const _DAO_PARTICIPATION_RATE_KEY = "0xf89f507ecd9cb7646ce1514ec6ab90d695dac9314c3771f451fd90148a3335a9"; // --> uint8
 const _DAO_MINIMUM_VOTING_DELAY_KEY = "0x799787138cc40d7a47af8e69bdea98db14e1ead8227cef96814fa51751e25c76"; // --> uint256
@@ -45,9 +44,8 @@ const changeParameters = (datakeys, dataValues) => {
   return payloads;
 }
 
-changeParameters(
+console.log(changeParameters(
   [
-    _DAO_JSON_METDATA_KEY,
     _DAO_MAJORITY_KEY,
     _DAO_PARTICIPATION_RATE_KEY,
     _DAO_MINIMUM_VOTING_DELAY_KEY,
@@ -55,14 +53,13 @@ changeParameters(
     _DAO_MINIMUM_EXECUTION_DELAY_KEY
   ],
   [
-    "new metadata link",
-    "new majority",
-    "new participation rate",
-    "new minimum voting delay",
-    "new minimum voting period",
-    "new minimum execution delay"
+    ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
+    ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
+    ethers.utils.hexZeroPad(ethers.utils.hexValue(1*24*3600), 32),
+    ethers.utils.hexZeroPad(ethers.utils.hexValue(1*24*3600), 32),
+    ethers.utils.hexZeroPad(ethers.utils.hexValue(1*24*3600), 32),
   ]
-);
+));
 
 const transferTokens = (
   tokenAddress,
