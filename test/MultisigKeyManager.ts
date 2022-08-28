@@ -11,24 +11,35 @@ describe("Deployment testing & Individual contracts method testing", function ()
     const UniversalReceiverDelegateUP = await ethers.getContractFactory("UniversalReceiverDelegateUP");
     const universalReceiverDelegateUP = await UniversalReceiverDelegateUP.deploy();
 
-    const UniversalReceiverDelegateVault = await ethers.getContractFactory("UniversalReceiverDelegateVault");
-    const universalReceiverDelegateVault = await UniversalReceiverDelegateVault.deploy();
+    const DaoPermissionsDeployer = await ethers.getContractFactory("DaoPermissionsDeployer");
+    const daoPermissionsDeployer = await DaoPermissionsDeployer.deploy();
+    const DaoDelegatesDeployer = await ethers.getContractFactory("DaoDelegatesDeployer");
+    const daoDelegatesDeployer = await DaoDelegatesDeployer.deploy();
+    const DaoProposalsDeployer = await ethers.getContractFactory("DaoProposalsDeployer");
+    const daoProposalsDeployer = await DaoProposalsDeployer.deploy();
 
-    const UniversalProfile = await ethers.getContractFactory("UniversalProfile");
-    const universalProfile = await UniversalProfile.deploy(owner.address, universalReceiverDelegateUP.address);
+    const UniversalProfileDeployer = await ethers.getContractFactory("UniversalProfileDeployer");
+    const universalProfileDeployer = await UniversalProfileDeployer.deploy();
+    const DaoDeployer = await ethers.getContractFactory("DaoDeployer");
+    const daoDeployer = await DaoDeployer.deploy(
+      daoPermissionsDeployer.address,
+      daoDelegatesDeployer.address,
+      daoProposalsDeployer.address
+    );
+    const MultisigDeployer = await ethers.getContractFactory("MultisigDeployer");
+    const multisigDeployer = await MultisigDeployer.deploy();
 
-    const Vault = await ethers.getContractFactory("Vault");
-    const vault = await Vault.deploy(owner.address, universalReceiverDelegateVault.address);
+    const Deployer = await ethers.getContractFactory("Deployer");
+    const deployer = await Deployer.deploy(
+      universalProfileDeployer.address,
+      daoDeployer.address,
+      multisigDeployer.address
+    );
 
-    const KeyManager = await ethers.getContractFactory("KeyManager");
-    const keyManager = await KeyManager.deploy(universalProfile.address);
-
-    const MultisigKeyManager = await ethers.getContractFactory("MultisigKeyManager");
-    const multisig = await MultisigKeyManager.deploy(universalProfile.address, keyManager.address);
-      
-    // Initialize the multisig with new members.
-    await universalProfile.connect(owner).setMultisigData(
-      ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 1),
+    deployer.connect(owner)["deploy(address,bytes,bytes32,address[],bytes32[])"](
+      universalReceiverDelegateUP.address,
+      ethers.utils.hexlify(ethers.utils.toUtf8Bytes("https://somelink.com/universal-profile-metadata")),
+      ethers.utils.hexZeroPad(ethers.utils.hexValue(50), 32),
       [
         owner.address,
         account1.address,
@@ -40,18 +51,30 @@ describe("Deployment testing & Individual contracts method testing", function ()
         "0x000000000000000000000000000000000000000000000000000000000000000f"
       ]
     );
-  
-    // Using initializing methods of the universal profile.
-    await universalProfile.giveOwnerPermissionToChangeOwner();
-    await universalProfile.setControllerPermissionsForMultisig(multisig.address);
+      
+    const userAddresses = await deployer.connect(owner).getAddresses();
 
-    // Giving the ownership of the Universal Profile to the Key Manager.
-    await universalProfile.transferOwnership(keyManager.address);
-    let ABI = ["function claimOwnership()"];
-    let iface = new ethers.utils.Interface(ABI);
-    await keyManager.execute(iface.encodeFunctionData("claimOwnership"));
+    const UniversalProfile = await ethers.getContractFactory("LSP0ERC725Account");
+    const universalProfile = UniversalProfile.attach(userAddresses[0]);
 
-    return { universalReceiverDelegateUP, universalProfile, vault, keyManager, multisig, owner, account1, account2, account3, account4 };
+    const KeyManager = await ethers.getContractFactory("LSP6KeyManager");
+    const keyManager = KeyManager.attach(userAddresses[1]);
+
+    const Multisig = await ethers.getContractFactory("MultisigKeyManager");
+    const multisig = Multisig.attach(userAddresses[5]);
+
+    return {
+      deployer,
+      universalReceiverDelegateUP,
+      universalProfile,
+      keyManager,
+      multisig,
+      owner,
+      account1,
+      account2,
+      account3,
+      account4
+    };
   }
   async function deployContractsAndProposeExecution() {
     const { universalProfile, multisig, owner, account1, account2, account3, account4 } = await loadFixture(deployContracts);
@@ -71,7 +94,16 @@ describe("Deployment testing & Individual contracts method testing", function ()
     const propose = await multisig.connect(owner).proposeExecution("Some random title", payloads);
     const proposalSignature = (await propose.wait(1)).logs[2].data.substring(0, 22);
 
-    return { universalProfile, multisig, owner, account1, account2, account3, account4, proposalSignature };
+    return {
+      universalProfile,
+      multisig,
+      owner,
+      account1,
+      account2,
+      account3,
+      account4,
+      proposalSignature
+    };
   }
 
   describe("Universal profile deployment", () => {
@@ -137,16 +169,16 @@ describe("Deployment testing & Individual contracts method testing", function ()
     });
 
     it("Should update the owner permissions, owner should have change owner permission.",async () => {
-      const { universalProfile, owner } = await loadFixture(deployContracts);
+      const { deployer, universalProfile } = await loadFixture(deployContracts);
 
       const keys = [
         "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
-        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000000",
-        "0x4b80742de2bf82acb3630000" + owner.address.substring(2)
+        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000001",
+        "0x4b80742de2bf82acb3630000" + deployer.address.substring(2)
       ];
       const values = [
         "0x0000000000000000000000000000000000000000000000000000000000000002",
-        owner.address.toLowerCase(),
+        deployer.address,
         "0x0000000000000000000000000000000000000000000000000000000000000001"
       ];
   
@@ -160,12 +192,12 @@ describe("Deployment testing & Individual contracts method testing", function ()
 
       const keys = [
         "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
-        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000001",
+        "0xdf30dba06db6a30e65354d9a64c60986" + "00000000000000000000000000000000",
         "0x4b80742de2bf82acb3630000" + multisig.address.substring(2)
       ];
       const values = [
         "0x0000000000000000000000000000000000000000000000000000000000000002",
-        multisig.address.toLowerCase(),
+        multisig.address,
         "0x0000000000000000000000000000000000000000000000000000000000007fbf"
       ];
 

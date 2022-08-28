@@ -269,7 +269,7 @@ describe("Deployment of the universal deployer", async () => {
     expect(await universalProfile["getData(bytes32[])"](keys)).to.deep.equal(values);
   });
 
-  it("Should deploy a new Universal Profile, DAO and Multisig", async () => {
+  it("Should deploy a new Universal Profile and Multisig", async () => {
     const deployment = await context.deployer
       .connect(context.accounts[0])
         ["deploy(address,bytes,bytes32,address[],bytes32[])"](
